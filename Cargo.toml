@@ -1,7 +1,7 @@
 [package]
 name = "excel_reader"
 description = "An Excel reader in pure rust."
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = ["itsuki <itsuki.enjoy@gmail.com>"]
 license-file = "LICENSE.txt"
