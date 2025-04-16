@@ -77,6 +77,6 @@ pub enum SheetVisibleState {
     Visible,
     /// Hidden
     Hidden,
-    /// The sheet is hidden and cannot be displayed using the user interface. It is supported only by Excel formats.
+    /// The sheet is hidden and cannot be displayed using the user interface.
     VeryHidden,
 }

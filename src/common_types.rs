@@ -60,7 +60,7 @@ pub struct Coordinate {
 }
 
 impl Coordinate {
-    pub(crate) fn from_point(point: (u64, u64)) -> Self {
+    pub fn from_point(point: (u64, u64)) -> Self {
         Self {
             row: point.0,
             col: point.1,

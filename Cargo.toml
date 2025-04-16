@@ -1,7 +1,7 @@
 [package]
 name = "excel_reader"
 description = "An Excel reader in pure rust."
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["itsuki <itsuki.enjoy@gmail.com>"]
 license-file = "LICENSE.txt"
@@ -9,6 +9,7 @@ readme = "README.md"
 keywords = ["excel", "xlsx", "xml"]
 categories = ["parsing", "text-processing"]
 repository = "https://github.com/0Itsuki0/rust_excel_reader/tree/master"
+rust-version = "1.83.0"
 
 
 [dependencies]

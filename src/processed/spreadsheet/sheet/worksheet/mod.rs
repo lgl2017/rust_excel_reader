@@ -36,12 +36,14 @@ pub struct Worksheet {
     pub name: String,
     pub sheet_id: u64,
 
+    /// None if the sheet does not contain any data
     pub dimension: Option<Dimension>,
+
     pub merged_cells: Vec<Dimension>,
 
     pub tables: Vec<Table>,
 
-    /// Value that indicates whether to use a 1900 or 1904 date base when converting serial values in the workbook to dates. [Note: If the dateCompatibility attribute is 0 or false, this attribute is ignored. end note]
+    /// Value that indicates whether to use a 1900 or 1904 date base when converting serial values in the workbook to dates.
     ///
     /// - true: workbook uses the 1904 backward compatibility date system.
     /// - false:  the workbook uses a date system based in 1900, as specified by the value of the dateCompatibility attribute.
@@ -84,7 +86,7 @@ impl Worksheet {
         return Self {
             name,
             sheet_id,
-            dimension: worksheet.dimension,
+            dimension: Self::get_dimension(worksheet.clone()),
             merged_cells: worksheet.merge_cells.clone().unwrap_or(vec![]),
             tables,
             is_1904,
@@ -146,26 +148,8 @@ impl Worksheet {
             *self.color_scheme.clone(),
         );
 
-        println!("\ncell: {:?}", coordinate);
-        println!("num_format_id: {:?}", num_format_id);
-        println!("font_id: {:?}", font_id);
-        println!("fill_id: {:?}", fill_id);
-        println!("border_id: {:?}", border_id);
-        println!(" \ncell value {:?}.", cell_value);
-
-        println!(" \ncell_property ");
-        println!(
-            "(width, height) : {:?}",
-            (cell_property.width, cell_property.height)
-        );
-        println!("hidden : {:?}", cell_property.hidden);
-        println!("show_phonetic : {:?}", cell_property.show_phonetic);
-        println!("font : {:?}", cell_property.font);
-        println!("border : {:?}", cell_property.border);
-        println!("fill : {:?}", cell_property.fill);
-        println!("alignment : {:?}", cell_property.alignment);
-
         Ok(Cell {
+            coordinate,
             value: cell_value,
             property: cell_property,
         })
@@ -173,6 +157,61 @@ impl Worksheet {
 }
 
 impl Worksheet {
+    fn get_dimension(worksheet: RawWorksheet) -> Option<Dimension> {
+        if let Some(d) = worksheet.dimension {
+            return Some(d);
+        }
+        let Some(data) = worksheet.sheet_data else {
+            return None;
+        };
+
+        let rows = data.rows.unwrap_or(vec![]);
+        if rows.is_empty() {
+            return None;
+        }
+        let first_row = rows[0].row_index.unwrap_or(1);
+        let last_row = rows[rows.len() - 1].row_index.unwrap_or(rows.len() as u64);
+
+        let mut first_col = u64::MAX;
+        let mut last_col = u64::MIN;
+
+        for row in rows {
+            let cells = row.cells.unwrap_or(vec![]);
+            if cells.is_empty() {
+                continue;
+            }
+            let f = if let Some(c) = cells[0].coordinate {
+                c.col
+            } else {
+                1
+            };
+            if f < first_col {
+                first_col = f
+            }
+            let l = if let Some(c) = cells[cells.len() - 1].coordinate {
+                c.col
+            } else {
+                cells.len() as u64
+            };
+            if l > last_col {
+                last_col = l
+            }
+        }
+        if first_col > last_col {
+            return None;
+        }
+
+        return Some(Dimension {
+            start: Coordinate {
+                row: first_row,
+                col: first_col,
+            },
+            end: Coordinate {
+                row: last_row,
+                col: last_col,
+            },
+        });
+    }
     /// get cell alignment information
     fn get_protection(
         &self,

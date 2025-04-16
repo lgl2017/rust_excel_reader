@@ -16,7 +16,8 @@ use crate::excel::xml_reader;
 /// ```
 pub type Relationships = Vec<Relationship>;
 
-pub fn load_workbook_relationships(
+/// get relationships of a workbook
+pub(crate) fn load_workbook_relationships(
     zip: &mut ZipArchive<impl Read + Seek>,
 ) -> anyhow::Result<Relationships> {
     let path = "xl/_rels/workbook.xml.rels";
@@ -48,7 +49,8 @@ pub fn load_workbook_relationships(
     Ok(relationships)
 }
 
-pub fn load_worksheet_relationships(
+/// get relationships of a specific sheet within a workbook
+pub(crate) fn load_sheet_relationships(
     zip: &mut ZipArchive<impl Read + Seek>,
     sheet_path: &str,
 ) -> anyhow::Result<Relationships> {
@@ -59,7 +61,7 @@ pub fn load_worksheet_relationships(
     let path = format!("{}/_rels{}.rels", base_folder, file_name);
 
     let Some(mut reader) = xml_reader(zip, &path) else {
-        bail!("Failed to get relationships for sheet {}.", sheet_path);
+        bail!("Relationships does not exist for sheet {}.", sheet_path);
     };
 
     let mut buf = Vec::new();
@@ -96,6 +98,8 @@ pub fn load_worksheet_relationships(
 }
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.packaging.ipackagerelationship?view=openxml-3.0.1
+///
+/// defines an association between a source Package or PackagePart to a target PackagePart or external resource.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Relationship {
     id: String,
