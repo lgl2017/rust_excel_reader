@@ -7,7 +7,7 @@ authors = ["itsuki <itsuki.enjoy@gmail.com>"]
 license-file = "LICENSE.txt"
 readme = "README.md"
 keywords = ["excel", "xlsx", "xml"]
-categories = ["parsing", "processing"]
+categories = ["parsing", "text-processing"]
 
 
 [dependencies]
