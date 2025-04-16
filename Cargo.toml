@@ -1,0 +1,17 @@
+[package]
+name = "excel_reader"
+description = "An Excel reader in pure rust."
+version = "0.1.0"
+edition = "2021"
+authors = ["itsuki <itsuki.enjoy@gmail.com>"]
+license-file = "LICENSE.txt"
+readme = "README.md"
+keywords = ["excel", "xlsx", "xml"]
+categories = ["parsing", "processing"]
+
+
+[dependencies]
+anyhow = "1.0.97"
+chrono = "0.4.40"
+quick-xml = { version = "0.37.2", features = ["encoding"] }
+zip = "2.3.0"

@@ -1,0 +1,43 @@
+use anyhow::bail;
+use quick_xml::events::Event;
+use crate::excel::XmlReader;
+use super::tab_stop::TabStop;
+
+/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.tabstoplist?view=openxml-3.0.1
+///
+/// This element specifies the list of all tab stops that are to be used within a paragraph.
+/// These tabs should be used when describing any custom tab stops within the document.
+/// If these are not specified then the default tab stops of the generating application should be used.
+///
+/// Example:
+/// ```
+/// <a:tabLst>
+///     <a:tab pos="2292350" algn="l"/>
+///     <a:tab pos="2627313" algn="l"/>
+///     <a:tab pos="2743200" algn="l"/>
+///     <a:tab pos="2974975" algn="l"/>
+/// </a:tabLst>
+/// ```
+// tag: tabLst
+pub type TabStopList = Vec<TabStop>;
+
+pub(crate) fn load_tab_stop_list(reader: &mut XmlReader) -> anyhow::Result<TabStopList> {
+    let mut stops: Vec<TabStop> = vec![];
+    let mut buf = Vec::new();
+
+    loop {
+        buf.clear();
+
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(ref e)) => {
+                stops.push(TabStop::load(e)?);
+            }
+            Ok(Event::End(ref e)) if e.local_name().as_ref() == b"tabLst" => break,
+            Ok(Event::Eof) => bail!("unexpected end of file."),
+            Err(e) => bail!(e.to_string()),
+            _ => (),
+        }
+    }
+
+    Ok(stops)
+}

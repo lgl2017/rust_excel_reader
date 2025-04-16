@@ -1,0 +1,176 @@
+use crate::excel::XmlReader;
+use anyhow::bail;
+use arc_to::ArcTo;
+use close_shape_path::CloseShapePath;
+use cubic_bezier_curve_to::CubicBezierCurveTo;
+use line_to::LineTo;
+use move_to::MoveTo;
+use quad_bezier_curve_to::QuadraticBezierCurveTo;
+use quick_xml::events::{BytesStart, Event};
+
+use crate::helper::{string_to_bool, string_to_int};
+
+pub mod arc_to;
+pub mod close_shape_path;
+pub mod cubic_bezier_curve_to;
+pub mod line_to;
+pub mod move_to;
+pub mod path_list;
+pub mod path_point;
+pub mod quad_bezier_curve_to;
+
+/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.path?view=openxml-3.0.1
+///
+/// This element specifies a creation path consisting of a series of moves, lines and curves that when combined forms a geometric shape
+///
+/// Example
+/// ```
+///   <a:pathLst>
+///     <a:path w="2650602" h="1261641">
+///       <a:moveTo>
+///         <a:pt x="0" y="1261641"/>
+///       </a:moveTo>
+///       <a:lnTo>
+///         <a:pt x="2650602" y="1261641"/>
+///       </a:lnTo>
+///       <a:lnTo>
+///         <a:pt x="1226916" y="0"/>
+///       </a:lnTo>
+///       <a:close/>
+///     </a:path>
+///   </a:pathLst>
+/// ```
+// tag: path
+#[derive(Debug, Clone, PartialEq)]
+pub struct Path {
+    // Child Elements
+    paths: Option<Vec<PathTypeEnum>>,
+
+    // Attributes
+    /// Specifies that the use of 3D extrusions are possible on this path.
+    /// This allows the generating application to know whether 3D extrusion can be applied in any form.
+    /// If this attribute is omitted, then a value of 0, or false is assumed.
+    // extrusionOk (3D Extrusion Allowed)
+    pub extrusion_allowed: Option<bool>,
+
+    /// Specifies how the corresponding path should be filled.
+    /// If this attribute is omitted, a value of "norm" is assumed.
+    ///
+    /// possible values: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.pathfillmodevalues?view=openxml-3.0.1
+    // fill (Path Fill)
+    pub fill: Option<String>,
+
+    /// Specifies the height, or maximum y coordinate that should be used for within the path coordinate system.
+    /// This value determines the vertical placement of all points within the corresponding path as they are all calculated using this height attribute as the max y coordinate.
+    // h (Path Height)
+    pub height: Option<i64>,
+
+    /// Specifies if the corresponding path should have a path stroke shown.
+    /// This is a boolean value that affect the outline of the path.
+    /// If this attribute is omitted, a value of true is assumed.
+    // stroke (Path Stroke)
+    pub stroke: Option<bool>,
+
+    /// Specifies the width, or maximum x coordinate that should be used for within the path coordinate system.
+    /// This value determines the horizontal placement of all points within the corresponding path as they are all calculated using this width attribute as the max x coordinate.
+    // w (Path Width)
+    pub width: Option<i64>,
+}
+
+impl Path {
+    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+        let mut path = Self {
+            paths: Some(PathTypeEnum::load_list(reader, b"path")?),
+            extrusion_allowed: Some(false),
+            fill: Some("norm".to_owned()),
+            height: None,
+            stroke: Some(true),
+            width: None,
+        };
+
+        let attributes = e.attributes();
+
+        for a in attributes {
+            match a {
+                Ok(a) => {
+                    let string_value = String::from_utf8(a.value.to_vec())?;
+                    match a.key.local_name().as_ref() {
+                        b"extrusionOk" => path.extrusion_allowed = string_to_bool(&string_value),
+                        b"fill" => path.fill = Some(string_value),
+                        b"h" => path.height = string_to_int(&string_value),
+                        b"stroke" => path.stroke = string_to_bool(&string_value),
+                        b"w" => path.width = string_to_int(&string_value),
+                        _ => {}
+                    }
+                }
+                Err(error) => {
+                    bail!(error.to_string())
+                }
+            }
+        }
+
+        Ok(path)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum PathTypeEnum {
+    Arc(ArcTo),
+    Close(CloseShapePath),
+    CubicBezier(CubicBezierCurveTo),
+    Line(LineTo),
+    Move(MoveTo),
+    QuadBezier(QuadraticBezierCurveTo),
+}
+
+impl PathTypeEnum {
+    pub(crate) fn load_list(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Vec<Self>> {
+        let mut paths: Vec<PathTypeEnum> = vec![];
+        let mut buf = Vec::new();
+
+        loop {
+            buf.clear();
+
+            match reader.read_event_into(&mut buf) {
+                Ok(Event::Start(ref e)) => {
+                    if let Some(fill) = PathTypeEnum::load_helper(reader, e)? {
+                        paths.push(fill);
+                    }
+                }
+                Ok(Event::End(ref e)) if e.local_name().as_ref() == tag => break,
+                Ok(Event::Eof) => bail!("unexpected end of file."),
+                Err(e) => bail!(e.to_string()),
+                _ => (),
+            }
+        }
+        Ok(paths)
+    }
+
+    fn load_helper(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Option<Self>> {
+        match e.local_name().as_ref() {
+            b"arcTo" => {
+                return Ok(Some(PathTypeEnum::Arc(ArcTo::load(e)?)));
+            }
+            b"close" => {
+                return Ok(Some(PathTypeEnum::Close(true)));
+            }
+            b"cubicBezTo" => {
+                return Ok(Some(PathTypeEnum::CubicBezier(CubicBezierCurveTo::load(
+                    reader,
+                )?)));
+            }
+            b"lnTo" => {
+                return Ok(Some(PathTypeEnum::Line(LineTo::load(reader)?)));
+            }
+            b"moveTo" => {
+                return Ok(Some(PathTypeEnum::Move(MoveTo::load(reader)?)));
+            }
+            b"quadBezTo" => {
+                return Ok(Some(PathTypeEnum::QuadBezier(
+                    QuadraticBezierCurveTo::load(reader)?,
+                )));
+            }
+            _ => return Ok(None),
+        }
+    }
+}

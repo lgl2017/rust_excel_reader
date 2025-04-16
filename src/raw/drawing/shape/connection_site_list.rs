@@ -1,0 +1,75 @@
+use super::connection_site::ConnectionSite;
+use crate::excel::XmlReader;
+use anyhow::bail;
+use quick_xml::events::Event;
+
+/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.connectionsitelist?view=openxml-3.0.1
+///
+/// This element specifies all the connection sites that are used for this shape
+///
+/// Example
+/// ```
+/// <a:cxnLst>
+///     <a:cxn ang="0">
+///         <a:pos x="0" y="679622"/>
+///     </a:cxn>
+///     <a:cxn ang="0">
+///         <a:pos x="1705233" y="679622"/>
+///     </a:cxn>
+/// </a:cxnLst>
+/// ```
+// tag: cxnLst
+pub type ConnectionSiteList = Vec<ConnectionSite>;
+
+pub(crate) fn load_connection_site_list(
+    reader: &mut XmlReader,
+) -> anyhow::Result<ConnectionSiteList> {
+    let mut buf = Vec::new();
+    let mut sites: Vec<ConnectionSite> = vec![];
+
+    loop {
+        buf.clear();
+
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"cxn" => {
+                sites.push(ConnectionSite::load(reader, e)?);
+            }
+            Ok(Event::End(ref e)) if e.local_name().as_ref() == b"cxnLst" => break,
+            Ok(Event::Eof) => bail!("unexpected end of file."),
+            Err(e) => bail!(e.to_string()),
+            _ => (),
+        }
+    }
+    Ok(sites)
+}
+
+// #[derive(Debug, Clone, PartialEq)]
+// pub struct ConnectionSiteList {
+//     // children
+//     // cxn (Shape Connection Site)
+//     pub connection_site: Option<Vec<ConnectionSite>>,
+// }
+
+// impl ConnectionSiteList {
+//     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+//         let mut buf = Vec::new();
+//         let mut sites: Vec<ConnectionSite> = vec![];
+
+//         loop {
+//             buf.clear();
+
+//             match reader.read_event_into(&mut buf) {
+//                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"cxn" => {
+//                     sites.push(ConnectionSite::load(reader, e)?);
+//                 }
+//                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"cxnLst" => break,
+//                 Ok(Event::Eof) => bail!("unexpected end of file."),
+//                 Err(e) => bail!(e.to_string()),
+//                 _ => (),
+//             }
+//         }
+//         Ok(Self {
+//             connection_site: Some(sites),
+//         })
+//     }
+// }
