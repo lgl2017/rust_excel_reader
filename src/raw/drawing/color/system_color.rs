@@ -9,6 +9,7 @@ use crate::helper::{extract_val_attribute, hex_to_rgba, rgba_to_hex};
 use super::color_transforms::{apply_color_transformations, ColorTransform};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.systemcolor?view=openxml-3.0.1
+///
 /// Example: The following represent the same color
 /// ```
 /// <a:sysClr val="window" lastClr="FFFFFF" />

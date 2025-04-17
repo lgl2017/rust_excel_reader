@@ -42,17 +42,7 @@ pub struct Excel<RS> {
 impl Excel<BufReader<File>> {
     pub fn from_path<P: AsRef<Path>>(path: P) -> anyhow::Result<Excel<BufReader<File>>> {
         let reader = BufReader::new(File::open(path)?);
-        let mut zip = ZipArchive::new(reader)?;
-        let relationships = load_workbook_relationships(&mut zip)?;
-
-        Ok(Self {
-            zip,
-            workbook_relationships: relationships,
-            stylesheet: Box::new(None),
-            theme: Box::new(None),
-            shared_strings: Box::new(None),
-            workbook: Box::new(None),
-        })
+        return Self::from_reader(reader);
     }
 }
 

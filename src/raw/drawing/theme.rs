@@ -16,7 +16,8 @@ use super::{
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.theme?view=openxml-3.0.1
 ///
 /// Root element of DrawingML Theme part
-// tag: theme
+///
+/// theme (Theme)
 #[derive(Debug, Clone, PartialEq)]
 pub struct Theme {
     // child: extLst (Extension List)	§20.1.2.2.15 Not supported

@@ -5,17 +5,6 @@ use crate::{
 
 /// Example:
 /// ```
-/// // shared string
-/// <si>
-///     <t>課きく　毛こ</t>
-///     <rPh sb="0" eb="1">
-///         <t>カ</t>
-///     </rPh>
-///     <rPh sb="4" eb="5">
-///        <t>ケ</t>
-///     </rPh>
-///     <phoneticPr fontId="1"/>
-/// </si>
 /// <si>
 ///     <r>
 ///         <rPr>

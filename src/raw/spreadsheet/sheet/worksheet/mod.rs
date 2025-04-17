@@ -96,6 +96,7 @@ pub struct Worksheet {
 
     // mergeCells (Merge Cells)	§18.3.1.55
     pub merge_cells: Option<MergeCells>,
+
     // oleObjects (Embedded Objects)	§18.3.1.60
     // pageMargins (Page Margins)	§18.3.1.62
     // pageSetup (Page Setup Settings)	§18.3.1.63

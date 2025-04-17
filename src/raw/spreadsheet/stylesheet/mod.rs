@@ -65,6 +65,7 @@ pub struct StyleSheet {
     pub cell_style_xfs: Option<CellStyleFormats>,
 
     /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.cellformats?view=openxml-3.0.1
+    ///
     /// This element contains the master formatting records (xf) which define the formatting applied to cells in this workbook.
     /// These records are the starting point for determining the formatting for a cell.
     /// Cells in the Sheet Part reference the xf records by zero-based index.
