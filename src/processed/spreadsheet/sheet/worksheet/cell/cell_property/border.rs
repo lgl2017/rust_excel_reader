@@ -1,10 +1,10 @@
 use crate::{
     common_types::HexColor,
     raw::{
-        drawing::scheme::color_scheme::ColorScheme,
+        drawing::scheme::color_scheme::XlsxColorScheme,
         spreadsheet::stylesheet::{
             border::{Border as RawBorder, BorderStyle as RawBorderStyle},
-            color::stylesheet_colors::StyleSheetColors,
+            color::stylesheet_colors::XlsxStyleSheetColors,
         },
     },
 };
@@ -73,8 +73,8 @@ impl Border {
 
     pub(crate) fn from_raw(
         border: Option<RawBorder>,
-        stylesheet_colors: Option<StyleSheetColors>,
-        color_scheme: Option<ColorScheme>,
+        stylesheet_colors: Option<XlsxStyleSheetColors>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
         let Some(border) = border else {
             return Self::default();
@@ -140,8 +140,8 @@ impl BorderStyle {
 
     pub(crate) fn from_raw(
         style: Option<RawBorderStyle>,
-        stylesheet_colors: Option<StyleSheetColors>,
-        color_scheme: Option<ColorScheme>,
+        stylesheet_colors: Option<XlsxStyleSheetColors>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
         let Some(style) = style else {
             return Self::default();

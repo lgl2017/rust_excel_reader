@@ -144,7 +144,7 @@ impl Relationship {
     }
 }
 
-pub fn zip_path_for_type(relationships: &Vec<Relationship>, r#type: &str) -> Vec<String> {
+pub(crate) fn zip_path_for_type(relationships: &Vec<Relationship>, r#type: &str) -> Vec<String> {
     let filtered: Vec<String> = relationships
         .iter()
         .filter(|r| {
@@ -158,11 +158,20 @@ pub fn zip_path_for_type(relationships: &Vec<Relationship>, r#type: &str) -> Vec
     return filtered;
 }
 
-pub fn zip_path_for_id(relationships: &Vec<Relationship>, id: &str) -> Option<String> {
+pub(crate) fn zip_path_for_id(relationships: &Vec<Relationship>, id: &str) -> Option<String> {
     let filtered: Vec<String> = relationships
         .iter()
         .filter(|r| r.to_owned().id.eq_ignore_ascii_case(&id))
         .map(|r| format_target_path(&r.target))
+        .collect();
+    return filtered.first().cloned();
+}
+
+pub(crate) fn raw_target_for_id(relationships: &Vec<Relationship>, id: &str) -> Option<String> {
+    let filtered: Vec<String> = relationships
+        .into_iter()
+        .filter(|r| r.to_owned().id.eq_ignore_ascii_case(&id))
+        .map(|r| r.target.clone())
         .collect();
     return filtered.first().cloned();
 }

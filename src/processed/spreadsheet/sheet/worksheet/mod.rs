@@ -1,37 +1,40 @@
 pub mod calculation_reference;
 pub mod cell;
-pub mod cell_property;
-pub mod cell_value;
 pub mod table;
 
-use anyhow::{bail, Context};
+use anyhow::Context;
 use calculation_reference::CalculationReferenceMode;
-use cell::Cell;
-use cell_property::CellProperty;
-use cell_value::CellValueType;
-use std::u64;
+use cell::{
+    cell_property::{hyperlink::Hyperlink, CellProperty},
+    cell_value::CellValueType,
+    Cell,
+};
+use std::{collections::BTreeMap, u64};
 use table::Table;
 
 use crate::{
     common_types::{Coordinate, Dimension},
     raw::{
-        drawing::scheme::color_scheme::ColorScheme,
+        drawing::scheme::color_scheme::XlsxColorScheme,
         spreadsheet::{
             shared_string::shared_string_item::SharedStringItem,
             sheet::worksheet::{
-                cell::Cell as RawCell, column_information::ColumnInformation as RawCol,
-                row::Row as RawRow, Worksheet as RawWorksheet,
+                cell::XlsxCell, column_information::XlsxColumnInformation,
+                hyperlink::XlsxHyperlink, row::XlsxRow, XlsxWorksheet,
             },
             stylesheet::{
-                format::{alignment::Alignment, cell_format::CellFormat, protection::Protection},
+                format::{
+                    alignment::XlsxAlignment, cell_format::CellFormat, protection::Protection,
+                },
                 StyleSheet,
             },
-            table::Table as RawTable,
+            table::XlsxTable,
+            workbook::defined_name::XlsxDefinedNames,
         },
     },
 };
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct Worksheet {
     pub name: String,
     pub sheet_id: u64,
@@ -54,23 +57,28 @@ pub struct Worksheet {
     pub calculation_reference_mode: Option<CalculationReferenceMode>,
 
     // private
-    raw_sheet: Box<RawWorksheet>,
+    raw_sheet: Box<XlsxWorksheet>,
     shared_string_items: Box<Vec<SharedStringItem>>,
     stylesheet: Box<StyleSheet>,
-    color_scheme: Box<Option<ColorScheme>>,
+    color_scheme: Box<Option<XlsxColorScheme>>,
+    external_hyperlinks: Box<BTreeMap<String, String>>,
+    defined_names: Box<XlsxDefinedNames>,
 }
 
 impl Worksheet {
     pub(crate) fn from_raw(
         name: String,
         sheet_id: u64,
-        worksheet: RawWorksheet,
-        tables: Vec<RawTable>,
+        worksheet: XlsxWorksheet,
+        tables: Vec<XlsxTable>,
+        defined_names: XlsxDefinedNames,
+        // (r_id, target)
+        external_hyperlinks: BTreeMap<String, String>,
         is_1904: bool,
         calculation_reference_mode: Option<CalculationReferenceMode>,
         shared_string_items: Vec<SharedStringItem>,
         stylesheet: StyleSheet,
-        color_scheme: Option<ColorScheme>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
         let default_table_style_name = if let Some(style) = stylesheet.clone().table_styles {
             style.default_table_style
@@ -95,6 +103,8 @@ impl Worksheet {
             shared_string_items: Box::new(shared_string_items),
             stylesheet: Box::new(stylesheet),
             color_scheme: Box::new(color_scheme),
+            external_hyperlinks: Box::new(external_hyperlinks),
+            defined_names: Box::new(defined_names),
         };
     }
 }
@@ -105,7 +115,7 @@ impl Worksheet {
     /// The style here ignoring table settings.
     /// If the cell is within a table that has different header row colors, column/row stripes, and etc.
     /// The appearance can be different.
-    pub fn get_cell(&mut self, coordinate: Coordinate) -> anyhow::Result<Cell> {
+    pub fn get_cell(&self, coordinate: Coordinate) -> anyhow::Result<Cell> {
         let row = self.get_raw_row(coordinate)?;
         let cell = self.get_raw_cell(coordinate, row.clone())?;
         let col = self.get_raw_col_info(coordinate);
@@ -143,6 +153,7 @@ impl Worksheet {
             num_format_id,
             alignment,
             protection,
+            self.get_hyperlink(coordinate),
             (*self.raw_sheet).sheet_format_properties.clone(),
             *self.stylesheet.clone(),
             *self.color_scheme.clone(),
@@ -157,7 +168,26 @@ impl Worksheet {
 }
 
 impl Worksheet {
-    fn get_dimension(worksheet: RawWorksheet) -> Option<Dimension> {
+    fn get_hyperlink(&self, cell_coordinate: Coordinate) -> Option<Hyperlink> {
+        let hyperlinks = self.raw_sheet.hyperlinks.clone().unwrap_or(vec![]);
+        if hyperlinks.is_empty() {
+            return None;
+        }
+        let target_link: Vec<XlsxHyperlink> = hyperlinks
+            .into_iter()
+            .filter(|h| h.r#ref == Some(cell_coordinate))
+            .collect();
+        let Some(target_link) = target_link.first() else {
+            return None;
+        };
+        return Hyperlink::from_raw(
+            target_link.clone(),
+            *self.external_hyperlinks.clone(),
+            *self.defined_names.clone(),
+        );
+    }
+
+    fn get_dimension(worksheet: XlsxWorksheet) -> Option<Dimension> {
         if let Some(d) = worksheet.dimension {
             return Some(d);
         }
@@ -215,9 +245,9 @@ impl Worksheet {
     /// get cell alignment information
     fn get_protection(
         &self,
-        cell: RawCell,
-        row_info: RawRow,
-        col_info: Option<RawCol>,
+        cell: XlsxCell,
+        row_info: XlsxRow,
+        col_info: Option<XlsxColumnInformation>,
     ) -> Option<Protection> {
         if let Some(n) = cell.style {
             if let Some(protection) = self.get_protection_helper(n) {
@@ -278,10 +308,10 @@ impl Worksheet {
     /// get cell alignment information
     fn get_alignment(
         &self,
-        cell: RawCell,
-        row_info: RawRow,
-        col_info: Option<RawCol>,
-    ) -> Option<Alignment> {
+        cell: XlsxCell,
+        row_info: XlsxRow,
+        col_info: Option<XlsxColumnInformation>,
+    ) -> Option<XlsxAlignment> {
         if let Some(n) = cell.style {
             if let Some(alignment) = self.get_alignment_helper(n) {
                 return Some(alignment);
@@ -308,7 +338,7 @@ impl Worksheet {
     /// get alignment for a cellXfs' xf_id.
     ///
     /// None if not specified or applyFont is set to false
-    fn get_alignment_helper(&self, xf_id: u64) -> Option<Alignment> {
+    fn get_alignment_helper(&self, xf_id: u64) -> Option<XlsxAlignment> {
         let Some(cell_format) = self.get_cell_format(xf_id) else {
             return None;
         };
@@ -347,9 +377,9 @@ impl Worksheet {
     /// * `get_number_format_id_helper`
     fn get_id(
         &self,
-        cell: RawCell,
-        row_info: RawRow,
-        col_info: Option<RawCol>,
+        cell: XlsxCell,
+        row_info: XlsxRow,
+        col_info: Option<XlsxColumnInformation>,
         helper_function: &dyn Fn(u64) -> Option<u64>,
     ) -> Option<u64> {
         if let Some(n) = cell.style {
@@ -507,25 +537,21 @@ impl Worksheet {
         return None;
     }
 
-    fn get_raw_cell(&mut self, coordinate: Coordinate, row: RawRow) -> anyhow::Result<RawCell> {
+    fn get_raw_cell(&self, coordinate: Coordinate, row: XlsxRow) -> anyhow::Result<XlsxCell> {
         let cells = row.cells.context("cells not availble in row.")?;
-        let col_coordintae = coordinate
-            .col
-            .checked_sub(1)
-            .context("col coordinate out of range.")?;
-        let col_coordintae = TryInto::<usize>::try_into(col_coordintae)?;
 
-        if col_coordintae >= cells.len() {
-            bail!("row coordinate out of range.")
-        }
-        let raw_cell = cells[col_coordintae].clone();
-        if raw_cell.coordinate != Some(coordinate) {
-            bail!("inconsistent coordinate.")
-        }
-        return Ok(raw_cell);
+        let raw_cell: Vec<XlsxCell> = cells
+            .into_iter()
+            .filter(|c| c.coordinate == Some(coordinate))
+            .collect();
+
+        return raw_cell.first().cloned().context(format!(
+            "cell for cooridnate: {:?} does not exist",
+            coordinate
+        ));
     }
 
-    fn get_raw_col_info(&mut self, coordinate: Coordinate) -> Option<RawCol> {
+    fn get_raw_col_info(&self, coordinate: Coordinate) -> Option<XlsxColumnInformation> {
         let cols = self.raw_sheet.column_infos.clone().unwrap_or(vec![]);
 
         let col_coordintae = coordinate.col;
@@ -541,7 +567,7 @@ impl Worksheet {
         return None;
     }
 
-    fn get_raw_row(&mut self, coordinate: Coordinate) -> anyhow::Result<RawRow> {
+    fn get_raw_row(&self, coordinate: Coordinate) -> anyhow::Result<XlsxRow> {
         let sheet_data = self
             .raw_sheet
             .clone()
@@ -549,18 +575,15 @@ impl Worksheet {
             .context("Sheet data does not exists.")?;
 
         let rows = sheet_data.rows.unwrap_or(vec![]);
-        let row_coordinate = coordinate
-            .row
-            .checked_sub(1)
-            .context("row coordinate out of range.")?;
+        let row: Vec<XlsxRow> = rows
+            .into_iter()
+            .filter(|r| r.row_index == Some(coordinate.row))
+            .collect();
 
-        let row_coordinate = TryInto::<usize>::try_into(row_coordinate)?;
-
-        if row_coordinate >= rows.len() {
-            bail!("row coordinate out of range.")
-        }
-        let row = rows[row_coordinate].clone();
-        return Ok(row);
+        return row.first().cloned().context(format!(
+            "row for cooridnate: {:?} does not exist",
+            coordinate
+        ));
     }
 
     fn get_cell_format(&self, xf_id: u64) -> Option<CellFormat> {

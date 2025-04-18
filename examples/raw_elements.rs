@@ -4,7 +4,7 @@ use excel_reader::excel::Excel;
 ///
 /// No additional processing done in addition to parsing.
 fn main() -> anyhow::Result<()> {
-    let path = "examples/sample.xlsx";
+    let path = "examples/table.xlsx";
     let mut excel = Excel::from_path(path)?;
 
     // Get stylesheet parsed from xl/styles.xml
@@ -24,16 +24,16 @@ fn main() -> anyhow::Result<()> {
 
     // Get a specific worksheet parsed from xl/worksheets/sheet{}.xml
     // `get_raw_worksheet_with_sheet_id` function or `get_raw_worksheet` function is also available.
-    let _worksheet = excel.get_raw_worksheet_with_sheet_id(&1)?;
+    let _worksheet = excel.get_raw_worksheet_with_sheet_id(&6)?;
 
     // Get all tables defined in a worksheet parsed from xl/tables/table{}.xml, ..., xl/tables/table{n}.xml
     // `get_raw_tables_for_worksheet_with_name` function or `get_raw_tables_for_worksheet` function is also available
-    let _tables = excel.get_raw_tables_for_worksheet_with_sheet_id(&1)?;
+    let _tables = excel.get_raw_tables_for_worksheet_with_sheet_id(&6)?;
 
     // Get sheet relationships
     // `get_raw_sheet_relationship_with_name` function or `get_raw_sheet_relationship` function is also available
     // NOTE: if the sheet does not link with any target package or external resource, xl/worksheets/_rels/sheet{}.xml.rels might not exist.
-    let _sheet_relationships = excel.get_raw_sheet_relationship_with_sheet_id(&1)?;
+    let _sheet_relationships = excel.get_raw_sheet_relationship_with_sheet_id(&6)?;
 
     Ok(())
 }

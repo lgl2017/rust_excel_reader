@@ -11,10 +11,10 @@ use crate::{
     common_types::Text,
     helper::string_to_bool,
     raw::{
-        drawing::scheme::color_scheme::ColorScheme,
+        drawing::scheme::color_scheme::XlsxColorScheme,
         spreadsheet::{
             shared_string::shared_string_item::SharedStringItem,
-            sheet::worksheet::cell::Cell as RawCell, string_item::StringItem,
+            sheet::worksheet::cell::XlsxCell as RawCell, string_item::XlsxStringItem,
             stylesheet::StyleSheet,
         },
     },
@@ -55,7 +55,7 @@ impl CellValueType {
         cell: RawCell,
         shared_string_items: Vec<SharedStringItem>,
         stylesheet: StyleSheet,
-        color_scheme: Option<ColorScheme>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> anyhow::Result<Self> {
         if cell.formula.is_none() && cell.inline_string.is_none() && cell.cell_value.is_none() {
             return Ok(Self::Empty);
@@ -115,9 +115,9 @@ impl CellValueType {
     }
 
     fn from_string_item(
-        string_item: StringItem,
+        string_item: XlsxStringItem,
         stylesheet: StyleSheet,
-        color_scheme: Option<ColorScheme>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> anyhow::Result<Self> {
         let phonetic_runs: Option<Vec<PhoneticRun>> =
             if let Some(raw_run) = string_item.phonetic_run {

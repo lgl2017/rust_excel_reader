@@ -1,10 +1,10 @@
 use crate::{
     common_types::HexColor,
     raw::{
-        drawing::scheme::color_scheme::ColorScheme,
+        drawing::scheme::color_scheme::XlsxColorScheme,
         spreadsheet::{
             string_item::run_properties::RunProperties as RawRunProperties,
-            stylesheet::{color::stylesheet_colors::StyleSheetColors, font::Font as RawFont},
+            stylesheet::{color::stylesheet_colors::XlsxStyleSheetColors, font::Font as RawFont},
         },
     },
 };
@@ -101,8 +101,8 @@ impl Font {
 
     pub(crate) fn from_raw_font(
         font: Option<RawFont>,
-        stylesheet_colors: Option<StyleSheetColors>,
-        color_scheme: Option<ColorScheme>,
+        stylesheet_colors: Option<XlsxStyleSheetColors>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
         let Some(font) = font else {
             return Self::default();
@@ -132,8 +132,8 @@ impl Font {
 
     pub(crate) fn from_raw_run_properties(
         r_pr: Option<RawRunProperties>,
-        stylesheet_colors: Option<StyleSheetColors>,
-        color_scheme: Option<ColorScheme>,
+        stylesheet_colors: Option<XlsxStyleSheetColors>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
         let Some(r_pr) = r_pr else {
             return Self::default();

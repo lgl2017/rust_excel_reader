@@ -1,6 +1,7 @@
 use anyhow::bail;
 use chrono::{DateTime, NaiveDateTime};
 use quick_xml::events::BytesStart;
+use regex::Regex;
 
 use crate::common_types::XSDDatetime;
 
@@ -104,7 +105,7 @@ pub(crate) fn extract_val_attribute(e: &BytesStart) -> anyhow::Result<Option<Str
 }
 
 /// Convert A1 reference dimension to (row, col) (1 based index).
-/// A6:G67 -> col: 1, row: 6
+///
 /// - top left (row, column),
 /// - bottom right (row, column)
 pub(crate) fn a1_dimension_to_row_col(
@@ -120,13 +121,41 @@ pub(crate) fn a1_dimension_to_row_col(
     let (Some(end_row), Some(end_col)) = a1_address_to_row_col(parts[1])? else {
         bail!("Invalid reference end address.")
     };
-    if start_row > end_row {
-        bail!("Invalid reference: start row > end row.")
-    }
-    if start_col > end_col {
-        bail!("Invalid reference: start col > end col.")
-    }
+
     Ok(((start_row, start_col), (end_row, end_col)))
+}
+
+/// Convert R1C1 reference dimension to (row, col) (1 based index).
+///
+/// - top left (row, column),
+/// - bottom right (row, column)
+pub(crate) fn r1c1_dimension_to_row_col(
+    r1c1_dimension: &str,
+) -> anyhow::Result<((u64, u64), (u64, u64))> {
+    let parts: Vec<&str> = r1c1_dimension.split(|c: char| c == ':').collect();
+    if parts.len() != 2 {
+        bail!("Invalid reference dimension.")
+    }
+    let Some(start) = r1c1_address_to_row_col(parts[0])? else {
+        bail!("Invalid reference start address.")
+    };
+    let Some(end) = r1c1_address_to_row_col(parts[1])? else {
+        bail!("Invalid reference end address.")
+    };
+
+    Ok((start, end))
+}
+
+/// Convert R1C1 reference to (row, col) (1 based index).
+pub(crate) fn r1c1_address_to_row_col(r1c1: &str) -> anyhow::Result<Option<(u64, u64)>> {
+    let r1c1 = r1c1.to_ascii_uppercase();
+    let re = Regex::new(r"R(?<row>[0-9]+)C(?<col>[0-9]+)$")?;
+    let Some(caps) = re.captures(&r1c1) else {
+        return Ok(None);
+    };
+    let row = &caps["row"].parse::<u64>()?;
+    let col = &caps["col"].parse::<u64>()?;
+    return Ok(Some((*row, *col)));
 }
 
 /// Convert A1 reference to (row, col) (1 based index).

@@ -1,4 +1,4 @@
-use crate::raw::spreadsheet::stylesheet::format::alignment::Alignment as RawAlignment;
+use crate::raw::spreadsheet::stylesheet::format::alignment::XlsxAlignment as RawAlignment;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.alignment?view=openxml-3.0.1
 ///

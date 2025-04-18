@@ -2,6 +2,9 @@ use chrono::FixedOffset;
 use chrono::NaiveDateTime;
 
 use crate::helper::a1_address_to_row_col;
+use crate::helper::a1_dimension_to_row_col;
+use crate::helper::r1c1_address_to_row_col;
+use crate::helper::r1c1_dimension_to_row_col;
 use crate::helper::string_to_int;
 
 /// Hex representation of RGBA (alpha last)
@@ -67,9 +70,19 @@ impl Coordinate {
         }
     }
 
-    pub(crate) fn from_a1(a1_address: &[u8]) -> Option<Self> {
+    pub fn from_a1(a1_address: &[u8]) -> Option<Self> {
         if let Ok((Some(row), Some(col))) = a1_address_to_row_col(a1_address) {
             return Some(Self { row, col });
+        }
+        return None;
+    }
+
+    pub fn from_r1c1(r1c1: &str) -> Option<Self> {
+        if let Ok(Some(coordinate)) = r1c1_address_to_row_col(r1c1) {
+            return Some(Self {
+                row: coordinate.0,
+                col: coordinate.1,
+            });
         }
         return None;
     }
@@ -79,6 +92,28 @@ impl Coordinate {
 pub struct Dimension {
     pub start: Coordinate,
     pub end: Coordinate,
+}
+
+impl Dimension {
+    pub(crate) fn from_a1(a1_address: &[u8]) -> Option<Self> {
+        if let Ok((start, end)) = a1_dimension_to_row_col(a1_address) {
+            return Some(Self {
+                start: Coordinate::from_point(start),
+                end: Coordinate::from_point(end),
+            });
+        }
+        return None;
+    }
+
+    pub(crate) fn from_r1c1(r1c1: &str) -> Option<Self> {
+        if let Ok((start, end)) = r1c1_dimension_to_row_col(r1c1) {
+            return Some(Self {
+                start: Coordinate::from_point(start),
+                end: Coordinate::from_point(end),
+            });
+        }
+        return None;
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]

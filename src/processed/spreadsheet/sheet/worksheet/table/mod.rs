@@ -1,6 +1,6 @@
 use table_style::TableStyle;
 
-use crate::{common_types::Dimension, raw::spreadsheet::table::Table as RawTable};
+use crate::{common_types::Dimension, raw::spreadsheet::table::XlsxTable as RawTable};
 
 pub mod table_style;
 
@@ -30,9 +30,6 @@ pub struct Table {
 
     /// table style
     pub table_style: TableStyle,
-
-    // private
-    raw_table: Box<RawTable>,
 }
 
 impl Table {
@@ -53,7 +50,6 @@ impl Table {
             header_row_count: table.clone().header_row_count.unwrap_or(1),
             totals_row_count: table.clone().totals_row_count.unwrap_or(1),
             table_style: TableStyle::from_raw(table.clone().table_style_info, default_table_style),
-            raw_table: Box::new(table),
         };
     }
 }

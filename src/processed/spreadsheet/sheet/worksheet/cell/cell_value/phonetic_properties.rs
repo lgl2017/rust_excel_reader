@@ -1,7 +1,7 @@
 use crate::{
-    processed::spreadsheet::sheet::worksheet::cell_property::font::Font,
+    processed::spreadsheet::sheet::worksheet::cell::cell_property::font::Font,
     raw::{
-        drawing::scheme::color_scheme::ColorScheme,
+        drawing::scheme::color_scheme::XlsxColorScheme,
         spreadsheet::{
             string_item::phonetic_properties::PhoneticProperties as RawProperties,
             stylesheet::StyleSheet,
@@ -55,7 +55,7 @@ impl PhoneticProperties {
     pub(crate) fn from_raw(
         properties: RawProperties,
         stylesheet: StyleSheet,
-        color_scheme: Option<ColorScheme>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
         let font_id = properties.font_id.unwrap_or(0).try_into().unwrap_or(0);
         let raw_font = stylesheet.get_font(font_id);

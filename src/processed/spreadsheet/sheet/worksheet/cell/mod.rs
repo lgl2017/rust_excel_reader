@@ -1,6 +1,10 @@
-use crate::common_types::Coordinate;
+pub mod cell_property;
+pub mod cell_value;
 
-use super::{cell_property::CellProperty, cell_value::CellValueType};
+use cell_property::CellProperty;
+use cell_value::CellValueType;
+
+use crate::common_types::Coordinate;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Cell {

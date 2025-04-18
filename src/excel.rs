@@ -1,6 +1,7 @@
 use anyhow::{bail, Context};
 use quick_xml::Reader;
 use std::{
+    collections::BTreeMap,
     fs::File,
     io::{BufReader, Read, Seek},
     path::Path,
@@ -9,19 +10,19 @@ use zip::{read::ZipFile, ZipArchive};
 
 use crate::{
     packaging::relationship::{
-        load_sheet_relationships, load_workbook_relationships, zip_path_for_id, zip_path_for_type,
-        Relationships,
+        load_sheet_relationships, load_workbook_relationships, raw_target_for_id, zip_path_for_id,
+        zip_path_for_type, Relationships,
     },
     processed::spreadsheet::{
         sheet::worksheet::{calculation_reference::CalculationReferenceMode, Worksheet},
         sheet_basic_info::{SheetBasicInfo, SheetType},
     },
     raw::{
-        drawing::{scheme::color_scheme::ColorScheme, theme::Theme},
+        drawing::{scheme::color_scheme::XlsxColorScheme, theme::XlsxTheme},
         spreadsheet::{
-            shared_string::shared_string_table::SharedStringTable,
-            sheet::worksheet::Worksheet as RawWorksheet, stylesheet::StyleSheet,
-            table::Table as RawTable, workbook::Workbook,
+            shared_string::shared_string_table::XlsxSharedStringTable,
+            sheet::worksheet::XlsxWorksheet, stylesheet::StyleSheet, table::XlsxTable,
+            workbook::XlsxWorkbook,
         },
     },
 };
@@ -33,9 +34,9 @@ pub struct Excel<RS> {
     zip: ZipArchive<RS>,
     workbook_relationships: Relationships,
     stylesheet: Box<Option<StyleSheet>>,
-    theme: Box<Option<Theme>>,
-    shared_strings: Box<Option<SharedStringTable>>,
-    workbook: Box<Option<Workbook>>,
+    theme: Box<Option<XlsxTheme>>,
+    shared_strings: Box<Option<XlsxSharedStringTable>>,
+    workbook: Box<Option<XlsxWorkbook>>,
 }
 
 // initialization
@@ -78,26 +79,26 @@ impl<RS: Read + Seek> Excel<RS> {
 
     /// Get theme used.
     /// Parsed from get stylesheet parsed from xl/theme/theme{}.xml
-    pub fn get_raw_theme(&mut self) -> anyhow::Result<Box<Option<Theme>>> {
+    pub fn get_raw_theme(&mut self) -> anyhow::Result<Box<Option<XlsxTheme>>> {
         if self.theme.is_none() {
             let path = zip_path_for_type(&self.workbook_relationships, "theme");
-            self.theme = Box::new(Some(Theme::load(&mut self.zip, path)?));
+            self.theme = Box::new(Some(XlsxTheme::load(&mut self.zip, path)?));
         }
         return Ok(self.theme.clone());
     }
 
     /// Get shared string parsed from xl/sharedStrings.xml
-    pub fn get_raw_shared_strings(&mut self) -> anyhow::Result<Box<Option<SharedStringTable>>> {
+    pub fn get_raw_shared_strings(&mut self) -> anyhow::Result<Box<Option<XlsxSharedStringTable>>> {
         if self.shared_strings.is_none() {
-            self.shared_strings = Box::new(Some(SharedStringTable::load(&mut self.zip)?));
+            self.shared_strings = Box::new(Some(XlsxSharedStringTable::load(&mut self.zip)?));
         }
         return Ok(self.shared_strings.clone());
     }
 
     /// Get workbook parsed from xl/workbook.xml
-    pub fn get_raw_workbook(&mut self) -> anyhow::Result<Box<Option<Workbook>>> {
+    pub fn get_raw_workbook(&mut self) -> anyhow::Result<Box<Option<XlsxWorkbook>>> {
         if self.workbook.is_none() {
-            self.workbook = Box::new(Some(Workbook::load(&mut self.zip)?));
+            self.workbook = Box::new(Some(XlsxWorkbook::load(&mut self.zip)?));
         }
         return Ok(self.workbook.clone());
     }
@@ -105,7 +106,7 @@ impl<RS: Read + Seek> Excel<RS> {
     /// Get a specific worksheet parsed from xl/worksheets/sheet{}.xml
     ///
     /// * name: worksheet name
-    pub fn get_raw_worksheet_with_name(&mut self, name: &str) -> anyhow::Result<RawWorksheet> {
+    pub fn get_raw_worksheet_with_name(&mut self, name: &str) -> anyhow::Result<XlsxWorksheet> {
         let sheet = self.get_sheet_with_name(name)?;
         return self.get_raw_worksheet(&sheet);
     }
@@ -113,17 +114,17 @@ impl<RS: Read + Seek> Excel<RS> {
     /// Get a specific worksheet parsed from xl/worksheets/sheet{}.xml
     ///
     /// * id: worksheet sheet id
-    pub fn get_raw_worksheet_with_sheet_id(&mut self, id: &u64) -> anyhow::Result<RawWorksheet> {
+    pub fn get_raw_worksheet_with_sheet_id(&mut self, id: &u64) -> anyhow::Result<XlsxWorksheet> {
         let sheet = self.get_sheet_with_sheet_id(id)?;
         return self.get_raw_worksheet(&sheet);
     }
 
     /// Get a specific worksheet parsed from xl/worksheets/sheet{}.xml
-    pub fn get_raw_worksheet(&mut self, sheet: &SheetBasicInfo) -> anyhow::Result<RawWorksheet> {
+    pub fn get_raw_worksheet(&mut self, sheet: &SheetBasicInfo) -> anyhow::Result<XlsxWorksheet> {
         if sheet.r#type != SheetType::WorkSheet {
             bail!("Sheet specified is not a worksheet")
         };
-        return RawWorksheet::load(&mut self.zip, &sheet.path);
+        return XlsxWorksheet::load(&mut self.zip, &sheet.path);
     }
 
     /// Get relationships for a sheet parsed from xl/worksheets/_rels/sheet{}.xml.rels
@@ -163,7 +164,7 @@ impl<RS: Read + Seek> Excel<RS> {
     pub fn get_raw_tables_for_worksheet_with_name(
         &mut self,
         name: &str,
-    ) -> anyhow::Result<Vec<RawTable>> {
+    ) -> anyhow::Result<Vec<XlsxTable>> {
         let sheet = self.get_sheet_with_name(name)?;
         return self.get_raw_tables_for_worksheet(&sheet);
     }
@@ -174,7 +175,7 @@ impl<RS: Read + Seek> Excel<RS> {
     pub fn get_raw_tables_for_worksheet_with_sheet_id(
         &mut self,
         id: &u64,
-    ) -> anyhow::Result<Vec<RawTable>> {
+    ) -> anyhow::Result<Vec<XlsxTable>> {
         let sheet = self.get_sheet_with_sheet_id(id)?;
         return self.get_raw_tables_for_worksheet(&sheet);
     }
@@ -183,30 +184,10 @@ impl<RS: Read + Seek> Excel<RS> {
     pub fn get_raw_tables_for_worksheet(
         &mut self,
         sheet: &SheetBasicInfo,
-    ) -> anyhow::Result<Vec<RawTable>> {
+    ) -> anyhow::Result<Vec<XlsxTable>> {
         let raw_worksheet = self.get_raw_worksheet(&sheet)?;
-        let table_parts = raw_worksheet.table_parts.unwrap_or(vec![]);
-        if table_parts.is_empty() {
-            return Ok(vec![]);
-        } else {
-            let worksheet_rels = load_sheet_relationships(&mut self.zip, &sheet.path)?;
-
-            let paths: Vec<String> = table_parts
-                .into_iter()
-                .map(|t| zip_path_for_id(&worksheet_rels, &t.id))
-                .filter(|p| p.is_some())
-                .map(|p| p.unwrap())
-                .collect();
-
-            let raw_tables: Vec<RawTable> = paths
-                .into_iter()
-                .map(|p| RawTable::load(&mut self.zip, &p))
-                .filter(|t| t.is_ok())
-                .map(|t| t.unwrap())
-                .collect();
-
-            return Ok(raw_tables);
-        };
+        let worksheet_rels = self.get_raw_sheet_relationship(&sheet).unwrap_or(vec![]);
+        return self.get_raw_tables(raw_worksheet, worksheet_rels);
     }
 }
 
@@ -246,31 +227,40 @@ impl<RS: Read + Seek> Excel<RS> {
 
     /// Get worksheet (processed)
     pub fn get_worksheet(&mut self, sheet: &SheetBasicInfo) -> anyhow::Result<Worksheet> {
-        let raw_worksheet = self.get_raw_worksheet(sheet)?;
+        let raw_workbook = self.get_raw_workbook()?.context("workbook not available")?;
+        let raw_worksheet = self.get_raw_worksheet(&sheet)?;
+        let worksheet_rels = self.get_raw_sheet_relationship(&sheet).unwrap_or(vec![]);
 
         let shared_strings = if let Some(table) = *self.get_raw_shared_strings()? {
             table.string_item.unwrap_or(vec![])
         } else {
             vec![]
         };
+
         let stylesheet = self
             .get_raw_stylesheet()?
             .context("Style sheet not availalble")?;
-        let mut color_scheme: Option<ColorScheme> = None;
+
+        let mut color_scheme: Option<XlsxColorScheme> = None;
         if let Some(theme) = *self.get_raw_theme()? {
             if let Some(theme_elements) = theme.theme_elements {
                 color_scheme = theme_elements.color_scheme
             }
         };
-        let tables = self.get_raw_tables_for_worksheet(sheet)?;
+
+        let tables = self.get_raw_tables(raw_worksheet.clone(), worksheet_rels.clone())?;
+        let rel_hyperlinks =
+            self.get_hyperlinks_in_rel(raw_worksheet.clone(), worksheet_rels.clone())?;
 
         let worksheet = Worksheet::from_raw(
             sheet.clone().name,
             sheet.sheet_id,
             raw_worksheet,
             tables,
-            self.is_1904(),
-            self.calculation_mode(),
+            raw_workbook.clone().defined_names.unwrap_or(vec![]),
+            rel_hyperlinks,
+            self.is_1904(raw_workbook.clone()),
+            self.calculation_mode(raw_workbook.clone()),
             shared_strings,
             stylesheet.clone(),
             color_scheme,
@@ -282,6 +272,62 @@ impl<RS: Read + Seek> Excel<RS> {
 
 /// private helper functions
 impl<RS: Read + Seek> Excel<RS> {
+    /// get a list of hyperlinks defined in a worksheet relationships
+    ///
+    /// (r_id, target): Example: `("rId1", "www.google.com")`
+    fn get_hyperlinks_in_rel(
+        &self,
+        raw_worksheet: XlsxWorksheet,
+        worksheet_rels: Relationships,
+    ) -> anyhow::Result<BTreeMap<String, String>> {
+        let hyperlinks = raw_worksheet.hyperlinks.unwrap_or(vec![]);
+        if hyperlinks.is_empty() {
+            return Ok(BTreeMap::new());
+        } else {
+            let rels: BTreeMap<String, String> = hyperlinks
+                .into_iter()
+                .filter(|h| h.r_id.is_some())
+                .map(|h| {
+                    (
+                        h.r_id.clone().unwrap(),
+                        raw_target_for_id(&worksheet_rels, &h.r_id.clone().unwrap()),
+                    )
+                })
+                .filter(|p| p.1.is_some())
+                .map(|p| (p.0, p.1.unwrap()))
+                .collect();
+            return Ok(rels);
+        };
+    }
+
+    /// get a list of tables used in a worksheet
+    fn get_raw_tables(
+        &mut self,
+        raw_worksheet: XlsxWorksheet,
+        worksheet_rels: Relationships,
+    ) -> anyhow::Result<Vec<XlsxTable>> {
+        let table_parts = raw_worksheet.table_parts.unwrap_or(vec![]);
+        if table_parts.is_empty() {
+            return Ok(vec![]);
+        } else {
+            let paths: Vec<String> = table_parts
+                .into_iter()
+                .map(|t| zip_path_for_id(&worksheet_rels, &t.id))
+                .filter(|p| p.is_some())
+                .map(|p| p.unwrap())
+                .collect();
+
+            let raw_tables: Vec<XlsxTable> = paths
+                .into_iter()
+                .map(|p| XlsxTable::load(&mut self.zip, &p))
+                .filter(|t| t.is_ok())
+                .map(|t| t.unwrap())
+                .collect();
+
+            return Ok(raw_tables);
+        };
+    }
+
     fn get_sheet_with_name(&mut self, name: &str) -> anyhow::Result<SheetBasicInfo> {
         let sheets = self.get_sheets()?;
         let target: Vec<SheetBasicInfo> = sheets
@@ -304,13 +350,7 @@ impl<RS: Read + Seek> Excel<RS> {
         return Ok(target.to_owned());
     }
 
-    fn is_1904(&mut self) -> bool {
-        let Ok(result) = self.get_raw_workbook() else {
-            return false;
-        };
-        let Some(workbook) = *result else {
-            return false;
-        };
+    fn is_1904(&self, workbook: XlsxWorkbook) -> bool {
         let Some(properties) = workbook.workbook_properties else {
             return false;
         };
@@ -321,13 +361,7 @@ impl<RS: Read + Seek> Excel<RS> {
         return properties.date1904.unwrap_or(false);
     }
 
-    fn calculation_mode(&mut self) -> Option<CalculationReferenceMode> {
-        let Ok(result) = self.get_raw_workbook() else {
-            return None;
-        };
-        let Some(workbook) = *result else {
-            return None;
-        };
+    fn calculation_mode(&self, workbook: XlsxWorkbook) -> Option<CalculationReferenceMode> {
         let Some(properties) = workbook.calculation_propertis else {
             return None;
         };

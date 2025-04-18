@@ -1,31 +1,33 @@
+pub mod border;
+pub mod fill;
+pub mod font;
+pub mod hyperlink;
+pub mod numbering_format;
+pub mod text_alignment;
+
 use border::Border;
 use fill::Fill;
 use font::Font;
+use hyperlink::Hyperlink;
 use numbering_format::NumberingFormat;
 use text_alignment::TextAlignment;
 
 use crate::raw::{
-    drawing::scheme::color_scheme::ColorScheme,
+    drawing::scheme::color_scheme::XlsxColorScheme,
     spreadsheet::{
         sheet::{
             sheet_format_properties::SheetFormatProperties as RawSheetProperties,
             worksheet::{
-                cell::Cell as RawCell, column_information::ColumnInformation as RawCol,
-                row::Row as RawRow,
+                cell::XlsxCell as RawCell, column_information::XlsxColumnInformation as RawCol,
+                row::XlsxRow as RawRow,
             },
         },
         stylesheet::{
-            format::{alignment::Alignment, protection::Protection},
+            format::{alignment::XlsxAlignment, protection::Protection},
             StyleSheet,
         },
     },
 };
-
-pub mod border;
-pub mod fill;
-pub mod font;
-pub mod numbering_format;
-pub mod text_alignment;
 
 static DEFAULT_CELL_WIDTH: f64 = 8.43;
 static DEFAULT_CELL_HEIGHT: f64 = 15.0;
@@ -33,12 +35,22 @@ static DEFAULT_CELL_HEIGHT: f64 = 15.0;
 #[derive(Debug, Clone, PartialEq)]
 pub struct CellProperty {
     pub width: f64,
+
     /// Flag indicating if the column width should automatically resize
     pub width_best_fit: bool,
 
     pub height: f64,
+
+    /// vertical distance in pixels from the bottom of a cell in a row to the typographical baseline of its content
+    pub dy_descent: f64,
+
     pub hidden: bool,
+
     pub show_phonetic: bool,
+
+    pub hyperlink: Option<Hyperlink>,
+
+    // styles
     pub alignment: TextAlignment,
     pub font: Font,
     pub border: Border,
@@ -55,11 +67,12 @@ impl CellProperty {
         font_id: Option<u64>,
         border_id: Option<u64>,
         numbering_format_id: Option<u64>,
-        alignment: Option<Alignment>,
+        alignment: Option<XlsxAlignment>,
         protection: Option<Protection>,
+        hyperlink: Option<Hyperlink>,
         sheet_format_properties: Option<RawSheetProperties>,
         stylesheet: StyleSheet,
-        color_scheme: Option<ColorScheme>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
         let show_phonetic = Self::show_phonetic(cell.clone(), col_info.clone(), row_info.clone());
         let width = Self::cell_width(col_info.clone(), sheet_format_properties.clone());
@@ -80,8 +93,10 @@ impl CellProperty {
             width,
             width_best_fit: Self::get_width_best_fit(col_info),
             height,
+            dy_descent: Self::get_dy_descent(row_info, sheet_format_properties),
             hidden,
             show_phonetic,
+            hyperlink,
             alignment: TextAlignment::from_raw(alignment),
             font,
             border,
@@ -96,6 +111,20 @@ impl CellProperty {
         };
 
         return col_info.best_fit.unwrap_or(false);
+    }
+
+    fn get_dy_descent(row: RawRow, sheet_format_properties: Option<RawSheetProperties>) -> f64 {
+        if let Some(d) = row.dy_descent {
+            return d;
+        };
+
+        if let Some(sheet_format_properties) = sheet_format_properties {
+            if let Some(d) = sheet_format_properties.dy_descent {
+                return d;
+            }
+        };
+
+        return 0.2;
     }
 
     fn get_numbering_format(
@@ -113,7 +142,7 @@ impl CellProperty {
     fn get_font(
         font_id: Option<u64>,
         stylesheet: StyleSheet,
-        color_scheme: Option<ColorScheme>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Font {
         if let Some(id) = font_id {
             if let Ok(id) = TryInto::<usize>::try_into(id) {
@@ -128,7 +157,7 @@ impl CellProperty {
     fn get_border(
         border_id: Option<u64>,
         stylesheet: StyleSheet,
-        color_scheme: Option<ColorScheme>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Border {
         if let Some(id) = border_id {
             if let Ok(id) = TryInto::<usize>::try_into(id) {
@@ -143,7 +172,7 @@ impl CellProperty {
     fn get_fill(
         fill_id: Option<u64>,
         stylesheet: StyleSheet,
-        color_scheme: Option<ColorScheme>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Fill {
         if let Some(id) = fill_id {
             if let Ok(id) = TryInto::<usize>::try_into(id) {

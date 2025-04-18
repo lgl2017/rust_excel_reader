@@ -1,6 +1,6 @@
 use super::{phonetic_properties::PhoneticProperties, phonetic_run::PhoneticRun};
 use crate::{
-    common_types::Text, processed::spreadsheet::sheet::worksheet::cell_property::font::Font,
+    common_types::Text, processed::spreadsheet::sheet::worksheet::cell::cell_property::font::Font,
 };
 
 /// Example:

@@ -1,9 +1,9 @@
 use crate::{
     common_types::HexColor,
     raw::{
-        drawing::scheme::color_scheme::ColorScheme,
+        drawing::scheme::color_scheme::XlsxColorScheme,
         spreadsheet::stylesheet::{
-            color::stylesheet_colors::StyleSheetColors,
+            color::stylesheet_colors::XlsxStyleSheetColors,
             fill::{
                 gradient_fill::{GradientFill as RawGradientFill, GradientStop as RawGradientStop},
                 pattern_fill::PatternFill as RawPatternFill,
@@ -32,8 +32,8 @@ impl Fill {
     }
     pub(crate) fn from_raw(
         fill: Option<RawFill>,
-        stylesheet_colors: Option<StyleSheetColors>,
-        color_scheme: Option<ColorScheme>,
+        stylesheet_colors: Option<XlsxStyleSheetColors>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
         let Some(fill) = fill else {
             return Self::default();
@@ -80,8 +80,8 @@ pub struct PatternFill {
 impl PatternFill {
     pub(crate) fn from_raw(
         fill: RawPatternFill,
-        stylesheet_colors: Option<StyleSheetColors>,
-        color_scheme: Option<ColorScheme>,
+        stylesheet_colors: Option<XlsxStyleSheetColors>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
         let foreground_color: Option<HexColor> = match fill.foreground_color {
             Some(c) => c.to_hex(stylesheet_colors.clone(), color_scheme.clone()),
@@ -241,8 +241,8 @@ pub struct GradientFill {
 impl GradientFill {
     pub(crate) fn from_raw(
         fill: RawGradientFill,
-        stylesheet_colors: Option<StyleSheetColors>,
-        color_scheme: Option<ColorScheme>,
+        stylesheet_colors: Option<XlsxStyleSheetColors>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
         let stops: Option<Vec<GradientStop>> = if let Some(stops) = fill.stop {
             let proccessed: Vec<GradientStop> = stops
@@ -306,8 +306,8 @@ pub struct GradientStop {
 impl GradientStop {
     pub(crate) fn from_raw(
         stop: RawGradientStop,
-        stylesheet_colors: Option<StyleSheetColors>,
-        color_scheme: Option<ColorScheme>,
+        stylesheet_colors: Option<XlsxStyleSheetColors>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
         let color_hex: Option<HexColor> = match stop.color {
             Some(c) => c.to_hex(stylesheet_colors, color_scheme),

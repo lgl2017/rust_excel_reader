@@ -2,7 +2,7 @@ use anyhow::bail;
 
 use crate::{
     packaging::relationship::{zip_path_for_id, Relationships},
-    raw::spreadsheet::workbook::sheet::Sheet as RawSheet,
+    raw::spreadsheet::workbook::sheet::XlsxSheet,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -27,7 +27,10 @@ pub struct SheetBasicInfo {
 }
 
 impl SheetBasicInfo {
-    pub(crate) fn from_raw(sheet: RawSheet, relationships: &Relationships) -> anyhow::Result<Self> {
+    pub(crate) fn from_raw(
+        sheet: XlsxSheet,
+        relationships: &Relationships,
+    ) -> anyhow::Result<Self> {
         let (Some(id), Some(name), Some(sheet_id)) = (sheet.id, sheet.name, sheet.sheet_id) else {
             bail!("neccessary properties for sheet are not present.")
         };

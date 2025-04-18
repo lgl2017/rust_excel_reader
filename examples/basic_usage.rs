@@ -1,6 +1,6 @@
 use excel_reader::{
     common_types::Coordinate, excel::Excel,
-    processed::spreadsheet::sheet::worksheet::cell_value::CellValueType,
+    processed::spreadsheet::sheet::worksheet::cell::cell_value::CellValueType,
 };
 
 /// Demo for basic usages
@@ -35,7 +35,7 @@ fn main() -> anyhow::Result<()> {
     println!("--------");
 
     // get worksheet detail
-    let mut worksheet = excel.get_worksheet(&sheets[2].clone())?;
+    let worksheet = excel.get_worksheet(&sheets[0].clone())?;
     println!("worksheet: {}", worksheet.name);
     println!("dimension: {:?}", worksheet.dimension);
     println!(
@@ -93,6 +93,7 @@ fn main() -> anyhow::Result<()> {
             println!("size: {} * {}", properties.width, properties.height);
             println!("hidden : {:?}", properties.hidden);
             println!("show_phonetic : {:?}", properties.show_phonetic);
+            println!("hyperlink : {:?}", properties.hyperlink);
             println!("font : {:?}", properties.font);
             println!("border : {:?}", properties.border);
             println!("fill : {:?}", properties.fill);
