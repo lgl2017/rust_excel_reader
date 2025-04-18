@@ -12,7 +12,7 @@ Excel Reader is a pure Rust library to read and parse xlsx files.
 You can use this library to get
 - An overview of Sheets in the workbook
 - Detail information on worksheets including dimension, merged cells, tables, and some other properties
-- Cell values, formatting, and styles such as border, fill, and font.
+- Cell values, formatting, and styles including hyperlink, border, fill, font, alignment and etc.
 
 
 If the processed information above does not meet your needs, you can also get the raw version (parsed xml in Rust structures) directly for the following elements.
@@ -136,6 +136,7 @@ while row_index <= end.row {
         println!("size: {} * {}", properties.width, properties.height);
         println!("hidden : {:?}", properties.hidden);
         println!("show_phonetic : {:?}", properties.show_phonetic);
+        println!("hyperlink : {:?}", properties.hyperlink);
         println!("font : {:?}", properties.font);
         println!("border : {:?}", properties.border);
         println!("fill : {:?}", properties.fill);
