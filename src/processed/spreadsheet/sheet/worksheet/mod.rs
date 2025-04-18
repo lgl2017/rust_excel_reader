@@ -2,7 +2,7 @@ pub mod calculation_reference;
 pub mod cell;
 pub mod table;
 
-use anyhow::Context;
+use anyhow::bail;
 use calculation_reference::CalculationReferenceMode;
 use cell::{
     cell_property::{hyperlink::Hyperlink, CellProperty},
@@ -117,8 +117,20 @@ impl Worksheet {
     /// If the cell is within a table that has different header row colors, column/row stripes, and etc.
     /// The appearance can be different.
     pub fn get_cell(&self, coordinate: Coordinate) -> anyhow::Result<Cell> {
-        let row = self.get_raw_row(coordinate)?;
-        let cell = self.get_raw_cell(coordinate, row.clone())?;
+        if !self.coordinate_in_range(coordinate) {
+            bail!(
+                "Coordinate: {:?} is not within worksheet dimension.",
+                coordinate
+            )
+        }
+        let Some(row) = self.get_raw_row(coordinate) else {
+            return Ok(Cell::default(coordinate));
+        };
+
+        let Some(cell) = self.get_raw_cell(coordinate, row.clone()) else {
+            return Ok(Cell::default(coordinate));
+        };
+
         let col = self.get_raw_col_info(coordinate);
 
         let cell_value = CellValueType::from_raw(
@@ -186,6 +198,20 @@ impl Worksheet {
             *self.external_hyperlinks.clone(),
             *self.defined_names.clone(),
         );
+    }
+
+    fn coordinate_in_range(&self, coordinate: Coordinate) -> bool {
+        let Some(dimension) = self.dimension.clone() else {
+            return false;
+        };
+        if !(dimension.start.row..=dimension.end.row).contains(&coordinate.row) {
+            return false;
+        };
+        if !(dimension.start.col..=dimension.end.col).contains(&coordinate.col) {
+            return false;
+        };
+
+        return true;
     }
 
     fn get_dimension(worksheet: XlsxWorksheet) -> Option<Dimension> {
@@ -538,18 +564,15 @@ impl Worksheet {
         return None;
     }
 
-    fn get_raw_cell(&self, coordinate: Coordinate, row: XlsxRow) -> anyhow::Result<XlsxCell> {
-        let cells = row.cells.context("cells not availble in row.")?;
+    fn get_raw_cell(&self, coordinate: Coordinate, row: XlsxRow) -> Option<XlsxCell> {
+        let cells = row.cells.unwrap_or(vec![]);
 
         let raw_cell: Vec<XlsxCell> = cells
             .into_iter()
             .filter(|c| c.coordinate == Some(coordinate))
             .collect();
 
-        return raw_cell.first().cloned().context(format!(
-            "cell for cooridnate: {:?} does not exist",
-            coordinate
-        ));
+        return raw_cell.first().cloned();
     }
 
     fn get_raw_col_info(&self, coordinate: Coordinate) -> Option<XlsxColumnInformation> {
@@ -568,12 +591,10 @@ impl Worksheet {
         return None;
     }
 
-    fn get_raw_row(&self, coordinate: Coordinate) -> anyhow::Result<XlsxRow> {
-        let sheet_data = self
-            .raw_sheet
-            .clone()
-            .sheet_data
-            .context("Sheet data does not exists.")?;
+    fn get_raw_row(&self, coordinate: Coordinate) -> Option<XlsxRow> {
+        let Some(sheet_data) = self.raw_sheet.clone().sheet_data else {
+            return None;
+        };
 
         let rows = sheet_data.rows.unwrap_or(vec![]);
         let row: Vec<XlsxRow> = rows
@@ -581,10 +602,7 @@ impl Worksheet {
             .filter(|r| r.row_index == Some(coordinate.row))
             .collect();
 
-        return row.first().cloned().context(format!(
-            "row for cooridnate: {:?} does not exist",
-            coordinate
-        ));
+        return row.first().cloned();
     }
 
     fn get_cell_format(&self, xf_id: u64) -> Option<XlsxCellFormat> {

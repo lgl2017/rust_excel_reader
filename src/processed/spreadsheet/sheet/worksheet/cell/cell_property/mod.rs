@@ -27,7 +27,11 @@ use crate::raw::{
 };
 
 static DEFAULT_CELL_WIDTH: f64 = 8.43;
+static DEFAULT_BEST_FIT: bool = false;
 static DEFAULT_CELL_HEIGHT: f64 = 15.0;
+static DEFAULT_DY_DESCENT: f64 = 0.2;
+static DEFAULT_HIDDEN: bool = false;
+static DEFAULT_SHOW_PHONETIC: bool = true;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct CellProperty {
@@ -56,6 +60,23 @@ pub struct CellProperty {
 }
 
 impl CellProperty {
+    pub(crate) fn default() -> Self {
+        return Self {
+            width: DEFAULT_CELL_WIDTH,
+            width_best_fit: DEFAULT_BEST_FIT,
+            height: DEFAULT_CELL_HEIGHT,
+            dy_descent: DEFAULT_DY_DESCENT,
+            hidden: DEFAULT_HIDDEN,
+            show_phonetic: DEFAULT_SHOW_PHONETIC,
+            hyperlink: None,
+            alignment: TextAlignment::default(),
+            font: Font::default(),
+            border: Border::default(),
+            fill: Fill::default(),
+            numbering_format: NumberingFormat::default(),
+        };
+    }
+
     pub(crate) fn from_raw(
         cell: XlsxCell,
         row_info: XlsxRow,
@@ -104,10 +125,10 @@ impl CellProperty {
 
     fn get_width_best_fit(col_info: Option<XlsxColumnInformation>) -> bool {
         let Some(col_info) = col_info else {
-            return false;
+            return DEFAULT_BEST_FIT;
         };
 
-        return col_info.best_fit.unwrap_or(false);
+        return col_info.best_fit.unwrap_or(DEFAULT_BEST_FIT);
     }
 
     fn get_dy_descent(
@@ -124,7 +145,7 @@ impl CellProperty {
             }
         };
 
-        return 0.2;
+        return DEFAULT_DY_DESCENT;
     }
 
     fn get_numbering_format(
@@ -197,10 +218,10 @@ impl CellProperty {
             if let Some(b) = col_info.show_phonetic {
                 b
             } else {
-                true
+                DEFAULT_SHOW_PHONETIC
             }
         } else {
-            true
+            DEFAULT_SHOW_PHONETIC
         };
     }
 
@@ -275,6 +296,6 @@ impl CellProperty {
             }
         }
 
-        return false;
+        return DEFAULT_HIDDEN;
     }
 }

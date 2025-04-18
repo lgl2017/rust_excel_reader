@@ -12,3 +12,13 @@ pub struct Cell {
     pub value: CellValueType,
     pub property: CellProperty,
 }
+
+impl Cell {
+    pub(crate) fn default(coordinate: Coordinate) -> Self {
+        return Self {
+            coordinate,
+            value: CellValueType::Empty,
+            property: CellProperty::default(),
+        };
+    }
+}
