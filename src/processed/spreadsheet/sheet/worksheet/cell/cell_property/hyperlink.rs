@@ -24,9 +24,7 @@ impl Hyperlink {
     ) -> Option<Self> {
         if let Some(r_id) = hyperlink.r_id {
             if let Some(v) = worksheet_rel.get(&r_id) {
-                return Some(Self::External(ExternalHyperlink {
-                    target: v.to_string(),
-                }));
+                return Some(Self::External(ExternalHyperlink::from_string(v)));
             }
         }
 
@@ -127,6 +125,57 @@ impl InternalHyperlink {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct ExternalHyperlink {
-    pub target: String,
+pub enum ExternalHyperlink {
+    Url(String),
+    Email(EmailHyperlink),
+}
+
+impl ExternalHyperlink {
+    pub(crate) fn from_string(s: &str) -> Self {
+        // mail with subject
+        if let Ok(re) = Regex::new(r"mailto:(?<email>.+?)(\?subject=)(?<subject>.+?)$") {
+            if let Some(caps) = re.captures(s) {
+                let email = &caps["email"];
+                let email = urlencoding::decode(email)
+                    .unwrap_or(std::borrow::Cow::Borrowed(email))
+                    .to_string();
+
+                let subject = &caps["subject"];
+                let subject = urlencoding::decode(subject)
+                    .unwrap_or(std::borrow::Cow::Borrowed(subject))
+                    .to_string();
+
+                return Self::Email(EmailHyperlink {
+                    mail_to: email,
+                    subject,
+                });
+            };
+        };
+
+        // mail without subject
+        if let Ok(re) = Regex::new(r"mailto:(?<email>.+?)$") {
+            if let Some(caps) = re.captures(s) {
+                let email = &caps["email"];
+                let email = urlencoding::decode(email)
+                    .unwrap_or(std::borrow::Cow::Borrowed(email))
+                    .to_string();
+                return Self::Email(EmailHyperlink {
+                    mail_to: email,
+                    subject: "".to_string(),
+                });
+            };
+        };
+
+        let url = urlencoding::decode(s)
+            .unwrap_or(std::borrow::Cow::Borrowed(s))
+            .to_string();
+
+        return Self::Url(url);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EmailHyperlink {
+    mail_to: String,
+    subject: String,
 }
