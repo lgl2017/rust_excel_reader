@@ -1,6 +1,6 @@
 use crate::excel::XmlReader;
 
-use super::DefaultBase;
+use super::XlsxDefaultBase;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.linedefault?view=openxml-3.0.1
 ///
@@ -28,8 +28,8 @@ use super::DefaultBase;
 ///   </style>
 /// </lnDef>
 /// ```
-pub type LineDefault = DefaultBase;
+pub type XlsxLineDefault = XlsxDefaultBase;
 
-pub(crate) fn load_line_default(reader: &mut XmlReader) -> anyhow::Result<LineDefault> {
-    return DefaultBase::load(reader, b"lnDef");
+pub(crate) fn load_line_default(reader: &mut XmlReader) -> anyhow::Result<XlsxLineDefault> {
+    return XlsxDefaultBase::load(reader, b"lnDef");
 }

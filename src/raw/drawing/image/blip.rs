@@ -4,63 +4,64 @@ use quick_xml::events::{BytesStart, Event};
 use crate::excel::XmlReader;
 
 use crate::raw::drawing::effect::{
-    alpha_bi_level::AlphaBiLevel, alpha_ceiling::AlphaCeiling, alpha_floor::AlphaFloor,
-    alpha_inverse::AlphaInverse, alpha_modulation::AlphaModulation,
-    alpha_modulation_fixed::AlphaModulationFixed, alpha_replace::AlphaReplace, bi_level::BiLevel,
-    blur::Blur, color_change::ColorChange, color_replacement::ColorReplacement, duotone::Duotone,
-    fill_overlay::FillOverlay, gray_scale::GrayScale, hue_saturation_luminance::Hsl,
-    luminance::Luminance, tint::Tint,
+    alpha_bi_level::XlsxAlphaBiLevel, alpha_ceiling::XlsxAlphaCeiling, alpha_floor::XlsxAlphaFloor,
+    alpha_inverse::XlsxAlphaInverse, alpha_modulation::XlsxAlphaModulation,
+    alpha_modulation_fixed::XlsxAlphaModulationFixed, alpha_replace::XlsxAlphaReplace,
+    bi_level::XlsxBiLevel, blur::XlsxBlur, color_change::XlsxColorChange,
+    color_replacement::XlsxColorReplacement, duotone::XlsxDuotone, fill_overlay::XlsxFillOverlay,
+    gray_scale::XlsxGrayScale, hue_saturation_luminance::XlsxHsl, luminance::XlsxLuminance,
+    tint::XlsxTint,
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blip?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-pub struct Blip {
+pub struct XlsxBlip {
     //     Child Elements	Subclause
     // alphaBiLevel (Alpha Bi-Level Effect)	§20.1.8.1
-    pub alpha_bi_level: Option<AlphaBiLevel>,
+    pub alpha_bi_level: Option<XlsxAlphaBiLevel>,
 
     // alphaCeiling (Alpha Ceiling Effect)	§20.1.8.2
-    pub alpha_ceiling: Option<AlphaCeiling>,
+    pub alpha_ceiling: Option<XlsxAlphaCeiling>,
 
     // alphaFloor (Alpha Floor Effect)	§20.1.8.3
-    pub alpha_floor: Option<AlphaFloor>,
+    pub alpha_floor: Option<XlsxAlphaFloor>,
 
     // alphaInv (Alpha Inverse Effect)	§20.1.8.4
-    pub alpha_inv: Option<AlphaInverse>,
+    pub alpha_inv: Option<XlsxAlphaInverse>,
 
     // alphaMod (Alpha Modulate Effect)	§20.1.8.5
-    pub alpha_mod: Option<AlphaModulation>,
+    pub alpha_mod: Option<XlsxAlphaModulation>,
 
     // alphaModFix (Alpha Modulate Fixed Effect)	§20.1.8.6
-    pub alpha_mod_fix: Option<AlphaModulationFixed>,
+    pub alpha_mod_fix: Option<XlsxAlphaModulationFixed>,
 
     // alphaRepl (Alpha Replace Effect)	§20.1.8.8
-    pub alpha_repl: Option<AlphaReplace>,
+    pub alpha_repl: Option<XlsxAlphaReplace>,
 
     // biLevel (Bi-Level (Black/White) Effect)	§20.1.8.11
-    pub bi_level: Option<BiLevel>,
+    pub bi_level: Option<XlsxBiLevel>,
 
     // blur (Blur Effect)	§20.1.8.15
-    pub blur: Option<Blur>,
+    pub blur: Option<XlsxBlur>,
 
     // clrChange (Color Change Effect)	§20.1.8.16
-    pub clr_change: Option<ColorChange>,
+    pub clr_change: Option<XlsxColorChange>,
     // clrRepl (Solid Color Replacement)	§20.1.8.18
-    pub clr_repl: Option<ColorReplacement>,
+    pub clr_repl: Option<XlsxColorReplacement>,
 
     // duotone (Duotone Effect)	§20.1.8.23
-    pub duotone: Option<Duotone>,
+    pub duotone: Option<XlsxDuotone>,
     // fillOverlay (Fill Overlay Effect)	§20.1.8.29
-    pub fill_overlay: Option<Box<FillOverlay>>,
+    pub fill_overlay: Option<Box<XlsxFillOverlay>>,
     // grayscl (Gray Scale Effect)	§20.1.8.34
-    pub grayscl: Option<GrayScale>,
+    pub grayscl: Option<XlsxGrayScale>,
 
     // hsl (Hue Saturation Luminance Effect)	§20.1.8.39
-    pub hsl: Option<Hsl>,
+    pub hsl: Option<XlsxHsl>,
     // lum (Luminance Effect)	§20.1.8.42
-    pub lum: Option<Luminance>,
+    pub lum: Option<XlsxLuminance>,
     // tint (Tint Effect)
-    pub tint: Option<Tint>,
+    pub tint: Option<XlsxTint>,
     // extLst (Extension List)	§20.1.2.2.15 Not Supported
 
     // Attributes
@@ -85,7 +86,7 @@ pub struct Blip {
     pub link: Option<String>,
 }
 
-impl Blip {
+impl XlsxBlip {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut blip = Self {
@@ -144,7 +145,7 @@ impl Blip {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"alphaBiLevel" => {
-                    blip.alpha_bi_level = Some(AlphaBiLevel::load(e)?);
+                    blip.alpha_bi_level = Some(XlsxAlphaBiLevel::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"alphaCeiling" => {
                     blip.alpha_ceiling = Some(true);
@@ -154,35 +155,35 @@ impl Blip {
                 }
 
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"alphaInv" => {
-                    blip.alpha_inv = AlphaInverse::load(reader, b"alphaInv")?;
+                    blip.alpha_inv = XlsxAlphaInverse::load(reader, b"alphaInv")?;
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"alphaMod" => {
-                    blip.alpha_mod = Some(AlphaModulation::load(reader)?);
+                    blip.alpha_mod = Some(XlsxAlphaModulation::load(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"alphaModFix" => {
-                    blip.alpha_mod_fix = Some(AlphaModulationFixed::load(e)?);
+                    blip.alpha_mod_fix = Some(XlsxAlphaModulationFixed::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"alphaRepl" => {
-                    blip.alpha_repl = Some(AlphaReplace::load(e)?);
+                    blip.alpha_repl = Some(XlsxAlphaReplace::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"biLevel" => {
-                    blip.bi_level = Some(BiLevel::load(e)?);
+                    blip.bi_level = Some(XlsxBiLevel::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"blur" => {
-                    blip.blur = Some(Blur::load(e)?);
+                    blip.blur = Some(XlsxBlur::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"clrChange" => {
-                    blip.clr_change = Some(ColorChange::load(reader, e)?);
+                    blip.clr_change = Some(XlsxColorChange::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"clrRepl" => {
-                    blip.clr_repl = ColorReplacement::load(reader, b"clrRepl")?;
+                    blip.clr_repl = XlsxColorReplacement::load(reader, b"clrRepl")?;
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"duotone" => {
-                    blip.duotone = Some(Duotone::load(reader)?);
+                    blip.duotone = Some(XlsxDuotone::load(reader)?);
                 }
 
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"fillOverlay" => {
-                    if let Some(fill_overlay) = FillOverlay::load(reader, b"fillOverlay")? {
+                    if let Some(fill_overlay) = XlsxFillOverlay::load(reader, b"fillOverlay")? {
                         blip.fill_overlay = Some(Box::new(fill_overlay));
                     }
                 }
@@ -190,14 +191,14 @@ impl Blip {
                     blip.grayscl = Some(true);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"hsl" => {
-                    blip.hsl = Some(Hsl::load(e)?);
+                    blip.hsl = Some(XlsxHsl::load(e)?);
                 }
 
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"lum" => {
-                    blip.lum = Some(Luminance::load(e)?);
+                    blip.lum = Some(XlsxLuminance::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"tint" => {
-                    blip.tint = Some(Tint::load(e)?);
+                    blip.tint = Some(XlsxTint::load(e)?);
                 }
 
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"blip" => break,

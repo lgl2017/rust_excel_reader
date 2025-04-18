@@ -10,7 +10,7 @@ use crate::helper::string_to_int;
 /// <a:rot lat="0" lon="0" rev="6000000"/>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct Rotation {
+pub struct XlsxRotation {
     // attributes
     /// latitude coordinate
     lat: Option<i64>,
@@ -22,7 +22,7 @@ pub struct Rotation {
     rev: Option<i64>,
 }
 
-impl Rotation {
+impl XlsxRotation {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut rotation = Self {

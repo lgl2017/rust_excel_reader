@@ -5,14 +5,14 @@ use crate::helper::string_to_int;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.softedge?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-pub struct SoftEdge {
+pub struct XlsxSoftEdge {
     // attributes
     /// Specifies the radius of blur to apply to the edges.
     // tag: rad (Radius)
     pub rad: Option<i64>,
 }
 
-impl SoftEdge {
+impl XlsxSoftEdge {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut soft_edge = Self { rad: None };

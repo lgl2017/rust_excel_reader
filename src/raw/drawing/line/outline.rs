@@ -6,14 +6,14 @@ use crate::excel::XmlReader;
 use crate::{
     helper::{extract_val_attribute, string_to_int},
     raw::drawing::fill::{
-        gradient_fill::GradientFill, no_fill::NoFill, pattern_fill::PatternFill,
-        solid_fill::SolidFill,
+        gradient_fill::XlsxGradientFill, no_fill::XlsxNoFill, pattern_fill::XlsxPatternFill,
+        solid_fill::XlsxSolidFill,
     },
 };
 
 use super::{
-    custom_dash::CustomDash, head_end::HeadEnd, line_join_bevel::LineJoinBevel, miter::Miter,
-    round_line_join::RoundLineJoin, tail_end::TailEnd,
+    custom_dash::XlsxCustomDash, head_end::XlsxHeadEnd, line_join_bevel::XlsxLineJoinBevel,
+    miter::XlsxMiter, round_line_join::XlsxRoundLineJoin, tail_end::XlsxTailEnd,
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.outline?view=openxml-3.0.1
@@ -31,33 +31,33 @@ use super::{
 /// </a:ln>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct Outline {
+pub struct XlsxOutline {
     // child: extLst (Extension List)	§20.1.2.2.15 Not supported
 
     /* children */
     /// when present: specifies that an angle joint is used to connect lines
-    pub bevel: Option<LineJoinBevel>,
+    pub bevel: Option<XlsxLineJoinBevel>,
 
     /// specifies a  custom dashing scheme
     // custDash (Custom Dash)	§20.1.8.21
-    pub custom_dash: Option<CustomDash>,
+    pub custom_dash: Option<XlsxCustomDash>,
 
     // gradFill (Gradient Fill)	§20.1.8.33
-    pub gradient_fill: Option<GradientFill>,
+    pub gradient_fill: Option<XlsxGradientFill>,
 
     // headEnd (Line Head/End Style)	§20.1.8.38
-    pub head_end: Option<HeadEnd>,
+    pub head_end: Option<XlsxHeadEnd>,
 
     // miter (Miter Line Join)	§20.1.8.43
-    pub miter: Option<Miter>,
+    pub miter: Option<XlsxMiter>,
 
     /// No fill
     /// when present: indicates that the parent element is part of a group and should inherit the fill properties of the group.
     // noFill (No Fill)	§20.1.8.44
-    pub no_fill: Option<NoFill>,
+    pub no_fill: Option<XlsxNoFill>,
 
     // pattFill (Pattern Fill)	§20.1.8.47
-    pub pattern_fill: Option<PatternFill>,
+    pub pattern_fill: Option<XlsxPatternFill>,
 
     /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.presetdash?view=openxml-3.0.1
     /// possible values: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.presetlinedashvalues?view=openxml-3.0.1
@@ -66,13 +66,13 @@ pub struct Outline {
 
     /// when present: specifies that lines joined together have a round join
     // round (Round Line Join)	§20.1.8.52
-    pub round: Option<RoundLineJoin>,
+    pub round: Option<XlsxRoundLineJoin>,
 
     // solidFill (Solid Fill)	§20.1.8.54
-    pub solid_fill: Option<SolidFill>,
+    pub solid_fill: Option<XlsxSolidFill>,
 
     // tailEnd (Tail line end style)
-    pub tail_end: Option<TailEnd>,
+    pub tail_end: Option<XlsxTailEnd>,
 
     /* Attributes */
     /// Specifies the alignment to be used for the underline stroke.
@@ -98,7 +98,7 @@ pub struct Outline {
     pub w: Option<i64>,
 }
 
-impl Outline {
+impl XlsxOutline {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
         let mut scheme = Self {
@@ -159,22 +159,22 @@ impl Outline {
                     scheme.bevel = Some(true);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"custDash" => {
-                    scheme.custom_dash = Some(CustomDash::load(reader)?);
+                    scheme.custom_dash = Some(XlsxCustomDash::load(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"gradFill" => {
-                    scheme.gradient_fill = Some(GradientFill::load(reader, e)?);
+                    scheme.gradient_fill = Some(XlsxGradientFill::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"headEnd" => {
-                    scheme.head_end = Some(HeadEnd::load(e)?);
+                    scheme.head_end = Some(XlsxHeadEnd::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"miter" => {
-                    scheme.miter = Some(Miter::load(e)?);
+                    scheme.miter = Some(XlsxMiter::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"noFill" => {
                     scheme.no_fill = Some(true);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"pattFill" => {
-                    scheme.pattern_fill = Some(PatternFill::load(reader, e)?);
+                    scheme.pattern_fill = Some(XlsxPatternFill::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"prstDash" => {
                     let val = extract_val_attribute(e)?;
@@ -184,10 +184,10 @@ impl Outline {
                     scheme.round = Some(true);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"solidFill" => {
-                    scheme.solid_fill = SolidFill::load(reader, e)?;
+                    scheme.solid_fill = XlsxSolidFill::load(reader, e)?;
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"tailEnd" => {
-                    scheme.tail_end = Some(TailEnd::load(e)?);
+                    scheme.tail_end = Some(XlsxTailEnd::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"ln" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

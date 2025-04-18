@@ -6,7 +6,7 @@ use crate::helper::string_to_int;
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.tinteffect?view=openxml-3.0.1
 // tag: tint
 #[derive(Debug, Clone, PartialEq)]
-pub struct Tint {
+pub struct XlsxTint {
     // attributes:
     /// Specifies by how much the color value is shifted.
     pub amt: Option<i64>,
@@ -15,7 +15,7 @@ pub struct Tint {
     pub hue: Option<i64>,
 }
 
-impl Tint {
+impl XlsxTint {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut tint = Self {

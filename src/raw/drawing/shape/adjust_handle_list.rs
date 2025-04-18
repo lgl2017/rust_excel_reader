@@ -1,4 +1,4 @@
-use super::{adjust_handle_polar::AdjustHandlePolar, adjust_handle_xy::AdjustHandleXY};
+use super::{adjust_handle_polar::XlsxAdjustHandlePolar, adjust_handle_xy::XlsxAdjustHandleXY};
 use crate::excel::XmlReader;
 use anyhow::bail;
 use quick_xml::events::Event;
@@ -21,16 +21,16 @@ use quick_xml::events::Event;
 /// ```
 // tag: ahLst
 #[derive(Debug, Clone, PartialEq)]
-pub struct AdjustHandleList {
+pub struct XlsxAdjustHandleList {
     // children
-    pub adjust_handle_polar: Option<Vec<AdjustHandlePolar>>,
-    pub adjust_handle_xy: Option<Vec<AdjustHandleXY>>,
+    pub adjust_handle_polar: Option<Vec<XlsxAdjustHandlePolar>>,
+    pub adjust_handle_xy: Option<Vec<XlsxAdjustHandleXY>>,
 }
 
-impl AdjustHandleList {
+impl XlsxAdjustHandleList {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
-        let mut polars: Vec<AdjustHandlePolar> = vec![];
-        let mut xys: Vec<AdjustHandleXY> = vec![];
+        let mut polars: Vec<XlsxAdjustHandlePolar> = vec![];
+        let mut xys: Vec<XlsxAdjustHandleXY> = vec![];
 
         let mut buf = Vec::new();
 
@@ -39,10 +39,10 @@ impl AdjustHandleList {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"ahPolar" => {
-                    polars.push(AdjustHandlePolar::load(reader, e)?);
+                    polars.push(XlsxAdjustHandlePolar::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"ahXY" => {
-                    xys.push(AdjustHandleXY::load(reader, e)?);
+                    xys.push(XlsxAdjustHandleXY::load(reader, e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"ahLst" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

@@ -3,7 +3,7 @@ use quick_xml::events::{BytesStart, Event};
 
 use crate::excel::XmlReader;
 
-use crate::raw::drawing::font::{MajorFont, MinorFont};
+use crate::raw::drawing::font::{XlsxMajorFont, XlsxMinorFont};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.fontscheme?view=openxml-3.0.1
 /// This element defines the font scheme within the theme.
@@ -19,22 +19,22 @@ use crate::raw::drawing::font::{MajorFont, MinorFont};
 /// </fontScheme>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct FontScheme {
+pub struct XlsxFontScheme {
     // child: extLst (Extension List)	Not supported
 
     /* Children */
     // majorFont (Major Font)	§20.1.4.1.24
-    pub major_font: Option<MajorFont>,
+    pub major_font: Option<XlsxMajorFont>,
 
     // minorFont (Minor fonts)
-    pub minor_font: Option<MinorFont>,
+    pub minor_font: Option<XlsxMinorFont>,
 
     /* Attributes */
     // name (Name)
     pub name: Option<String>,
 }
 
-impl FontScheme {
+impl XlsxFontScheme {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
         let mut scheme = Self {
@@ -70,10 +70,10 @@ impl FontScheme {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"majorFont" => {
-                    scheme.major_font = Some(MajorFont::load_major(reader)?);
+                    scheme.major_font = Some(XlsxMajorFont::load_major(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"minorFont" => {
-                    scheme.minor_font = Some(MinorFont::load_minor(reader)?);
+                    scheme.minor_font = Some(XlsxMinorFont::load_minor(reader)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"fontScheme" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

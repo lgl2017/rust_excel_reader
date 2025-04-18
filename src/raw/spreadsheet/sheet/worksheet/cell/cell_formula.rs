@@ -2,9 +2,9 @@ use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
 use crate::{
-    common_types::Coordinate,
+    common_types::{Coordinate, Dimension},
     excel::XmlReader,
-    helper::{a1_dimension_to_row_col, string_to_bool, string_to_unsignedint},
+    helper::{string_to_bool, string_to_unsignedint},
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.cellformula?view=openxml-3.0.1
@@ -22,7 +22,7 @@ use crate::{
 ///
 /// f (Formula)
 #[derive(Debug, Clone, PartialEq)]
-pub struct CellFormula {
+pub struct XlsxCellFormula {
     pub raw_value: String,
 
     //  attributes
@@ -99,7 +99,7 @@ pub struct CellFormula {
     /// allowed value: ST_Ref: https://learn.microsoft.com/en-us/openspecs/office_standards/ms-oe376/e7f22870-88a1-4c06-8e5f-d035b1179c50
     ///
     /// Example: `A1:AD5` – a reference to the cell range of 150 cells, with top left corner in the cell at column , row 1, and the bottom right corner in the cell at column 30, row 5. The width of this range is 30 columns, and the height of this range is 5 rows.
-    pub ref_range: Option<(Coordinate, Coordinate)>,
+    pub ref_range: Option<Dimension>,
 
     /// si (Shared Group Index)
     ///
@@ -128,7 +128,7 @@ pub struct CellFormula {
     pub r#type: Option<String>,
 }
 
-impl CellFormula {
+impl XlsxCellFormula {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut text = String::new();
         let mut buf: Vec<u8> = Vec::new();
@@ -198,11 +198,7 @@ impl CellFormula {
                         }
                         b"ref" => {
                             let value = a.value.as_ref();
-                            let dimension = a1_dimension_to_row_col(value)?;
-                            formula.ref_range = Some((
-                                Coordinate::from_point(dimension.0),
-                                Coordinate::from_point(dimension.1),
-                            ));
+                            formula.ref_range = Dimension::from_a1(value);
                         }
                         b"si" => {
                             formula.shared_group_index = string_to_unsignedint(&string_value);

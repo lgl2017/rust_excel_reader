@@ -15,7 +15,7 @@ use crate::helper::string_to_int;
 /// ```
 // normAutofit (Normal AutoFit)	§21.1.2.1.3
 #[derive(Debug, Clone, PartialEq)]
-pub struct NormAutoFit {
+pub struct XlsxNormAutoFit {
     // attributes
     /// Specifies the percentage of the original font size to which each run in the text body is scaled.
     /// In order to auto-fit text within a bounding box it is sometimes necessary to decrease the font size by a certain percentage.
@@ -33,7 +33,7 @@ pub struct NormAutoFit {
     pub ln_spc_reduction: Option<i64>,
 }
 
-impl NormAutoFit {
+impl XlsxNormAutoFit {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut fit = Self {

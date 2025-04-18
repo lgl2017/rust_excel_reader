@@ -14,7 +14,7 @@ use crate::helper::{string_to_bool, string_to_int};
 /// ```
 /// workbookPr (Workbook Properties)
 #[derive(Debug, Clone, PartialEq)]
-pub struct WorkbookProperties {
+pub struct XlsxWorkbookProperties {
     //  Attributes	Description
     /// allowRefreshQuery (Allow Refresh Query)
     ///
@@ -167,7 +167,7 @@ pub struct WorkbookProperties {
     pub update_links: Option<String>,
 }
 
-impl WorkbookProperties {
+impl XlsxWorkbookProperties {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut properties = Self {

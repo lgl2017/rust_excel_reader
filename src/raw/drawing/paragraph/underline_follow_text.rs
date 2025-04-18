@@ -9,4 +9,4 @@
 /// </a:rPr>
 /// ```
 // tag: buFontTx
-pub type UnderlineFollowsText = bool;
+pub type XlsxUnderlineFollowsText = bool;

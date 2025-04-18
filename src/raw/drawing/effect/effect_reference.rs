@@ -3,7 +3,7 @@ use quick_xml::events::BytesStart;
 
 use crate::excel::XmlReader;
 use crate::helper::string_to_unsignedint;
-use crate::raw::drawing::color::ColorEnum;
+use crate::raw::drawing::color::XlsxColorEnum;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.effectreference?view=openxml-3.0.1
 ///
@@ -17,9 +17,9 @@ use crate::raw::drawing::color::ColorEnum;
 /// ```
 // tag: effectRef
 #[derive(Debug, Clone, PartialEq)]
-pub struct EffectReference {
+pub struct XlsxEffectReference {
     // Child Elements
-    color: Option<ColorEnum>,
+    color: Option<XlsxColorEnum>,
 
     // Attributes
     /// Specifies the style matrix index of the style referred to
@@ -27,11 +27,11 @@ pub struct EffectReference {
     pub index: Option<u64>,
 }
 
-impl EffectReference {
+impl XlsxEffectReference {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut reference = Self {
-            color: ColorEnum::load(reader, b"effectRef")?,
+            color: XlsxColorEnum::load(reader, b"effectRef")?,
             index: None,
         };
 

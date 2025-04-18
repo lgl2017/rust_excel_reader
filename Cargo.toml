@@ -16,4 +16,5 @@ rust-version = "1.83.0"
 anyhow = "1.0.97"
 chrono = "0.4.40"
 quick-xml = { version = "0.37.2", features = ["encoding"] }
+regex = "1.11.1"
 zip = "2.3.0"

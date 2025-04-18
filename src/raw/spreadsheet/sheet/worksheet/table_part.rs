@@ -14,10 +14,10 @@ use crate::excel::XmlReader;
 ///   <tablePart r:id="rId2"/>
 /// </tableParts>
 /// ```
-pub type TableParts = Vec<TablePart>;
+pub type XlsxTableParts = Vec<XlsxTablePart>;
 
-pub(crate) fn load_table_parts(reader: &mut XmlReader) -> anyhow::Result<TableParts> {
-    let mut parts: TableParts = vec![];
+pub(crate) fn load_table_parts(reader: &mut XmlReader) -> anyhow::Result<XlsxTableParts> {
+    let mut parts: XlsxTableParts = vec![];
 
     let mut buf = Vec::new();
     loop {
@@ -25,7 +25,7 @@ pub(crate) fn load_table_parts(reader: &mut XmlReader) -> anyhow::Result<TablePa
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"tablePart" => {
-                parts.push(TablePart::load(e)?);
+                parts.push(XlsxTablePart::load(e)?);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"tableParts" => break,
             Ok(Event::Eof) => bail!("unexpected end of file."),
@@ -45,13 +45,13 @@ pub(crate) fn load_table_parts(reader: &mut XmlReader) -> anyhow::Result<TablePa
 /// <tablePart r:id="rId2" />
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct TablePart {
+pub struct XlsxTablePart {
     // attributes
     /// This relationship Id is used to locate a particular table definition part.
     pub id: String,
 }
 
-impl TablePart {
+impl XlsxTablePart {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
 

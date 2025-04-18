@@ -1,43 +1,43 @@
+use super::{
+    blur::XlsxBlur, fill_overlay::XlsxFillOverlay, glow::XlsxGlow, inner_shadow::XlsxInnerShadow,
+    outer_shadow::XlsxOuterShadow, preset_shadow::XlsxPresetShadow, reflection::XlsxReflection,
+    soft_edge::XlsxSoftEdge,
+};
+use crate::excel::XmlReader;
 use anyhow::bail;
 use quick_xml::events::Event;
-use crate::excel::XmlReader;
-use super::{
-    blur::Blur, fill_overlay::FillOverlay, glow::Glow, inner_shadow::InnerShadow,
-    outer_shadow::OuterShadow, preset_shadow::PresetShadow, reflection::Reflection,
-    soft_edge::SoftEdge,
-};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.effectlist?view=openxml-3.0.1
 /// tag: effectLst
 #[derive(Debug, Clone, PartialEq)]
-pub struct EffectList {
+pub struct XlsxEffectList {
     /// Child Elements
 
     /// blur (Blur Effect)	§20.1.8.15
-    pub blur: Option<Blur>,
+    pub blur: Option<XlsxBlur>,
 
     /// fillOverlay (Fill Overlay Effect)	§20.1.8.29
-    pub fill_overlay: Option<Box<FillOverlay>>,
+    pub fill_overlay: Option<Box<XlsxFillOverlay>>,
     /// glow (Glow Effect)	§20.1.8.32
-    pub glow: Option<Glow>,
+    pub glow: Option<XlsxGlow>,
 
     /// innerShdw (Inner Shadow Effect)	§20.1.8.40
-    pub innder_shadow: Option<InnerShadow>,
+    pub innder_shadow: Option<XlsxInnerShadow>,
 
     /// outerShdw (Outer Shadow Effect)	§20.1.8.45
-    pub outer_shadow: Option<OuterShadow>,
+    pub outer_shadow: Option<XlsxOuterShadow>,
 
     /// prstShdw (Preset Shadow)	§20.1.8.49
-    pub preset_shadow: Option<PresetShadow>,
+    pub preset_shadow: Option<XlsxPresetShadow>,
 
     /// reflection (Reflection Effect)	§20.1.8.50
-    pub reflection: Option<Reflection>,
+    pub reflection: Option<XlsxReflection>,
 
     /// softEdge (Soft Edge Effect)
-    pub soft_edge: Option<SoftEdge>,
+    pub soft_edge: Option<XlsxSoftEdge>,
 }
 
-impl EffectList {
+impl XlsxEffectList {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
         let mut list = Self {
             blur: None,
@@ -57,33 +57,33 @@ impl EffectList {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"blur" => {
-                    list.blur = Some(Blur::load(e)?);
+                    list.blur = Some(XlsxBlur::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"fillOverlay" => {
-                    if let Some(fill_overlay) = FillOverlay::load(reader, b"fillOverlay")? {
+                    if let Some(fill_overlay) = XlsxFillOverlay::load(reader, b"fillOverlay")? {
                         list.fill_overlay = Some(Box::new(fill_overlay));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"glow" => {
-                    list.glow = Some(Glow::load(reader, e)?);
+                    list.glow = Some(XlsxGlow::load(reader, e)?);
                 }
 
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"innerShdw" => {
-                    list.innder_shadow = Some(InnerShadow::load(reader, e)?);
+                    list.innder_shadow = Some(XlsxInnerShadow::load(reader, e)?);
                 }
 
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"outerShdw" => {
-                    list.outer_shadow = Some(OuterShadow::load(reader, e)?);
+                    list.outer_shadow = Some(XlsxOuterShadow::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"prstShdw" => {
-                    list.preset_shadow = Some(PresetShadow::load(reader, e)?);
+                    list.preset_shadow = Some(XlsxPresetShadow::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"reflection" => {
-                    list.reflection = Some(Reflection::load(e)?);
+                    list.reflection = Some(XlsxReflection::load(e)?);
                 }
 
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"softEdge" => {
-                    list.soft_edge = Some(SoftEdge::load(e)?);
+                    list.soft_edge = Some(XlsxSoftEdge::load(e)?);
                 }
 
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"effectLst" => break,

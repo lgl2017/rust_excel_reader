@@ -1,11 +1,11 @@
 use crate::excel::XmlReader;
 use anyhow::bail;
-use arc_to::ArcTo;
-use close_shape_path::CloseShapePath;
-use cubic_bezier_curve_to::CubicBezierCurveTo;
-use line_to::LineTo;
-use move_to::MoveTo;
-use quad_bezier_curve_to::QuadraticBezierCurveTo;
+use arc_to::XlsxArcTo;
+use close_shape_path::XlsxCloseShapePath;
+use cubic_bezier_curve_to::XlsxCubicBezierCurveTo;
+use line_to::XlsxLineTo;
+use move_to::XlsxMoveTo;
+use quad_bezier_curve_to::XlsxQuadraticBezierCurveTo;
 use quick_xml::events::{BytesStart, Event};
 
 use crate::helper::{string_to_bool, string_to_int};
@@ -42,9 +42,9 @@ pub mod quad_bezier_curve_to;
 /// ```
 // tag: path
 #[derive(Debug, Clone, PartialEq)]
-pub struct Path {
+pub struct XlsxPath {
     // Child Elements
-    paths: Option<Vec<PathTypeEnum>>,
+    paths: Option<Vec<XlsxPathTypeEnum>>,
 
     // Attributes
     /// Specifies that the use of 3D extrusions are possible on this path.
@@ -77,10 +77,10 @@ pub struct Path {
     pub width: Option<i64>,
 }
 
-impl Path {
+impl XlsxPath {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut path = Self {
-            paths: Some(PathTypeEnum::load_list(reader, b"path")?),
+            paths: Some(XlsxPathTypeEnum::load_list(reader, b"path")?),
             extrusion_allowed: Some(false),
             fill: Some("norm".to_owned()),
             height: None,
@@ -114,18 +114,18 @@ impl Path {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum PathTypeEnum {
-    Arc(ArcTo),
-    Close(CloseShapePath),
-    CubicBezier(CubicBezierCurveTo),
-    Line(LineTo),
-    Move(MoveTo),
-    QuadBezier(QuadraticBezierCurveTo),
+pub enum XlsxPathTypeEnum {
+    Arc(XlsxArcTo),
+    Close(XlsxCloseShapePath),
+    CubicBezier(XlsxCubicBezierCurveTo),
+    Line(XlsxLineTo),
+    Move(XlsxMoveTo),
+    QuadBezier(XlsxQuadraticBezierCurveTo),
 }
 
-impl PathTypeEnum {
+impl XlsxPathTypeEnum {
     pub(crate) fn load_list(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Vec<Self>> {
-        let mut paths: Vec<PathTypeEnum> = vec![];
+        let mut paths: Vec<XlsxPathTypeEnum> = vec![];
         let mut buf = Vec::new();
 
         loop {
@@ -133,7 +133,7 @@ impl PathTypeEnum {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) => {
-                    if let Some(fill) = PathTypeEnum::load_helper(reader, e)? {
+                    if let Some(fill) = XlsxPathTypeEnum::load_helper(reader, e)? {
                         paths.push(fill);
                     }
                 }
@@ -149,25 +149,25 @@ impl PathTypeEnum {
     fn load_helper(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Option<Self>> {
         match e.local_name().as_ref() {
             b"arcTo" => {
-                return Ok(Some(PathTypeEnum::Arc(ArcTo::load(e)?)));
+                return Ok(Some(XlsxPathTypeEnum::Arc(XlsxArcTo::load(e)?)));
             }
             b"close" => {
-                return Ok(Some(PathTypeEnum::Close(true)));
+                return Ok(Some(XlsxPathTypeEnum::Close(true)));
             }
             b"cubicBezTo" => {
-                return Ok(Some(PathTypeEnum::CubicBezier(CubicBezierCurveTo::load(
-                    reader,
-                )?)));
+                return Ok(Some(XlsxPathTypeEnum::CubicBezier(
+                    XlsxCubicBezierCurveTo::load(reader)?,
+                )));
             }
             b"lnTo" => {
-                return Ok(Some(PathTypeEnum::Line(LineTo::load(reader)?)));
+                return Ok(Some(XlsxPathTypeEnum::Line(XlsxLineTo::load(reader)?)));
             }
             b"moveTo" => {
-                return Ok(Some(PathTypeEnum::Move(MoveTo::load(reader)?)));
+                return Ok(Some(XlsxPathTypeEnum::Move(XlsxMoveTo::load(reader)?)));
             }
             b"quadBezTo" => {
-                return Ok(Some(PathTypeEnum::QuadBezier(
-                    QuadraticBezierCurveTo::load(reader)?,
+                return Ok(Some(XlsxPathTypeEnum::QuadBezier(
+                    XlsxQuadraticBezierCurveTo::load(reader)?,
                 )));
             }
             _ => return Ok(None),

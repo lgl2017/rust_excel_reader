@@ -5,7 +5,7 @@ use quick_xml::events::BytesStart;
 use crate::helper::string_to_int;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Rectangle {
+pub struct XlsxRectangle {
     // attributes
     /// Specifies the bottom edge of the rectangle.
     pub b: Option<i64>,
@@ -20,7 +20,7 @@ pub struct Rectangle {
     pub t: Option<i64>,
 }
 
-impl Rectangle {
+impl XlsxRectangle {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut rect = Self {

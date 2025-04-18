@@ -11,7 +11,7 @@ use zip::{read::ZipFile, ZipArchive};
 use crate::{
     packaging::relationship::{
         load_sheet_relationships, load_workbook_relationships, raw_target_for_id, zip_path_for_id,
-        zip_path_for_type, Relationships,
+        zip_path_for_type, XlsxRelationships,
     },
     processed::spreadsheet::{
         sheet::worksheet::{calculation_reference::CalculationReferenceMode, Worksheet},
@@ -21,7 +21,7 @@ use crate::{
         drawing::{scheme::color_scheme::XlsxColorScheme, theme::XlsxTheme},
         spreadsheet::{
             shared_string::shared_string_table::XlsxSharedStringTable,
-            sheet::worksheet::XlsxWorksheet, stylesheet::StyleSheet, table::XlsxTable,
+            sheet::worksheet::XlsxWorksheet, stylesheet::XlsxStyleSheet, table::XlsxTable,
             workbook::XlsxWorkbook,
         },
     },
@@ -32,8 +32,8 @@ pub(crate) type XmlReader<'a> = Reader<BufReader<ZipFile<'a>>>;
 /// A struct representing xml zipped excel file
 pub struct Excel<RS> {
     zip: ZipArchive<RS>,
-    workbook_relationships: Relationships,
-    stylesheet: Box<Option<StyleSheet>>,
+    workbook_relationships: XlsxRelationships,
+    stylesheet: Box<Option<XlsxStyleSheet>>,
     theme: Box<Option<XlsxTheme>>,
     shared_strings: Box<Option<XlsxSharedStringTable>>,
     workbook: Box<Option<XlsxWorkbook>>,
@@ -65,14 +65,14 @@ impl<RS: Read + Seek> Excel<RS> {
 /// functions for getting raw parsed results
 impl<RS: Read + Seek> Excel<RS> {
     /// Get relationship parsed from xl/_rels/workbook.xml.rels
-    pub fn get_raw_workbook_relationship(&mut self) -> Relationships {
+    pub fn get_raw_workbook_relationship(&mut self) -> XlsxRelationships {
         return self.workbook_relationships.clone();
     }
 
     /// Get stylesheet parsed from xl/styles.xml
-    pub fn get_raw_stylesheet(&mut self) -> anyhow::Result<Box<Option<StyleSheet>>> {
+    pub fn get_raw_stylesheet(&mut self) -> anyhow::Result<Box<Option<XlsxStyleSheet>>> {
         if self.stylesheet.is_none() {
-            self.stylesheet = Box::new(Some(StyleSheet::load(&mut self.zip)?));
+            self.stylesheet = Box::new(Some(XlsxStyleSheet::load(&mut self.zip)?));
         }
         return Ok(self.stylesheet.clone());
     }
@@ -133,7 +133,7 @@ impl<RS: Read + Seek> Excel<RS> {
     pub fn get_raw_sheet_relationship_with_name(
         &mut self,
         name: &str,
-    ) -> anyhow::Result<Relationships> {
+    ) -> anyhow::Result<XlsxRelationships> {
         let sheet = self.get_sheet_with_name(name)?;
         return self.get_raw_sheet_relationship(&sheet);
     }
@@ -144,7 +144,7 @@ impl<RS: Read + Seek> Excel<RS> {
     pub fn get_raw_sheet_relationship_with_sheet_id(
         &mut self,
         id: &u64,
-    ) -> anyhow::Result<Relationships> {
+    ) -> anyhow::Result<XlsxRelationships> {
         let sheet = self.get_sheet_with_sheet_id(id)?;
         return self.get_raw_sheet_relationship(&sheet);
     }
@@ -153,7 +153,7 @@ impl<RS: Read + Seek> Excel<RS> {
     pub fn get_raw_sheet_relationship(
         &mut self,
         sheet: &SheetBasicInfo,
-    ) -> anyhow::Result<Relationships> {
+    ) -> anyhow::Result<XlsxRelationships> {
         let worksheet_rels = load_sheet_relationships(&mut self.zip, &sheet.path)?;
         return Ok(worksheet_rels);
     }
@@ -278,7 +278,7 @@ impl<RS: Read + Seek> Excel<RS> {
     fn get_hyperlinks_in_rel(
         &self,
         raw_worksheet: XlsxWorksheet,
-        worksheet_rels: Relationships,
+        worksheet_rels: XlsxRelationships,
     ) -> anyhow::Result<BTreeMap<String, String>> {
         let hyperlinks = raw_worksheet.hyperlinks.unwrap_or(vec![]);
         if hyperlinks.is_empty() {
@@ -304,7 +304,7 @@ impl<RS: Read + Seek> Excel<RS> {
     fn get_raw_tables(
         &mut self,
         raw_worksheet: XlsxWorksheet,
-        worksheet_rels: Relationships,
+        worksheet_rels: XlsxRelationships,
     ) -> anyhow::Result<Vec<XlsxTable>> {
         let table_parts = raw_worksheet.table_parts.unwrap_or(vec![]);
         if table_parts.is_empty() {

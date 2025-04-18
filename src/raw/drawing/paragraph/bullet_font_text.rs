@@ -8,4 +8,4 @@
 /// </a:pPr>
 /// ```
 // tag: buFontTx
-pub type BulletFontText = bool;
+pub type XlsxBulletFontText = bool;

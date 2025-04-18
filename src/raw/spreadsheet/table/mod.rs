@@ -2,17 +2,17 @@ use std::io::{Read, Seek};
 
 use anyhow::bail;
 use quick_xml::events::Event;
-use table_column::{load_table_columns, TableColumns};
-use table_style_info::TableStyleInfo;
+use table_column::{load_table_columns, XlsxTableColumns};
+use table_style_info::XlsxTableStyleInfo;
 use zip::ZipArchive;
 
 use crate::{
-    common_types::{Coordinate, Dimension},
+    common_types::Dimension,
     excel::xml_reader,
-    helper::{a1_dimension_to_row_col, string_to_bool, string_to_unsignedint},
+    helper::{string_to_bool, string_to_unsignedint},
 };
 
-use super::filter::{auto_filter::AutoFilter, sort_state::SortState};
+use super::filter::{auto_filter::XlsxAutoFilter, sort_state::XlsxSortState};
 
 pub mod calculated_column_formula;
 pub mod table_column;
@@ -41,21 +41,21 @@ pub mod xml_column_properties;
 ///
 /// table (Table)
 #[derive(Debug, Clone, PartialEq)]
-pub struct Table {
+pub struct XlsxTable {
     /// extLst (Future Feature Data Storage Area)	Not supported
 
     // Child Elements
     /// autoFilter (AutoFilter Settings)
-    pub auto_filter: Option<AutoFilter>,
+    pub auto_filter: Option<XlsxAutoFilter>,
 
     /// sortState (Sort State)
-    pub sort_state: Option<SortState>,
+    pub sort_state: Option<XlsxSortState>,
 
     /// tableColumns (Table Columns)
-    pub table_columns: Option<TableColumns>,
+    pub table_columns: Option<XlsxTableColumns>,
 
     /// tableStyleInfo (Table Style)
-    pub table_style_info: Option<TableStyleInfo>,
+    pub table_style_info: Option<XlsxTableStyleInfo>,
 
     // Attributes	Description
     /// comment (Table Comment)
@@ -196,7 +196,7 @@ pub struct Table {
     pub totals_row_shown: Option<bool>,
 }
 
-impl Table {
+impl XlsxTable {
     pub(crate) fn load(zip: &mut ZipArchive<impl Read + Seek>, path: &str) -> anyhow::Result<Self> {
         let mut table = Self {
             auto_filter: None,
@@ -294,11 +294,7 @@ impl Table {
                                     }
                                     b"ref" => {
                                         let value = a.value.as_ref();
-                                        let dimension = a1_dimension_to_row_col(value)?;
-                                        table.r#ref = Some(Dimension {
-                                            start: Coordinate::from_point(dimension.0),
-                                            end: Coordinate::from_point(dimension.1),
-                                        });
+                                        table.r#ref = Dimension::from_a1(value);
                                     }
                                     b"tableBorderDxfId" => {
                                         table.table_border_dxf_id =
@@ -335,16 +331,16 @@ impl Table {
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"autoFilter" => {
-                    table.auto_filter = Some(AutoFilter::load(&mut reader, e)?);
+                    table.auto_filter = Some(XlsxAutoFilter::load(&mut reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"sortState" => {
-                    table.sort_state = Some(SortState::load(&mut reader, e)?);
+                    table.sort_state = Some(XlsxSortState::load(&mut reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"tableColumns" => {
                     table.table_columns = Some(load_table_columns(&mut reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"tableStyleInfo" => {
-                    table.table_style_info = Some(TableStyleInfo::load(e)?);
+                    table.table_style_info = Some(XlsxTableStyleInfo::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"table" => break,
                 Ok(Event::Eof) => break,

@@ -1,4 +1,4 @@
-use super::spacing::SpacingEnum;
+use super::spacing::XlsxSpacingEnum;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.linespacing?view=openxml-3.0.1
 ///
@@ -14,4 +14,4 @@ use super::spacing::SpacingEnum;
 /// </a:pPr>
 /// ```
 // tag: lnSpc
-pub type LineSpacing = SpacingEnum;
+pub type XlsxLineSpacing = XlsxSpacingEnum;

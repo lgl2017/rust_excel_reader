@@ -12,14 +12,14 @@ use crate::helper::string_to_int;
 /// <miter lim="100000" />
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct Miter {
+pub struct XlsxMiter {
     // Attributes
     /// Specifies the amount by which lines is extended to form a miter join
     // lim (Miter Join Limit)
     pub lim: Option<i64>,
 }
 
-impl Miter {
+impl XlsxMiter {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
 

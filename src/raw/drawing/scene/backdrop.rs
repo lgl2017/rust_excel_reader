@@ -7,19 +7,19 @@ use crate::helper::string_to_int;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.backdrop?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-pub struct BackDrop {
+pub struct XlsxBackDrop {
     // extLst Not supported
 
     // Child Elements
     // anchor
-    pub anchor: Option<Anchor>,
+    pub anchor: Option<XlsxAnchor>,
     // norm
-    norm: Option<NormalVector>,
+    norm: Option<XlsxNormalVector>,
     // up
-    up: Option<UpVector>,
+    up: Option<XlsxUpVector>,
 }
 
-impl BackDrop {
+impl XlsxBackDrop {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
         let mut list = Self {
             anchor: None,
@@ -37,13 +37,13 @@ impl BackDrop {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"anchor" => {
-                    list.anchor = Some(Anchor::load(e)?)
+                    list.anchor = Some(XlsxAnchor::load(e)?)
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"norm" => {
-                    list.norm = Some(NormalVector::load(e)?);
+                    list.norm = Some(XlsxNormalVector::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"up" => {
-                    list.up = Some(UpVector::load(e)?);
+                    list.up = Some(XlsxUpVector::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"backdrop" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),
@@ -62,13 +62,13 @@ impl BackDrop {
 /// ```
 /// <norm dx="123" dy="23" dz="10000"/>
 /// ```
-pub type NormalVector = Vector;
+pub type XlsxNormalVector = XlsxVector;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.upvector?view=openxml-3.0.1
-pub type UpVector = Vector;
+pub type XlsxUpVector = XlsxVector;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Vector {
+pub struct XlsxVector {
     // attributes
     /// Distance along X-axis in 3D
     dx: Option<i64>,
@@ -80,7 +80,7 @@ pub struct Vector {
     dz: Option<i64>,
 }
 
-impl Vector {
+impl XlsxVector {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut vector = Self {
@@ -117,7 +117,7 @@ impl Vector {
 /// <anchor x="123" y="23" z="10000"/>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct Anchor {
+pub struct XlsxAnchor {
     // Attributes	Description
     // x (X-Coordinate in 3D)	X-Coordinate in 3D space.
     pub x: Option<i64>,
@@ -129,7 +129,7 @@ pub struct Anchor {
     pub z: Option<i64>,
 }
 
-impl Anchor {
+impl XlsxAnchor {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut anchor = Self {

@@ -16,15 +16,12 @@ use crate::raw::{
     drawing::scheme::color_scheme::XlsxColorScheme,
     spreadsheet::{
         sheet::{
-            sheet_format_properties::SheetFormatProperties as RawSheetProperties,
-            worksheet::{
-                cell::XlsxCell as RawCell, column_information::XlsxColumnInformation as RawCol,
-                row::XlsxRow as RawRow,
-            },
+            sheet_format_properties::XlsxSheetFormatProperties,
+            worksheet::{cell::XlsxCell, column_information::XlsxColumnInformation, row::XlsxRow},
         },
         stylesheet::{
-            format::{alignment::XlsxAlignment, protection::Protection},
-            StyleSheet,
+            format::{alignment::XlsxAlignment, protection::XlsxCellProtection},
+            XlsxStyleSheet,
         },
     },
 };
@@ -60,18 +57,18 @@ pub struct CellProperty {
 
 impl CellProperty {
     pub(crate) fn from_raw(
-        cell: RawCell,
-        row_info: RawRow,
-        col_info: Option<RawCol>,
+        cell: XlsxCell,
+        row_info: XlsxRow,
+        col_info: Option<XlsxColumnInformation>,
         fill_id: Option<u64>,
         font_id: Option<u64>,
         border_id: Option<u64>,
         numbering_format_id: Option<u64>,
         alignment: Option<XlsxAlignment>,
-        protection: Option<Protection>,
+        protection: Option<XlsxCellProtection>,
         hyperlink: Option<Hyperlink>,
-        sheet_format_properties: Option<RawSheetProperties>,
-        stylesheet: StyleSheet,
+        sheet_format_properties: Option<XlsxSheetFormatProperties>,
+        stylesheet: XlsxStyleSheet,
         color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
         let show_phonetic = Self::show_phonetic(cell.clone(), col_info.clone(), row_info.clone());
@@ -105,7 +102,7 @@ impl CellProperty {
         };
     }
 
-    fn get_width_best_fit(col_info: Option<RawCol>) -> bool {
+    fn get_width_best_fit(col_info: Option<XlsxColumnInformation>) -> bool {
         let Some(col_info) = col_info else {
             return false;
         };
@@ -113,7 +110,10 @@ impl CellProperty {
         return col_info.best_fit.unwrap_or(false);
     }
 
-    fn get_dy_descent(row: RawRow, sheet_format_properties: Option<RawSheetProperties>) -> f64 {
+    fn get_dy_descent(
+        row: XlsxRow,
+        sheet_format_properties: Option<XlsxSheetFormatProperties>,
+    ) -> f64 {
         if let Some(d) = row.dy_descent {
             return d;
         };
@@ -129,7 +129,7 @@ impl CellProperty {
 
     fn get_numbering_format(
         numbering_format: Option<u64>,
-        stylesheet: StyleSheet,
+        stylesheet: XlsxStyleSheet,
     ) -> NumberingFormat {
         if let Some(id) = numbering_format {
             let raw = stylesheet.get_num_format(id);
@@ -141,7 +141,7 @@ impl CellProperty {
 
     fn get_font(
         font_id: Option<u64>,
-        stylesheet: StyleSheet,
+        stylesheet: XlsxStyleSheet,
         color_scheme: Option<XlsxColorScheme>,
     ) -> Font {
         if let Some(id) = font_id {
@@ -156,7 +156,7 @@ impl CellProperty {
 
     fn get_border(
         border_id: Option<u64>,
-        stylesheet: StyleSheet,
+        stylesheet: XlsxStyleSheet,
         color_scheme: Option<XlsxColorScheme>,
     ) -> Border {
         if let Some(id) = border_id {
@@ -171,7 +171,7 @@ impl CellProperty {
 
     fn get_fill(
         fill_id: Option<u64>,
-        stylesheet: StyleSheet,
+        stylesheet: XlsxStyleSheet,
         color_scheme: Option<XlsxColorScheme>,
     ) -> Fill {
         if let Some(id) = fill_id {
@@ -184,7 +184,11 @@ impl CellProperty {
         return Fill::default();
     }
 
-    fn show_phonetic(cell: RawCell, col_info: Option<RawCol>, row_info: RawRow) -> bool {
+    fn show_phonetic(
+        cell: XlsxCell,
+        col_info: Option<XlsxColumnInformation>,
+        row_info: XlsxRow,
+    ) -> bool {
         return if let Some(b) = cell.show_phonetic {
             b
         } else if let Some(b) = row_info.show_phonetic {
@@ -201,8 +205,8 @@ impl CellProperty {
     }
 
     fn cell_width(
-        col_info: Option<RawCol>,
-        sheet_format_properties: Option<RawSheetProperties>,
+        col_info: Option<XlsxColumnInformation>,
+        sheet_format_properties: Option<XlsxSheetFormatProperties>,
     ) -> f64 {
         if let Some(col_info) = col_info {
             if let Some(f) = col_info.width {
@@ -224,7 +228,10 @@ impl CellProperty {
         return DEFAULT_CELL_WIDTH;
     }
 
-    fn cell_height(row_info: RawRow, sheet_format_properties: Option<RawSheetProperties>) -> f64 {
+    fn cell_height(
+        row_info: XlsxRow,
+        sheet_format_properties: Option<XlsxSheetFormatProperties>,
+    ) -> f64 {
         if let Some(f) = row_info.height {
             return f;
         }
@@ -239,10 +246,10 @@ impl CellProperty {
     }
 
     fn cell_hidden(
-        cell_protection: Option<Protection>,
-        col_info: Option<RawCol>,
-        row_info: RawRow,
-        sheet_format_properties: Option<RawSheetProperties>,
+        cell_protection: Option<XlsxCellProtection>,
+        col_info: Option<XlsxColumnInformation>,
+        row_info: XlsxRow,
+        sheet_format_properties: Option<XlsxSheetFormatProperties>,
     ) -> bool {
         if let Some(protection) = cell_protection {
             if protection.hidden == Some(true) {

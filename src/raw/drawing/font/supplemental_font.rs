@@ -8,7 +8,7 @@ use quick_xml::events::BytesStart;
 /// <font script="Thai" typeface="Cordia New"/>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct SupplementalFont {
+pub struct XlsxSupplementalFont {
     // Attributes
     /// Specifies the script, or language, in which the typeface is supposed to be used.
     // script (Script)
@@ -19,7 +19,7 @@ pub struct SupplementalFont {
     pub typeface: Option<String>,
 }
 
-impl SupplementalFont {
+impl XlsxSupplementalFont {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
 

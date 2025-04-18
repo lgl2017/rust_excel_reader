@@ -5,10 +5,10 @@ use crate::excel::XmlReader;
 
 use crate::{
     helper::{string_to_bool, string_to_int},
-    raw::drawing::color::ColorEnum,
+    raw::drawing::color::XlsxColorEnum,
 };
 
-use super::rectangle::{FillToRectangle, TileRectangle};
+use super::rectangle::{XlsxFillToRectangle, XlsxTileRectangle};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.gradientfill?view=openxml-3.0.1
 ///
@@ -35,7 +35,7 @@ use super::rectangle::{FillToRectangle, TileRectangle};
 /// </a:gradFill>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct GradientFill {
+pub struct XlsxGradientFill {
     // Child Elements
     /// The list of gradient stops that specifies the gradient colors and their relative positions in the color band.
     // tag: gsLst
@@ -50,7 +50,7 @@ pub struct GradientFill {
 
     /// This element specifies a rectangular region of the shape to which the gradient is applied.
     // tag: tileRect
-    pub tile_rect: Option<TileRectangle>,
+    pub tile_rect: Option<XlsxTileRectangle>,
 
     // attributes
     /// Specifies the direction(s) in which to flip the gradient while tiling.
@@ -63,7 +63,7 @@ pub struct GradientFill {
     pub rotate_with_shape: Option<bool>,
 }
 
-impl GradientFill {
+impl XlsxGradientFill {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut fill = Self {
@@ -111,7 +111,7 @@ impl GradientFill {
                     fill.path = Some(PathGradientfill::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"tileRect" => {
-                    fill.tile_rect = Some(TileRectangle::load(e)?);
+                    fill.tile_rect = Some(XlsxTileRectangle::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"gradFill" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),
@@ -162,7 +162,7 @@ pub(crate) fn load_gradient_stops(reader: &mut XmlReader) -> anyhow::Result<Vec<
 #[derive(Debug, Clone, PartialEq)]
 pub struct GradientStop {
     // children
-    pub color: Option<ColorEnum>,
+    pub color: Option<XlsxColorEnum>,
 
     // attribute
     pub pos: Option<i64>,
@@ -194,7 +194,7 @@ impl GradientStop {
             }
         }
 
-        stop.color = ColorEnum::load(reader, b"gs")?;
+        stop.color = XlsxColorEnum::load(reader, b"gs")?;
 
         Ok(stop)
     }
@@ -261,7 +261,7 @@ pub struct PathGradientfill {
     // children
     /// defines the "focus" rectangle for the center shade, specified relative to the fill tile rectangle
     // tag: fillToRect
-    pub fill_to_rect: Option<FillToRectangle>,
+    pub fill_to_rect: Option<XlsxFillToRectangle>,
 
     // attributes
     /// Specifies the direction of color change for the gradient.
@@ -302,7 +302,7 @@ impl PathGradientfill {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"fillToRect" => {
-                    fill.fill_to_rect = Some(FillToRectangle::load(e)?);
+                    fill.fill_to_rect = Some(XlsxFillToRectangle::load(e)?);
                 }
 
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"path" => break,

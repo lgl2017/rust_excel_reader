@@ -3,7 +3,7 @@ use quick_xml::events::{BytesStart, Event};
 
 use crate::{
     excel::XmlReader,
-    raw::drawing::shape::adjust_value_list::{load_adjust_value_list, AdjustValueList},
+    raw::drawing::shape::adjust_value_list::{load_adjust_value_list, XlsxAdjustValueList},
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.presettextwarp?view=openxml-3.0.1
@@ -18,11 +18,11 @@ use crate::{
 /// ```
 // tag: prstTxWarp
 #[derive(Debug, Clone, PartialEq)]
-pub struct PresetTextWarp {
+pub struct XlsxPresetTextWarp {
     // children
     /// Adjust Value List
     // tag: avLst
-    pub adjust_value_list: Option<AdjustValueList>,
+    pub adjust_value_list: Option<XlsxAdjustValueList>,
 
     // attributes
     /// Preset Warp Shape
@@ -30,7 +30,7 @@ pub struct PresetTextWarp {
     pub preset: Option<String>,
 }
 
-impl PresetTextWarp {
+impl XlsxPresetTextWarp {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
         let mut preset_text_warp = Self {

@@ -2,7 +2,7 @@ use std::usize;
 
 use anyhow::bail;
 use quick_xml::events::BytesStart;
-use stylesheet_colors::{get_default_indexed_color_mapping, StyleSheetColors};
+use stylesheet_colors::{get_default_indexed_color_mapping, XlsxStyleSheetColors};
 
 use crate::{
     common_types::HexColor,
@@ -10,23 +10,23 @@ use crate::{
         apply_tint, format_hex_string, hex_to_rgba, rgba_to_hex, string_to_bool, string_to_float,
         string_to_unsignedint,
     },
-    raw::drawing::scheme::color_scheme::ColorScheme,
+    raw::drawing::scheme::color_scheme::XlsxColorScheme,
 };
 
 pub mod rgb_color;
 pub mod stylesheet_colors;
 
 /// BackgroundColor: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.backgroundcolor?view=openxml-3.0.1
-pub type BackgroundColor = Color;
+pub type XlsxBackgroundColor = XlsxColor;
 
 /// ForegroundColor: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.foregroundcolor?view=openxml-3.0.1
-pub type ForegroundColor = Color;
+pub type XlsxForegroundColor = XlsxColor;
 
 /// Color corresponding to the following classes
 ///
 /// DataBarColor: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.color?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-pub struct Color {
+pub struct XlsxColor {
     // attributes
     /// A boolean value (0: false, 1: true) indicating the color is automatic and system color dependent.
     /// Example:
@@ -53,7 +53,7 @@ pub struct Color {
     pub tint: Option<f64>,
 }
 
-impl Color {
+impl XlsxColor {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut color = Self {
@@ -87,11 +87,11 @@ impl Color {
     }
 }
 
-impl Color {
+impl XlsxColor {
     pub(crate) fn to_hex(
         &self,
-        stylesheet_colors: Option<StyleSheetColors>,
-        color_scheme: Option<ColorScheme>,
+        stylesheet_colors: Option<XlsxStyleSheetColors>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Option<HexColor> {
         let Some(base_color) = self.get_base_color(stylesheet_colors, color_scheme) else {
             return None;
@@ -115,8 +115,8 @@ impl Color {
 
     fn get_base_color(
         &self,
-        stylesheet_colors: Option<StyleSheetColors>,
-        color_scheme: Option<ColorScheme>,
+        stylesheet_colors: Option<XlsxStyleSheetColors>,
+        color_scheme: Option<XlsxColorScheme>,
     ) -> Option<HexColor> {
         if let (Some(theme_index), Some(color_scheme)) = (self.theme, color_scheme) {
             return color_scheme.get_color(theme_index);

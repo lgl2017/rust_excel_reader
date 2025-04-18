@@ -1,7 +1,7 @@
+use super::tab_stop::XlsxTabStop;
+use crate::excel::XmlReader;
 use anyhow::bail;
 use quick_xml::events::Event;
-use crate::excel::XmlReader;
-use super::tab_stop::TabStop;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.tabstoplist?view=openxml-3.0.1
 ///
@@ -19,10 +19,10 @@ use super::tab_stop::TabStop;
 /// </a:tabLst>
 /// ```
 // tag: tabLst
-pub type TabStopList = Vec<TabStop>;
+pub type XlsxTabStopList = Vec<XlsxTabStop>;
 
-pub(crate) fn load_tab_stop_list(reader: &mut XmlReader) -> anyhow::Result<TabStopList> {
-    let mut stops: Vec<TabStop> = vec![];
+pub(crate) fn load_tab_stop_list(reader: &mut XmlReader) -> anyhow::Result<XlsxTabStopList> {
+    let mut stops: Vec<XlsxTabStop> = vec![];
     let mut buf = Vec::new();
 
     loop {
@@ -30,7 +30,7 @@ pub(crate) fn load_tab_stop_list(reader: &mut XmlReader) -> anyhow::Result<TabSt
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) => {
-                stops.push(TabStop::load(e)?);
+                stops.push(XlsxTabStop::load(e)?);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"tabLst" => break,
             Ok(Event::Eof) => bail!("unexpected end of file."),

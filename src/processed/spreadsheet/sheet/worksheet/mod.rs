@@ -17,16 +17,17 @@ use crate::{
     raw::{
         drawing::scheme::color_scheme::XlsxColorScheme,
         spreadsheet::{
-            shared_string::shared_string_item::SharedStringItem,
+            shared_string::shared_string_item::XlsxSharedStringItem,
             sheet::worksheet::{
                 cell::XlsxCell, column_information::XlsxColumnInformation,
                 hyperlink::XlsxHyperlink, row::XlsxRow, XlsxWorksheet,
             },
             stylesheet::{
                 format::{
-                    alignment::XlsxAlignment, cell_format::CellFormat, protection::Protection,
+                    alignment::XlsxAlignment, cell_format::XlsxCellFormat,
+                    protection::XlsxCellProtection,
                 },
-                StyleSheet,
+                XlsxStyleSheet,
             },
             table::XlsxTable,
             workbook::defined_name::XlsxDefinedNames,
@@ -58,8 +59,8 @@ pub struct Worksheet {
 
     // private
     raw_sheet: Box<XlsxWorksheet>,
-    shared_string_items: Box<Vec<SharedStringItem>>,
-    stylesheet: Box<StyleSheet>,
+    shared_string_items: Box<Vec<XlsxSharedStringItem>>,
+    stylesheet: Box<XlsxStyleSheet>,
     color_scheme: Box<Option<XlsxColorScheme>>,
     external_hyperlinks: Box<BTreeMap<String, String>>,
     defined_names: Box<XlsxDefinedNames>,
@@ -76,8 +77,8 @@ impl Worksheet {
         external_hyperlinks: BTreeMap<String, String>,
         is_1904: bool,
         calculation_reference_mode: Option<CalculationReferenceMode>,
-        shared_string_items: Vec<SharedStringItem>,
-        stylesheet: StyleSheet,
+        shared_string_items: Vec<XlsxSharedStringItem>,
+        stylesheet: XlsxStyleSheet,
         color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
         let default_table_style_name = if let Some(style) = stylesheet.clone().table_styles {
@@ -248,7 +249,7 @@ impl Worksheet {
         cell: XlsxCell,
         row_info: XlsxRow,
         col_info: Option<XlsxColumnInformation>,
-    ) -> Option<Protection> {
+    ) -> Option<XlsxCellProtection> {
         if let Some(n) = cell.style {
             if let Some(protection) = self.get_protection_helper(n) {
                 return Some(protection);
@@ -275,7 +276,7 @@ impl Worksheet {
     /// get protection for a cellXfs' xf_id.
     ///
     /// None if not specified or applyFont is set to false
-    fn get_protection_helper(&self, xf_id: u64) -> Option<Protection> {
+    fn get_protection_helper(&self, xf_id: u64) -> Option<XlsxCellProtection> {
         let Some(cell_format) = self.get_cell_format(xf_id) else {
             return None;
         };
@@ -586,7 +587,7 @@ impl Worksheet {
         ));
     }
 
-    fn get_cell_format(&self, xf_id: u64) -> Option<CellFormat> {
+    fn get_cell_format(&self, xf_id: u64) -> Option<XlsxCellFormat> {
         let Ok(xf_id) = TryInto::<usize>::try_into(xf_id) else {
             return None;
         };
@@ -594,7 +595,7 @@ impl Worksheet {
         return self.stylesheet.get_cell_format(xf_id);
     }
 
-    fn get_cell_style_format(&self, xf_id: u64) -> Option<CellFormat> {
+    fn get_cell_style_format(&self, xf_id: u64) -> Option<XlsxCellFormat> {
         let Ok(cell_style_format_id) = TryInto::<usize>::try_into(xf_id) else {
             return None;
         };

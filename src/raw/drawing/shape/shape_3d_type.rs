@@ -3,9 +3,9 @@ use quick_xml::events::{BytesStart, Event};
 
 use crate::excel::XmlReader;
 
-use crate::{helper::string_to_int, raw::drawing::color::ColorEnum};
+use crate::{helper::string_to_int, raw::drawing::color::XlsxColorEnum};
 
-use super::bevel::{BevelBottom, BevelTop};
+use super::bevel::{XlsxBevelBottom, XlsxBevelTop};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.shape3dtype?view=openxml-3.0.1
 ///
@@ -23,21 +23,21 @@ use super::bevel::{BevelBottom, BevelTop};
 /// </a:sp3d>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct Shape3DType {
+pub struct XlsxShape3DType {
     // extLst (Extension List)	§20.1.2.2.15 No Supported
 
     // children
     // bevelB (Bottom Bevel)
-    pub bevel_b: Option<BevelBottom>,
+    pub bevel_b: Option<XlsxBevelBottom>,
 
     // bevelT (Top Bevel)
-    pub bevel_t: Option<BevelTop>,
+    pub bevel_t: Option<XlsxBevelTop>,
 
     // contourClr (Contour Color)
-    pub contour_clr: Option<ColorEnum>,
+    pub contour_clr: Option<XlsxColorEnum>,
 
     // extrusionClr (Extrusion Color)
-    pub extrusion_clr: Option<ColorEnum>,
+    pub extrusion_clr: Option<XlsxColorEnum>,
 
     // attributes
     /// Extrusion Height
@@ -57,7 +57,7 @@ pub struct Shape3DType {
     pub z: Option<i64>,
 }
 
-impl Shape3DType {
+impl XlsxShape3DType {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
 
@@ -100,16 +100,16 @@ impl Shape3DType {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"bevelB" => {
-                    shape3d.bevel_b = Some(BevelBottom::load(e)?);
+                    shape3d.bevel_b = Some(XlsxBevelBottom::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"bevelT" => {
-                    shape3d.bevel_t = Some(BevelTop::load(e)?);
+                    shape3d.bevel_t = Some(XlsxBevelTop::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"contourClr" => {
-                    shape3d.contour_clr = ColorEnum::load(reader, b"contourClr")?;
+                    shape3d.contour_clr = XlsxColorEnum::load(reader, b"contourClr")?;
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"extrusionClr" => {
-                    shape3d.extrusion_clr = ColorEnum::load(reader, b"extrusionClr")?;
+                    shape3d.extrusion_clr = XlsxColorEnum::load(reader, b"extrusionClr")?;
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"sp3d" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

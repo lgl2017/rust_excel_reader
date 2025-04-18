@@ -1,7 +1,7 @@
+use crate::excel::XmlReader;
+use crate::raw::drawing::image::blip::XlsxBlip;
 use anyhow::bail;
 use quick_xml::events::Event;
-use crate::excel::XmlReader;
-use crate::raw::drawing::image::blip::Blip;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.picturebullet?view=openxml-3.0.1
 ///
@@ -17,11 +17,11 @@ use crate::raw::drawing::image::blip::Blip;
 /// ```
 // tag: buBlip
 #[derive(Debug, Clone, PartialEq)]
-pub struct PictureBullet {
-    pub blip: Option<Blip>,
+pub struct XlsxPictureBullet {
+    pub blip: Option<XlsxBlip>,
 }
 
-impl PictureBullet {
+impl XlsxPictureBullet {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
         let mut bullet = Self { blip: None };
 
@@ -32,7 +32,7 @@ impl PictureBullet {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"blip" => {
-                    bullet.blip = Some(Blip::load(reader, e)?);
+                    bullet.blip = Some(XlsxBlip::load(reader, e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"blipFill" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

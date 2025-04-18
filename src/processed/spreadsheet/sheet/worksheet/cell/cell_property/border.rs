@@ -3,7 +3,7 @@ use crate::{
     raw::{
         drawing::scheme::color_scheme::XlsxColorScheme,
         spreadsheet::stylesheet::{
-            border::{Border as RawBorder, BorderStyle as RawBorderStyle},
+            border::{XlsxBorder, XlsxBorderStyle},
             color::stylesheet_colors::XlsxStyleSheetColors,
         },
     },
@@ -72,7 +72,7 @@ impl Border {
     }
 
     pub(crate) fn from_raw(
-        border: Option<RawBorder>,
+        border: Option<XlsxBorder>,
         stylesheet_colors: Option<XlsxStyleSheetColors>,
         color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
@@ -139,7 +139,7 @@ impl BorderStyle {
     }
 
     pub(crate) fn from_raw(
-        style: Option<RawBorderStyle>,
+        style: Option<XlsxBorderStyle>,
         stylesheet_colors: Option<XlsxStyleSheetColors>,
         color_scheme: Option<XlsxColorScheme>,
     ) -> Self {

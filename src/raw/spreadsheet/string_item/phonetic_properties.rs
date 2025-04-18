@@ -28,7 +28,7 @@ use crate::helper::string_to_unsignedint;
 /// The phonetic text character, "カ" is displayed over the "課" character and the phonetic text "ケ" is displayed above the "毛" character, using the font record in the style sheet at index 1.
 // tag: phoneticPr
 #[derive(Debug, Clone, PartialEq)]
-pub struct PhoneticProperties {
+pub struct XlsxPhoneticProperties {
     // Attributes
     /// Specifies how the text for the phonetic run is aligned across the top of the cells, with respect to the main text in the body of the cell.
     ///
@@ -55,7 +55,7 @@ pub struct PhoneticProperties {
     pub r#type: Option<String>,
 }
 
-impl PhoneticProperties {
+impl XlsxPhoneticProperties {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut properties = Self {

@@ -5,7 +5,7 @@ use crate::helper::string_to_int;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.transformeffect?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-pub struct TransformEffect {
+pub struct XlsxTransformEffect {
     /// Specifies the horizontal skew angle
     pub kx: Option<i64>,
 
@@ -25,7 +25,7 @@ pub struct TransformEffect {
     pub ty: Option<i64>,
 }
 
-impl TransformEffect {
+impl XlsxTransformEffect {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut transform = Self {

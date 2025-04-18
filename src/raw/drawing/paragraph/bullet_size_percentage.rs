@@ -14,7 +14,7 @@ use crate::helper::{extract_val_attribute, string_to_int};
 /// ```
 // tag: buSzPct
 #[derive(Debug, Clone, PartialEq)]
-pub struct BulletSizePercentage {
+pub struct XlsxBulletSizePercentage {
     // Attributes
     /// Specifies the percentage of the text size that this bullet should be. It is specified here in terms of 100% being equal to 100000 and 1% being specified in increments of 1000.
     /// This attribute should not be lower than 25%, or 25000 and not be higher than 400%, or 400000.
@@ -22,7 +22,7 @@ pub struct BulletSizePercentage {
     pub val: Option<i64>,
 }
 
-impl BulletSizePercentage {
+impl XlsxBulletSizePercentage {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let mut bullet = Self { val: None };
 

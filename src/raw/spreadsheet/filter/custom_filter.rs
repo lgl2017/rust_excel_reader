@@ -10,12 +10,12 @@ use crate::{excel::XmlReader, helper::string_to_bool};
 ///
 /// There can be at most two customFilters specified.
 #[derive(Debug, Clone, PartialEq)]
-pub struct CustomFilters {
+pub struct XlsxCustomFilters {
     // Child Elements	Subclause
     /// customFilter (Custom Filter Criteria)
     ///
     /// There can be at most two customFilters specified.
-    pub custom_filter: Vec<CustomFilter>,
+    pub custom_filter: Vec<XlsxCustomFilter>,
 
     // Attributes
     /// and (And)
@@ -26,10 +26,10 @@ pub struct CustomFilters {
     pub and: Option<bool>,
 }
 
-impl CustomFilters {
+impl XlsxCustomFilters {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut and: Option<bool> = None;
-        let mut filters: Vec<CustomFilter> = vec![];
+        let mut filters: Vec<XlsxCustomFilter> = vec![];
 
         let attributes = e.attributes();
         for a in attributes {
@@ -56,7 +56,7 @@ impl CustomFilters {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"customFilter" => {
-                    filters.push(CustomFilter::load(e)?);
+                    filters.push(XlsxCustomFilter::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"customFilters" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file at `customFilters`."),
@@ -95,7 +95,7 @@ impl CustomFilters {
 /// </customFilters>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct CustomFilter {
+pub struct XlsxCustomFilter {
     // Attributes
     /// operator (Filter Comparison Operator)
     ///
@@ -109,7 +109,7 @@ pub struct CustomFilter {
     pub val: Option<String>,
 }
 
-impl CustomFilter {
+impl XlsxCustomFilter {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut filter = Self {

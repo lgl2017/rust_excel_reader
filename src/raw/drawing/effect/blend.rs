@@ -2,16 +2,17 @@ use crate::excel::XmlReader;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
-use super::effect_container::EffectContainer;
+use super::effect_container::XlsxEffectContainer;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blend?view=openxml-3.0.1
-/// specifies a blend of several effects.
+///
+/// Specifies a blend of several effects.
 /// The container specifies the raw effects to blend while the blend mode specifies how the effects are to be blended.
 #[derive(Debug, Clone, PartialEq)]
-pub struct Blend {
+pub struct XlsxBlend {
     // children
     /// specifies the raw effects to blend
-    pub cont: Option<Box<EffectContainer>>,
+    pub cont: Option<Box<XlsxEffectContainer>>,
 
     // attributes
     /// Specifies how to blend the two effects
@@ -19,7 +20,7 @@ pub struct Blend {
     pub blend: Option<String>,
 }
 
-impl Blend {
+impl XlsxBlend {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut blend = Self {
@@ -51,7 +52,7 @@ impl Blend {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"cont" => {
-                    blend.cont = Some(Box::new(EffectContainer::load(reader, e)?));
+                    blend.cont = Some(Box::new(XlsxEffectContainer::load(reader, e)?));
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"blend" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

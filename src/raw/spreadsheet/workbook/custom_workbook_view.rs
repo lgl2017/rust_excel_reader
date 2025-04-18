@@ -16,10 +16,12 @@ use crate::{
 ///   <customWorkbookView name="CustomView" guid="{CE6681F1-E999-414D-8446-68A031534B57}" maximized="1" xWindow="1" yWindow="1" windowWidth="1024" windowHeight="547" activeSheetId="1"/>
 /// </customWorkbookViews>
 /// ```
-pub type CustomWorkbookViews = Vec<CustomWorkbookView>;
+pub type XlsxCustomWorkbookViews = Vec<XlsxCustomWorkbookView>;
 
-pub(crate) fn load_custom_bookviews(reader: &mut XmlReader) -> anyhow::Result<CustomWorkbookViews> {
-    let mut views: CustomWorkbookViews = vec![];
+pub(crate) fn load_custom_bookviews(
+    reader: &mut XmlReader,
+) -> anyhow::Result<XlsxCustomWorkbookViews> {
+    let mut views: XlsxCustomWorkbookViews = vec![];
 
     let mut buf = Vec::new();
     loop {
@@ -27,7 +29,7 @@ pub(crate) fn load_custom_bookviews(reader: &mut XmlReader) -> anyhow::Result<Cu
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"customWorkbookView" => {
-                views.push(CustomWorkbookView::load(reader, e)?);
+                views.push(XlsxCustomWorkbookView::load(reader, e)?);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"customWorkbookViews" => break,
             Ok(Event::Eof) => bail!("unexpected end of file."),
@@ -49,7 +51,7 @@ pub(crate) fn load_custom_bookviews(reader: &mut XmlReader) -> anyhow::Result<Cu
 /// ```
 /// customWorkbookView (Custom Workbook View)
 #[derive(Debug, Clone, PartialEq)]
-pub struct CustomWorkbookView {
+pub struct XlsxCustomWorkbookView {
     /// extLst (Future Feature Data Storage Area) Not supported
 
     /// Attributes
@@ -223,7 +225,7 @@ pub struct CustomWorkbookView {
     pub y_window: Option<i64>,
 }
 
-impl CustomWorkbookView {
+impl XlsxCustomWorkbookView {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut view = Self {

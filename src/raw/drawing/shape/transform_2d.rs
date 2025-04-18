@@ -6,7 +6,7 @@ use crate::{
     helper::{string_to_bool, string_to_int},
 };
 
-use super::{extents::Extents, offset::Offset};
+use super::{extents::XlsxExtents, offset::XlsxOffset};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.transform2d?view=openxml-3.0.1
 ///
@@ -21,13 +21,13 @@ use super::{extents::Extents, offset::Offset};
 /// ```
 // tag: xfrm
 #[derive(Debug, Clone, PartialEq)]
-pub struct Transform2D {
+pub struct XlsxTransform2D {
     // Child Elements
     // ext (Extents)
-    pub extents: Option<Extents>,
+    pub extents: Option<XlsxExtents>,
 
     // off (Offset)
-    pub offset: Option<Offset>,
+    pub offset: Option<XlsxOffset>,
 
     // Attributes
     ///Specifies a horizontal flip.
@@ -45,7 +45,7 @@ pub struct Transform2D {
     pub rotation: Option<i64>,
 }
 
-impl Transform2D {
+impl XlsxTransform2D {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut transform = Self {
             extents: None,
@@ -85,10 +85,10 @@ impl Transform2D {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"ext" => {
-                    transform.extents = Some(Extents::load(e)?);
+                    transform.extents = Some(XlsxExtents::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"off" => {
-                    transform.offset = Some(Offset::load(e)?);
+                    transform.offset = Some(XlsxOffset::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"xfrm" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

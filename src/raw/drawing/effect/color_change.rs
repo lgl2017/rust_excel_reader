@@ -2,10 +2,11 @@ use crate::excel::XmlReader;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
-use crate::{helper::string_to_bool, raw::drawing::color::ColorEnum};
+use crate::{helper::string_to_bool, raw::drawing::color::XlsxColorEnum};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.colorchange?view=openxml-3.0.1
-/// Example
+///
+/// Example:
 /// ```
 /// <a:clrChange useA="1">
 ///     <a:clrFrom>
@@ -18,12 +19,12 @@ use crate::{helper::string_to_bool, raw::drawing::color::ColorEnum};
 /// ```
 // tag: clrChange
 #[derive(Debug, Clone, PartialEq)]
-pub struct ColorChange {
+pub struct XlsxColorChange {
     // Children
     // tag: clrFrom (Change Color From)	§20.1.8.17
-    pub color_from: Option<ColorFrom>,
+    pub color_from: Option<XlsxColorFrom>,
     // tag: clrTo (Change Color To)
-    pub color_to: Option<ColorTo>,
+    pub color_to: Option<XlsxColorTo>,
 
     // attributes
     /// Specifies whether alpha values are considered for the effect.
@@ -32,7 +33,7 @@ pub struct ColorChange {
     pub use_a: Option<bool>,
 }
 
-impl ColorChange {
+impl XlsxColorChange {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut change = Self {
@@ -66,10 +67,10 @@ impl ColorChange {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"clrTo" => {
-                    change.color_from = ColorFrom::load(reader, b"clrFrom")?;
+                    change.color_from = XlsxColorFrom::load(reader, b"clrFrom")?;
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"clrTo" => {
-                    change.color_to = ColorTo::load(reader, b"clrTo")?;
+                    change.color_to = XlsxColorTo::load(reader, b"clrTo")?;
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"clrChange" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),
@@ -93,7 +94,7 @@ impl ColorChange {
 /// </a:clrFrom>
 /// ```
 // tag: clrFrom
-pub type ColorFrom = ColorEnum;
+pub type XlsxColorFrom = XlsxColorEnum;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.colorto?view=openxml-3.0.1
 /// specifies the color which replaces the clrFrom in a clrChange effect.
@@ -105,4 +106,4 @@ pub type ColorFrom = ColorEnum;
 /// </a:clrTo>
 /// ```
 // tag: clrTo
-pub type ColorTo = ColorEnum;
+pub type XlsxColorTo = XlsxColorEnum;

@@ -11,7 +11,7 @@ use quick_xml::events::BytesStart;
 /// ```
 // tag: snd
 #[derive(Debug, Clone, PartialEq)]
-pub struct HyperlinkSound {
+pub struct XlsxHyperlinkSound {
     // Attributes	Description
     // embed (Embedded Audio File Relationship ID)
     pub embed: Option<String>,
@@ -21,7 +21,7 @@ pub struct HyperlinkSound {
     pub name: Option<String>,
 }
 
-impl HyperlinkSound {
+impl XlsxHyperlinkSound {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut sound = Self {

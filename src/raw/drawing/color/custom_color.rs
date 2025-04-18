@@ -1,4 +1,4 @@
-use super::ColorEnum;
+use super::XlsxColorEnum;
 use crate::excel::XmlReader;
 
 use anyhow::bail;
@@ -49,18 +49,20 @@ use quick_xml::events::{BytesStart, Event};
 /// </a:custClrLst>
 ///  ```
 /// tag: custClrLst
-pub type CustomColorList = Vec<CustomColor>;
+pub type XlsxCustomColorList = Vec<XlsxCustomColor>;
 
-pub(crate) fn load_custom_color_list(reader: &mut XmlReader) -> anyhow::Result<CustomColorList> {
+pub(crate) fn load_custom_color_list(
+    reader: &mut XmlReader,
+) -> anyhow::Result<XlsxCustomColorList> {
     let mut buf = Vec::new();
-    let mut colors: Vec<CustomColor> = vec![];
+    let mut colors: Vec<XlsxCustomColor> = vec![];
 
     loop {
         buf.clear();
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"custClr" => {
-                let color = CustomColor::load(reader, e)?;
+                let color = XlsxCustomColor::load(reader, e)?;
                 colors.push(color);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"custClrLst" => break,
@@ -76,21 +78,21 @@ pub(crate) fn load_custom_color_list(reader: &mut XmlReader) -> anyhow::Result<C
 ///  CustomColor: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.customcolor?view=openxml-3.0.1
 /// tag: custClr
 #[derive(Debug, Clone, PartialEq)]
-pub struct CustomColor {
+pub struct XlsxCustomColor {
     /// attributes
     pub name: Option<String>,
 
     /// children
-    pub color: Option<ColorEnum>,
+    pub color: Option<XlsxColorEnum>,
 }
 
-impl CustomColor {
+impl XlsxCustomColor {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
 
         let mut color = Self {
             name: None,
-            color: ColorEnum::load(reader, b"custClr")?,
+            color: XlsxColorEnum::load(reader, b"custClr")?,
         };
 
         for a in attributes {

@@ -5,17 +5,18 @@ use crate::{
     excel::XmlReader,
     helper::{string_to_bool, string_to_int},
     raw::drawing::{
-        scene::scene_3d_type::Scene3DType,
-        shape::{shape_3d_type::Shape3DType, shape_autofit::ShapeAutofit},
+        scene::scene_3d_type::XlsxScene3DType,
+        shape::{shape_3d_type::XlsxShape3DType, shape_autofit::XlsxShapeAutofit},
     },
 };
 
 use super::{
-    flat_text::FlatText, no_autofit::NoAutoFit, norm_autofit::NormAutoFit,
-    preset_text_warp::PresetTextWarp,
+    flat_text::XlsxFlatText, no_autofit::XlsxNoAutoFit, norm_autofit::XlsxNormAutoFit,
+    preset_text_warp::XlsxPresetTextWarp,
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.bodyproperties?view=openxml-3.0.1
+///
 /// defines the body properties for the text body within a shape.
 ///
 /// Example:
@@ -30,12 +31,12 @@ use super::{
 /// </a:bodyPr>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct BodyProperties {
+pub struct XlsxBodyProperties {
     // child: extLst (Extension List)	Not supported
 
     // Child Elements
     // flatTx (No text in 3D scene)	§20.1.5.8
-    pub flat_tx: Option<FlatText>,
+    pub flat_tx: Option<XlsxFlatText>,
 
     /// NoAutoFit:  https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.noautofit?view=openxml-3.0.1
     /// This element specifies that text within the text body should not be auto-fit to the bounding box.
@@ -48,7 +49,7 @@ pub struct BodyProperties {
     /// </a:bodyPr>
     /// ```
     // noAutofit (No AutoFit)	§21.1.2.1.2
-    pub no_autofit: Option<NoAutoFit>,
+    pub no_autofit: Option<XlsxNoAutoFit>,
 
     /// NormalAutoFit: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.normalautofit?view=openxml-3.0.1
     /// This element specifies that text within the text body should be normally auto-fit to the bounding box.
@@ -61,16 +62,16 @@ pub struct BodyProperties {
     /// </a:bodyPr>
     /// ```
     // normAutofit (Normal AutoFit)	§21.1.2.1.3
-    pub norm_autofit: Option<NormAutoFit>,
+    pub norm_autofit: Option<XlsxNormAutoFit>,
 
     // prstTxWarp (Preset Text Warp)	§20.1.9.19
-    pub preset_text_warp: Option<PresetTextWarp>,
+    pub preset_text_warp: Option<XlsxPresetTextWarp>,
 
     // scene3d (3D Scene Properties)	§20.1.4.1.26
-    pub scene3d: Option<Scene3DType>,
+    pub scene3d: Option<XlsxScene3DType>,
 
     // sp3d (Apply 3D shape properties)	§20.1.5.12
-    pub shape3d: Option<Shape3DType>,
+    pub shape3d: Option<XlsxShape3DType>,
 
     /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.shapeautofit?view=openxml-3.0.1
     ///
@@ -85,7 +86,7 @@ pub struct BodyProperties {
     /// </a:bodyPr>
     /// ```
     // spAutoFit (Shape AutoFit)
-    pub shape_autofit: Option<ShapeAutofit>,
+    pub shape_autofit: Option<XlsxShapeAutofit>,
 
     // attributes
     /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.bodyproperties.anchor?view=openxml-3.0.1#documentformat-openxml-drawing-bodyproperties-anchor
@@ -249,7 +250,7 @@ pub struct BodyProperties {
     pub wrap: Option<String>,
 }
 
-impl BodyProperties {
+impl XlsxBodyProperties {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
 
@@ -331,22 +332,22 @@ impl BodyProperties {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"flatTx" => {
-                    properties.flat_tx = Some(FlatText::load(e)?);
+                    properties.flat_tx = Some(XlsxFlatText::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"noAutofit" => {
                     properties.no_autofit = Some(true);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"normAutofit" => {
-                    properties.norm_autofit = Some(NormAutoFit::load(e)?);
+                    properties.norm_autofit = Some(XlsxNormAutoFit::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"prstTxWarp" => {
-                    properties.preset_text_warp = Some(PresetTextWarp::load(reader, e)?);
+                    properties.preset_text_warp = Some(XlsxPresetTextWarp::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"scene3d" => {
-                    properties.scene3d = Some(Scene3DType::load(reader)?);
+                    properties.scene3d = Some(XlsxScene3DType::load(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"sp3d" => {
-                    properties.shape3d = Some(Shape3DType::load(reader, e)?);
+                    properties.shape3d = Some(XlsxShape3DType::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"spAutoFit" => {
                     properties.shape_autofit = Some(true);

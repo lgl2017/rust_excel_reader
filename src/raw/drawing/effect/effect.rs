@@ -6,7 +6,7 @@ use quick_xml::events::BytesStart;
 /// specifies a reference to an existing effect container
 // tag: effect
 #[derive(Debug, Clone, PartialEq)]
-pub struct Effect {
+pub struct XlsxEffect {
     // attributes
     /// Specifies the reference.
     ///
@@ -18,7 +18,7 @@ pub struct Effect {
     pub r#ref: Option<String>,
 }
 
-impl Effect {
+impl XlsxEffect {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut effect = Self { r#ref: None };

@@ -1,11 +1,11 @@
+use super::{
+    line_default::{load_line_default, XlsxLineDefault},
+    shape_default::{load_shape_default, XlsxShapeDefault},
+    text_default::{load_text_default, XlsxTextDefault},
+};
+use crate::excel::XmlReader;
 use anyhow::bail;
 use quick_xml::events::Event;
-use crate::excel::XmlReader;
-use super::{
-    line_default::{load_line_default, LineDefault},
-    shape_default::{load_shape_default, ShapeDefault},
-    text_default::{load_text_default, TextDefault},
-};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.objectdefaults?view=openxml-3.0.1
 /// This element allows for the definition of default shape, line, and textbox formatting properties.
@@ -69,21 +69,21 @@ use super::{
 /// </a:objectDefaults>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct ObjectDefaults {
+pub struct XlsxObjectDefaults {
     // extLst (Extension List)	§20.1.2.2.15 Not supporte
 
     // Child Elements
     // lnDef (Line Default)	§20.1.4.1.20
-    pub line_defaults: Option<Box<LineDefault>>,
+    pub line_defaults: Option<Box<XlsxLineDefault>>,
 
     // spDef (Shape Default)	§20.1.4.1.27
-    pub shape_defaults: Option<Box<ShapeDefault>>,
+    pub shape_defaults: Option<Box<XlsxShapeDefault>>,
 
     // txDef (Text Default)
-    pub text_defaults: Option<Box<TextDefault>>,
+    pub text_defaults: Option<Box<XlsxTextDefault>>,
 }
 
-impl ObjectDefaults {
+impl XlsxObjectDefaults {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
 

@@ -32,16 +32,17 @@ use crate::excel::XmlReader;
 ///
 /// v (Cell value)
 #[derive(Debug, Clone, PartialEq)]
-pub struct CellValue {
+pub struct XlsxCellValue {
     pub raw_value: String,
 
     // attributes
     /// Content Contains Significant Whitespace.
+    ///
     /// possible values: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spaceprocessingmodevalues?view=openxml-3.0.1
     pub space: Option<String>,
 }
 
-impl CellValue {
+impl XlsxCellValue {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut space: Option<String> = None;
 

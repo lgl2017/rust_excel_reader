@@ -7,14 +7,14 @@ use crate::helper::string_to_int;
 /// This is equivalent to an alpha ceiling, followed by alpha blur, followed by either an alpha ceiling (positive radius) or alpha floor (negative radius).
 // tag: alphaOutset
 #[derive(Debug, Clone, PartialEq)]
-pub struct AlphaOutset {
+pub struct XlsxAlphaOutset {
     // attributes
     /// Specifies the radius of blur.
     // tag: rad (Radius)
     pub rad: Option<i64>,
 }
 
-impl AlphaOutset {
+impl XlsxAlphaOutset {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut blur = Self { rad: None };

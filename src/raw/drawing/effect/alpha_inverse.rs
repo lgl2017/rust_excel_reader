@@ -1,4 +1,4 @@
-use crate::raw::drawing::color::ColorEnum;
+use crate::raw::drawing::color::XlsxColorEnum;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alphainverse?view=openxml-3.0.1
 ///
@@ -8,4 +8,4 @@ use crate::raw::drawing::color::ColorEnum;
 ///     <a:schemeClr val="phClr" />
 /// </a:alphaInv>
 /// ```
-pub type AlphaInverse = ColorEnum;
+pub type XlsxAlphaInverse = XlsxColorEnum;

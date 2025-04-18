@@ -6,7 +6,7 @@ use crate::helper::string_to_int;
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.luminanceeffect?view=openxml-3.0.1
 // tag: lum
 #[derive(Debug, Clone, PartialEq)]
-pub struct Luminance {
+pub struct XlsxLuminance {
     // attributes:
     /// Specifies the percent to change the brightness.
     pub bright: Option<i64>,
@@ -15,7 +15,7 @@ pub struct Luminance {
     pub contrast: Option<i64>,
 }
 
-impl Luminance {
+impl XlsxLuminance {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut lum = Self {

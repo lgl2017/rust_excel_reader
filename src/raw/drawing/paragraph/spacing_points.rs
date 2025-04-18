@@ -16,14 +16,14 @@ use crate::helper::{extract_val_attribute, string_to_int};
 /// ```
 // tag: spcPts
 #[derive(Debug, Clone, PartialEq)]
-pub struct SpacingPoints {
+pub struct XlsxSpacingPoints {
     // Attributes
     /// Specifies the size of the white space in point size
     // val (Value)
     pub val: Option<i64>,
 }
 
-impl SpacingPoints {
+impl XlsxSpacingPoints {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let mut spacing = Self { val: None };
 

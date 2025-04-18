@@ -5,7 +5,7 @@ use crate::excel::XmlReader;
 
 use crate::helper::string_to_bool;
 
-use super::hyperlink_sound::HyperlinkSound;
+use super::hyperlink_sound::XlsxHyperlinkSound;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.hyperlinkonmouseover?view=openxml-3.0.1
 ///
@@ -14,7 +14,7 @@ use super::hyperlink_sound::HyperlinkSound;
 /// <a:hlinkMouseOver r:id="rId2" tooltip="Some Sample Text"/>
 /// ```
 // tag: hlinkMouseOver
-pub type HyperlinkOnMouseOver = HyperlinkOnEvent;
+pub type XlsxHyperlinkOnMouseOver = XlsxHyperlinkOnEvent;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.hyperlinkonclick?view=openxml-3.0.1
 ///
@@ -23,15 +23,15 @@ pub type HyperlinkOnMouseOver = HyperlinkOnEvent;
 /// <a:hlinkClick r:id="rId2" tooltip="Some Sample Text"/>
 /// ```
 // tag: hlinkClick
-pub type HyperlinkOnClick = HyperlinkOnEvent;
+pub type XlsxHyperlinkOnClick = XlsxHyperlinkOnEvent;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct HyperlinkOnEvent {
+pub struct XlsxHyperlinkOnEvent {
     // extLst (Extension List)	Not supported
 
     //  Child Elements	Subclause
     // snd (Hyperlink Sound)
-    pub sound: Option<HyperlinkSound>,
+    pub sound: Option<XlsxHyperlinkSound>,
 
     // Attributes
     /// Specifies an action that is to be taken when this hyperlink is activated.
@@ -71,7 +71,7 @@ pub struct HyperlinkOnEvent {
     pub tooltip: Option<String>,
 }
 
-impl HyperlinkOnEvent {
+impl XlsxHyperlinkOnEvent {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut onclick: Self = Self {
             sound: None,
@@ -136,7 +136,7 @@ impl HyperlinkOnEvent {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"snd" => {
-                    onclick.sound = Some(HyperlinkSound::load(e)?);
+                    onclick.sound = Some(XlsxHyperlinkSound::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"hlinkClick" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

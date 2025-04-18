@@ -13,9 +13,9 @@ use crate::{
     raw::{
         drawing::scheme::color_scheme::XlsxColorScheme,
         spreadsheet::{
-            shared_string::shared_string_item::SharedStringItem,
-            sheet::worksheet::cell::XlsxCell as RawCell, string_item::XlsxStringItem,
-            stylesheet::StyleSheet,
+            shared_string::shared_string_item::XlsxSharedStringItem,
+            sheet::worksheet::cell::XlsxCell, string_item::XlsxStringItem,
+            stylesheet::XlsxStyleSheet,
         },
     },
 };
@@ -52,9 +52,9 @@ pub enum CellValueType {
 
 impl CellValueType {
     pub(crate) fn from_raw(
-        cell: RawCell,
-        shared_string_items: Vec<SharedStringItem>,
-        stylesheet: StyleSheet,
+        cell: XlsxCell,
+        shared_string_items: Vec<XlsxSharedStringItem>,
+        stylesheet: XlsxStyleSheet,
         color_scheme: Option<XlsxColorScheme>,
     ) -> anyhow::Result<Self> {
         if cell.formula.is_none() && cell.inline_string.is_none() && cell.cell_value.is_none() {
@@ -116,7 +116,7 @@ impl CellValueType {
 
     fn from_string_item(
         string_item: XlsxStringItem,
-        stylesheet: StyleSheet,
+        stylesheet: XlsxStyleSheet,
         color_scheme: Option<XlsxColorScheme>,
     ) -> anyhow::Result<Self> {
         let phonetic_runs: Option<Vec<PhoneticRun>> =

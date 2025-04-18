@@ -2,7 +2,7 @@ use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
 use crate::{
-    excel::XmlReader, helper::string_to_float, raw::spreadsheet::stylesheet::color::Color,
+    excel::XmlReader, helper::string_to_float, raw::spreadsheet::stylesheet::color::XlsxColor,
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.gradientfill?view=openxml-3.0.1
@@ -31,7 +31,7 @@ use crate::{
 /// </fill>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct GradientFill {
+pub struct XlsxGradientFill {
     // attributes
     /// values ranging from 0 to 1.
     /// Specifies the position of the bottom edge of the inner rectangle
@@ -62,10 +62,10 @@ pub struct GradientFill {
     pub r#type: Option<String>,
 
     // children
-    pub stop: Option<Vec<GradientStop>>,
+    pub stop: Option<Vec<XlsxGradientStop>>,
 }
 
-impl GradientFill {
+impl XlsxGradientFill {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut fill = Self {
@@ -77,7 +77,7 @@ impl GradientFill {
             r#type: None,
             stop: None,
         };
-        let mut stops: Vec<GradientStop> = vec![];
+        let mut stops: Vec<XlsxGradientStop> = vec![];
 
         for a in attributes {
             match a {
@@ -118,7 +118,7 @@ impl GradientFill {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"stop" => {
-                    let stop = GradientStop::load(reader, e)?;
+                    let stop = XlsxGradientStop::load(reader, e)?;
                     stops.push(stop);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"gradientFill" => break,
@@ -136,7 +136,7 @@ impl GradientFill {
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.gradientstop?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-pub struct GradientStop {
+pub struct XlsxGradientStop {
     // attributes
     /// Position information for this gradient stop
     ///
@@ -146,10 +146,10 @@ pub struct GradientStop {
     pub position: Option<f64>,
 
     // children
-    pub color: Option<Color>,
+    pub color: Option<XlsxColor>,
 }
 
-impl GradientStop {
+impl XlsxGradientStop {
     pub fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut stop = Self {
@@ -182,7 +182,7 @@ impl GradientStop {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"color" => {
-                    let color: Color = Color::load(e)?;
+                    let color = XlsxColor::load(e)?;
                     stop.color = Some(color);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"stop" => break,

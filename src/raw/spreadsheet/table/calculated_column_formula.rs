@@ -10,7 +10,7 @@ use crate::{excel::XmlReader, helper::string_to_bool};
 ///
 /// calculatedColumnFormula (Calculated Column Formula)
 #[derive(Debug, Clone, PartialEq)]
-pub struct CalculatedColumnFormula {
+pub struct XlsxCalculatedColumnFormula {
     // text content
     pub formula: String,
 
@@ -21,7 +21,7 @@ pub struct CalculatedColumnFormula {
     pub array: Option<bool>,
 }
 
-impl CalculatedColumnFormula {
+impl XlsxCalculatedColumnFormula {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut text = String::new();
         let mut buf: Vec<u8> = Vec::new();

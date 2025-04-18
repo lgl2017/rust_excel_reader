@@ -1,15 +1,3 @@
-use anyhow::bail;
-use blip_fill::BlipFill;
-use gradient_fill::GradientFill;
-use group_fill::GroupFill;
-use no_fill::NoFill;
-use pattern_fill::PatternFill;
-use quick_xml::events::{BytesStart, Event};
-
-use crate::excel::XmlReader;
-
-use solid_fill::SolidFill;
-
 pub mod blip_fill;
 pub mod fill_reference;
 pub mod gradient_fill;
@@ -18,6 +6,17 @@ pub mod no_fill;
 pub mod pattern_fill;
 pub mod rectangle;
 pub mod solid_fill;
+
+use anyhow::bail;
+
+use crate::excel::XmlReader;
+use blip_fill::XlsxBlipFill;
+use gradient_fill::XlsxGradientFill;
+use group_fill::XlsxGroupFill;
+use no_fill::XlsxNoFill;
+use pattern_fill::XlsxPatternFill;
+use quick_xml::events::{BytesStart, Event};
+use solid_fill::XlsxSolidFill;
 
 /// BackgroundFillStyleList: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.backgroundfillstylelist?view=openxml-3.0.1
 /// defines a set of three background fill styles that are used within a theme, arranged in order from subtle to moderate to intense
@@ -35,46 +34,46 @@ pub mod solid_fill;
 /// </a:bgFillStyleLst>
 /// ``
 // tag: bgFillStyleLst
-pub type BackgroundFillStyleList = Vec<FillStyleEnum>;
+pub type XlsxBackgroundFillStyleList = Vec<XlsxFillStyleEnum>;
 
 pub(crate) fn load_bg_fill_style_lst(
     reader: &mut XmlReader,
-) -> anyhow::Result<BackgroundFillStyleList> {
-    return Ok(FillStyleEnum::load_list(reader, b"bgFillStyleLst")?);
+) -> anyhow::Result<XlsxBackgroundFillStyleList> {
+    return Ok(XlsxFillStyleEnum::load_list(reader, b"bgFillStyleLst")?);
 }
 
 /// FillStyleList: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.fillstylelist?view=openxml-3.0.1
 /// This element defines a set of three fill styles that are used within a theme.
 /// The three fill styles are arranged in order from subtle to moderate to intense.
 // tag: fillStyleLst
-pub type FillStyleList = Vec<FillStyleEnum>;
+pub type XlsxFillStyleList = Vec<XlsxFillStyleEnum>;
 
-pub(crate) fn load_fill_style_lst(reader: &mut XmlReader) -> anyhow::Result<FillStyleList> {
-    return Ok(FillStyleEnum::load_list(reader, b"fillStyleLst")?);
+pub(crate) fn load_fill_style_lst(reader: &mut XmlReader) -> anyhow::Result<XlsxFillStyleList> {
+    return Ok(XlsxFillStyleEnum::load_list(reader, b"fillStyleLst")?);
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum FillStyleEnum {
+pub enum XlsxFillStyleEnum {
     // tag: solidFill
-    SolidFill(SolidFill),
+    SolidFill(XlsxSolidFill),
 
     // tag: gradFill
-    GradientFill(GradientFill),
+    GradientFill(XlsxGradientFill),
 
     // grpFill (Group Fill)	§20.1.8.35
-    GroupFill(GroupFill),
+    GroupFill(XlsxGroupFill),
 
     // noFill (No Fill)	§20.1.8.44
-    NoFill(NoFill),
+    NoFill(XlsxNoFill),
 
     // pattFill (Pattern Fill)	§20.1.8.47
-    PatternFill(PatternFill),
+    PatternFill(XlsxPatternFill),
 
     // blipFill (Picture Fill)	§20.1.8.14
-    BlipFill(BlipFill),
+    BlipFill(XlsxBlipFill),
 }
 
-impl FillStyleEnum {
+impl XlsxFillStyleEnum {
     pub(crate) fn load(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Option<Self>> {
         let mut buf = Vec::new();
 
@@ -83,7 +82,7 @@ impl FillStyleEnum {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) => {
-                    return FillStyleEnum::load_helper(reader, e);
+                    return XlsxFillStyleEnum::load_helper(reader, e);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == tag => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),
@@ -96,7 +95,7 @@ impl FillStyleEnum {
     }
 
     pub(crate) fn load_list(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Vec<Self>> {
-        let mut fills: Vec<FillStyleEnum> = vec![];
+        let mut fills: Vec<XlsxFillStyleEnum> = vec![];
         let mut buf = Vec::new();
 
         loop {
@@ -104,7 +103,7 @@ impl FillStyleEnum {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) => {
-                    if let Some(fill) = FillStyleEnum::load_helper(reader, e)? {
+                    if let Some(fill) = XlsxFillStyleEnum::load_helper(reader, e)? {
                         fills.push(fill);
                     }
                 }
@@ -120,29 +119,29 @@ impl FillStyleEnum {
     fn load_helper(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Option<Self>> {
         match e.local_name().as_ref() {
             b"solidFill" => {
-                let Some(fill) = SolidFill::load(reader, b"solidFill")? else {
+                let Some(fill) = XlsxSolidFill::load(reader, b"solidFill")? else {
                     return Ok(None);
                 };
-                return Ok(Some(FillStyleEnum::SolidFill(fill)));
+                return Ok(Some(XlsxFillStyleEnum::SolidFill(fill)));
             }
             b"gradFill" => {
-                let fill = GradientFill::load(reader, e)?;
-                return Ok(Some(FillStyleEnum::GradientFill(fill)));
+                let fill = XlsxGradientFill::load(reader, e)?;
+                return Ok(Some(XlsxFillStyleEnum::GradientFill(fill)));
             }
             b"grpFill" => {
-                return Ok(Some(FillStyleEnum::GroupFill(true)));
+                return Ok(Some(XlsxFillStyleEnum::GroupFill(true)));
             }
             b"noFill" => {
-                return Ok(Some(FillStyleEnum::NoFill(true)));
+                return Ok(Some(XlsxFillStyleEnum::NoFill(true)));
             }
             b"pattFill" => {
-                let fill = PatternFill::load(reader, e)?;
-                return Ok(Some(FillStyleEnum::PatternFill(fill)));
+                let fill = XlsxPatternFill::load(reader, e)?;
+                return Ok(Some(XlsxFillStyleEnum::PatternFill(fill)));
             }
 
             b"blipFill" => {
-                let fill = BlipFill::load(reader, e)?;
-                return Ok(Some(FillStyleEnum::BlipFill(fill)));
+                let fill = XlsxBlipFill::load(reader, e)?;
+                return Ok(Some(XlsxFillStyleEnum::BlipFill(fill)));
             }
             _ => return Ok(None),
         }

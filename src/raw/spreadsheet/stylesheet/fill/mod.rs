@@ -1,6 +1,6 @@
 use anyhow::bail;
-use gradient_fill::GradientFill;
-use pattern_fill::PatternFill;
+use gradient_fill::XlsxGradientFill;
+use pattern_fill::XlsxPatternFill;
 use quick_xml::events::Event;
 
 use crate::excel::XmlReader;
@@ -20,18 +20,18 @@ pub mod pattern_fill;
 ///      </fill>
 /// </fills>
 /// ```
-pub type Fills = Vec<Fill>;
+pub type XlsxFills = Vec<XlsxFill>;
 
-pub(crate) fn load_fills(reader: &mut XmlReader) -> anyhow::Result<Fills> {
+pub(crate) fn load_fills(reader: &mut XmlReader) -> anyhow::Result<XlsxFills> {
     let mut buf = Vec::new();
-    let mut fills: Vec<Fill> = vec![];
+    let mut fills: Vec<XlsxFill> = vec![];
 
     loop {
         buf.clear();
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"fill" => {
-                let Some(fill) = Fill::load(reader)? else {
+                let Some(fill) = XlsxFill::load(reader)? else {
                     continue;
                 };
                 fills.push(fill);
@@ -50,15 +50,15 @@ pub(crate) fn load_fills(reader: &mut XmlReader) -> anyhow::Result<Fills> {
 ///
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.fill?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-pub enum Fill {
+pub enum XlsxFill {
     // children
     // xml tag name: patternFill
-    PatternFill(PatternFill),
+    PatternFill(XlsxPatternFill),
     // xml tag name: gradientFill
-    GradientFill(GradientFill),
+    GradientFill(XlsxGradientFill),
 }
 
-impl Fill {
+impl XlsxFill {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Option<Self>> {
         let mut buf = Vec::new();
 
@@ -67,13 +67,13 @@ impl Fill {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"patternFill" => {
-                    let pattern_fill = PatternFill::load(reader, e)?;
-                    return Ok(Some(Fill::PatternFill(pattern_fill)));
+                    let pattern_fill = XlsxPatternFill::load(reader, e)?;
+                    return Ok(Some(XlsxFill::PatternFill(pattern_fill)));
                 }
 
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"gradientFill" => {
-                    let gradient_fill = GradientFill::load(reader, e)?;
-                    return Ok(Some(Fill::GradientFill(gradient_fill)));
+                    let gradient_fill = XlsxGradientFill::load(reader, e)?;
+                    return Ok(Some(XlsxFill::GradientFill(gradient_fill)));
                 }
 
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"fill" => break,

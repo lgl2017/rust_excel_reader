@@ -1,9 +1,10 @@
+use crate::excel::XmlReader;
 use anyhow::bail;
-use complex_sript_font::ComplexScriptFont;
-use east_asian_font::EastAsianFont;
-use latin_font::LatinFont;
+use complex_sript_font::XlsxComplexScriptFont;
+use east_asian_font::XlsxEastAsianFont;
+use latin_font::XlsxLatinFont;
 use quick_xml::events::Event;
-use crate::excel::XmlReader;use supplemental_font::SupplementalFont;
+use supplemental_font::XlsxSupplementalFont;
 
 pub mod base_font;
 pub mod complex_sript_font;
@@ -35,7 +36,7 @@ pub mod text_font_type;
 ///   <font script="Knda" typeface="Tunga"/>
 /// </minorFont>
 /// ```
-pub type MinorFont = FontBase;
+pub type XlsxMinorFont = XlsxFontBase;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.majorfont?view=openxml-3.0.1
 ///
@@ -59,35 +60,35 @@ pub type MinorFont = FontBase;
 ///   <font script="Knda" typeface="Tunga"/>
 /// </majorFont>
 /// ```
-pub type MajorFont = FontBase;
+pub type XlsxMajorFont = XlsxFontBase;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct FontBase {
+pub struct XlsxFontBase {
     // child: extLst (Extension List)	Not supported
 
     /* Children */
     /// ComplexScriptFont: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.complexscriptfont?view=openxml-3.0.1
     // cs (Complex Script Font), attribute: typeface
-    pub cs: Option<ComplexScriptFont>,
+    pub cs: Option<XlsxComplexScriptFont>,
 
     /// EastAsianFont: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.eastasianfont?view=openxml-3.0.1
     // ea (East Asian Font), attribute: typeface
-    pub ea: Option<EastAsianFont>,
+    pub ea: Option<XlsxEastAsianFont>,
 
     // font (Font)	§20.1.4.1.16
-    pub font: Option<Vec<SupplementalFont>>,
+    pub font: Option<Vec<XlsxSupplementalFont>>,
 
     /// LatinFont: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.latinfont?view=openxml-3.0.1
     // tag: latin (Latin Font), attribute: typeface
-    pub latin: Option<LatinFont>,
+    pub latin: Option<XlsxLatinFont>,
 }
 
-impl FontBase {
-    pub(crate) fn load_major(reader: &mut XmlReader) -> anyhow::Result<MajorFont> {
+impl XlsxFontBase {
+    pub(crate) fn load_major(reader: &mut XmlReader) -> anyhow::Result<XlsxMajorFont> {
         return Self::load_helper(reader, b"majorFont");
     }
 
-    pub(crate) fn load_minor(reader: &mut XmlReader) -> anyhow::Result<MajorFont> {
+    pub(crate) fn load_minor(reader: &mut XmlReader) -> anyhow::Result<XlsxMajorFont> {
         return Self::load_helper(reader, b"minorFont");
     }
 
@@ -98,7 +99,7 @@ impl FontBase {
             font: None,
             latin: None,
         };
-        let mut supplemental_fonts: Vec<SupplementalFont> = vec![];
+        let mut supplemental_fonts: Vec<XlsxSupplementalFont> = vec![];
 
         let mut buf = Vec::new();
 
@@ -110,16 +111,16 @@ impl FontBase {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"cs" => {
-                    font.cs = Some(ComplexScriptFont::load(e)?);
+                    font.cs = Some(XlsxComplexScriptFont::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"ea" => {
-                    font.ea = Some(EastAsianFont::load(e)?);
+                    font.ea = Some(XlsxEastAsianFont::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"font" => {
-                    supplemental_fonts.push(SupplementalFont::load(e)?);
+                    supplemental_fonts.push(XlsxSupplementalFont::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"latin" => {
-                    font.latin = Some(LatinFont::load(e)?);
+                    font.latin = Some(XlsxLatinFont::load(e)?);
                 }
 
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == tag => break,

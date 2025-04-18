@@ -12,7 +12,7 @@ use crate::helper::{string_to_bool, string_to_float, string_to_unsignedint};
 /// <sheetFormatPr defaultColWidth="16.3333" defaultRowHeight="19.9" customHeight="1" outlineLevelRow="0" outlineLevelCol="0" />
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct SheetFormatProperties {
+pub struct XlsxSheetFormatProperties {
     // Attributes
     /// baseColWidth (Base Column Width)
     ///
@@ -52,6 +52,11 @@ pub struct SheetFormatProperties {
     /// In this case, all rows having this height do not need to express the height, only rows whose height differs from this value need to be explicitly expressed.
     pub default_row_height: Option<f64>,
 
+    /// x14ac:dyDescent
+    ///
+    /// vertical distance in pixels from the bottom of a cell in a row to the typographical baseline of its content
+    pub dy_descent: Option<f64>,
+
     /// outlineLevelCol (Column Outline Level)
     ///
     /// Highest number of outline levels for columns in this sheet.
@@ -86,7 +91,7 @@ pub struct SheetFormatProperties {
     pub zero_height: Option<bool>,
 }
 
-impl SheetFormatProperties {
+impl XlsxSheetFormatProperties {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut properties = Self {
@@ -94,6 +99,7 @@ impl SheetFormatProperties {
             custom_height: None,
             default_col_width: None,
             default_row_height: None,
+            dy_descent: None,
             outline_level_col: None,
             outline_level_row: None,
             thick_bottom: None,
@@ -117,6 +123,9 @@ impl SheetFormatProperties {
                         }
                         b"defaultRowHeight" => {
                             properties.default_row_height = string_to_float(&string_value);
+                        }
+                        b"dyDescent" => {
+                            properties.dy_descent = string_to_float(&string_value);
                         }
                         b"outlineLevelCol" => {
                             properties.outline_level_col = string_to_unsignedint(&string_value);

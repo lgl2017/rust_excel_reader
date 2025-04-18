@@ -3,7 +3,7 @@ use quick_xml::events::{BytesStart, Event};
 
 use crate::{
     excel::XmlReader,
-    raw::spreadsheet::stylesheet::color::{BackgroundColor, Color, ForegroundColor},
+    raw::spreadsheet::stylesheet::color::{XlsxBackgroundColor, XlsxColor, XlsxForegroundColor},
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.patternfill?view=openxml-3.0.1
@@ -17,7 +17,7 @@ use crate::{
 ///// </fill>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct PatternFill {
+pub struct XlsxPatternFill {
     // attributes
     /// patternType
     ///
@@ -30,14 +30,14 @@ pub struct PatternFill {
     // children
     // xml tag name: fgColor
     /// foreground color
-    pub foreground_color: Option<ForegroundColor>,
+    pub foreground_color: Option<XlsxForegroundColor>,
 
     // xml tag name: bgcolor
     /// background color
-    pub background_color: Option<BackgroundColor>,
+    pub background_color: Option<XlsxBackgroundColor>,
 }
 
-impl PatternFill {
+impl XlsxPatternFill {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut fill = Self {
@@ -71,11 +71,11 @@ impl PatternFill {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"fgColor" => {
-                    let color: Color = Color::load(e)?;
+                    let color = XlsxColor::load(e)?;
                     fill.foreground_color = Some(color);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"bgColor" => {
-                    let color: Color = Color::load(e)?;
+                    let color = XlsxColor::load(e)?;
                     fill.background_color = Some(color);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"patternFill" => break,

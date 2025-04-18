@@ -3,11 +3,11 @@ use quick_xml::events::BytesStart;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.rgbcolor?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-pub struct RgbColor {
+pub struct XlsxRgbColor {
     pub rgb: Option<String>,
 }
 
-impl RgbColor {
+impl XlsxRgbColor {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut color = Self { rgb: None };

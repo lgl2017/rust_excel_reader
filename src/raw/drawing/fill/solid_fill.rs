@@ -1,4 +1,4 @@
-use crate::raw::drawing::color::ColorEnum;
+use crate::raw::drawing::color::XlsxColorEnum;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.solidfill?view=openxml-3.0.1
 ///
@@ -9,4 +9,4 @@ use crate::raw::drawing::color::ColorEnum;
 /// </a:solidFill>
 /// ```
 // tag: solidFill
-pub type SolidFill = ColorEnum;
+pub type XlsxSolidFill = XlsxColorEnum;

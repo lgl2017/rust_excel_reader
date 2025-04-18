@@ -5,14 +5,14 @@ use crate::helper::string_to_int;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alphamodulationfixed?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-pub struct AlphaModulationFixed {
+pub struct XlsxAlphaModulationFixed {
     // Attributes
     /// Specifies the percentage amount to scale the alpha.
     // amt (Amount)
     pub amt: Option<i64>,
 }
 
-impl AlphaModulationFixed {
+impl XlsxAlphaModulationFixed {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut alpha_modulation_fixed = Self { amt: None };

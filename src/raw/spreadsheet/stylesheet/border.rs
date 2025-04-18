@@ -3,21 +3,21 @@ use quick_xml::events::{BytesStart, Event};
 
 use crate::{excel::XmlReader, helper::string_to_bool};
 
-use super::color::Color;
+use super::color::XlsxColor;
 
-pub type Borders = Vec<Border>;
+pub type XlsxBorders = Vec<XlsxBorder>;
 
 /// Borders: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.borders?view=openxml-3.0.1
-pub(crate) fn load_borders(reader: &mut XmlReader) -> anyhow::Result<Borders> {
+pub(crate) fn load_borders(reader: &mut XmlReader) -> anyhow::Result<XlsxBorders> {
     let mut buf: Vec<u8> = Vec::new();
-    let mut borders: Vec<Border> = vec![];
+    let mut borders: Vec<XlsxBorder> = vec![];
 
     loop {
         buf.clear();
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"border" => {
-                let border = Border::load(reader, e)?;
+                let border = XlsxBorder::load(reader, e)?;
                 borders.push(border);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"borders" => break,
@@ -68,7 +68,7 @@ pub(crate) fn load_borders(reader: &mut XmlReader) -> anyhow::Result<Borders> {
 /// </borders>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct Border {
+pub struct XlsxBorder {
     // attributes
     // xml tag: diagonalDown
     /// A boolean value indicating if the cell's diagonal border includes a diagonal line,
@@ -85,15 +85,15 @@ pub struct Border {
 
     // children
     // xml tag: left or start
-    pub left: Option<LeftBorder>,
+    pub left: Option<XlsxLeftBorder>,
     // xml tag: right or end
-    pub right: Option<RightBorder>,
-    pub top: Option<TopBorder>,
-    pub bottom: Option<BottomBorder>,
-    pub diagonal: Option<DiagonalBorder>,
+    pub right: Option<XlsxRightBorder>,
+    pub top: Option<XlsxTopBorder>,
+    pub bottom: Option<XlsxBottomBorder>,
+    pub diagonal: Option<XlsxDiagonalBorder>,
 }
 
-impl Border {
+impl XlsxBorder {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut border = Self {
@@ -137,31 +137,31 @@ impl Border {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"left" => {
-                    let border_style = BorderStyle::load(reader, e, b"left")?;
+                    let border_style = XlsxBorderStyle::load(reader, e, b"left")?;
                     border.left = Some(border_style);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"start" => {
-                    let border_style = BorderStyle::load(reader, e, b"start")?;
+                    let border_style = XlsxBorderStyle::load(reader, e, b"start")?;
                     border.left = Some(border_style);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"right" => {
-                    let border_style = BorderStyle::load(reader, e, b"right")?;
+                    let border_style = XlsxBorderStyle::load(reader, e, b"right")?;
                     border.right = Some(border_style);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"end" => {
-                    let border_style = BorderStyle::load(reader, e, b"end")?;
+                    let border_style = XlsxBorderStyle::load(reader, e, b"end")?;
                     border.right = Some(border_style);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"top" => {
-                    let border_style = BorderStyle::load(reader, e, b"top")?;
+                    let border_style = XlsxBorderStyle::load(reader, e, b"top")?;
                     border.top = Some(border_style);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"bottom" => {
-                    let border_style = BorderStyle::load(reader, e, b"bottom")?;
+                    let border_style = XlsxBorderStyle::load(reader, e, b"bottom")?;
                     border.bottom = Some(border_style);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"diagonal" => {
-                    let border_style = BorderStyle::load(reader, e, b"diagonal")?;
+                    let border_style = XlsxBorderStyle::load(reader, e, b"diagonal")?;
                     border.diagonal = Some(border_style);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"border" => break,
@@ -176,34 +176,34 @@ impl Border {
 }
 
 /// RightBorder (Semantically equivalent to end): https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.rightborder?view=openxml-3.0.1
-pub type RightBorder = BorderStyle;
+pub type XlsxRightBorder = XlsxBorderStyle;
 
 /// LeftBorder (Semantically equivalent to start): https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.leftborder?view=openxml-3.0.1
-pub type LeftBorder = BorderStyle;
+pub type XlsxLeftBorder = XlsxBorderStyle;
 
 /// TopBorder: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.topborder?view=openxml-3.0.1
-pub type TopBorder = BorderStyle;
+pub type XlsxTopBorder = XlsxBorderStyle;
 
 /// BottomBorder: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.bottomborder?view=openxml-3.0.1
-pub type BottomBorder = BorderStyle;
+pub type XlsxBottomBorder = XlsxBorderStyle;
 
 /// DiagonalBorder: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.diagonalborder?view=openxml-3.0.1
-pub type DiagonalBorder = BorderStyle;
+pub type XlsxDiagonalBorder = XlsxBorderStyle;
 
 /// EndBorder(Trailing Edge Border): https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.endborder?view=openxml-3.0.1
-pub type EndBorder = BorderStyle;
+pub type XlsxEndBorder = XlsxBorderStyle;
 
 /// StartBorder(Leading Edge Border): https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.startborder?view=openxml-3.0.1
-pub type StartBorder = BorderStyle;
+pub type XlsxStartBorder = XlsxBorderStyle;
 
 /// HorizontalBorder(Horizontal inner Border): https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.horizontalborder?view=openxml-3.0.1
-pub type HorizontalBorder = BorderStyle;
+pub type XlsxHorizontalBorder = XlsxBorderStyle;
 
 /// VerticalBorder(Vertical Inner Border): https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.verticalborder?view=openxml-3.0.1
-pub type VerticalBorder = BorderStyle;
+pub type XlsxVerticalBorder = XlsxBorderStyle;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct BorderStyle {
+pub struct XlsxBorderStyle {
     // attributes
     /// The line style for this border
     /// possible values: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.borderstylevalues?view=openxml-3.0.1
@@ -211,10 +211,10 @@ pub struct BorderStyle {
 
     // children
     /// Data Bar Color
-    pub color: Option<Color>,
+    pub color: Option<XlsxColor>,
 }
 
-impl BorderStyle {
+impl XlsxBorderStyle {
     pub fn load(reader: &mut XmlReader, e: &BytesStart, tag: &[u8]) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut border_style = Self {
@@ -247,7 +247,7 @@ impl BorderStyle {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"color" => {
-                    let color: Color = Color::load(e)?;
+                    let color = XlsxColor::load(e)?;
                     border_style.color = Some(color);
                 }
 

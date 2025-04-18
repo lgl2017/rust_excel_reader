@@ -17,7 +17,7 @@ use crate::helper::{string_to_bool, string_to_unsignedint};
 ///
 /// colorFilter (Color Filter Criteria)
 #[derive(Debug, Clone, PartialEq)]
-pub struct ColorFilter {
+pub struct XlsxColorFilter {
     // Attributes
     /// cellColor (Filter By Cell Color)
     ///
@@ -35,7 +35,7 @@ pub struct ColorFilter {
     pub dxf_id: Option<u64>,
 }
 
-impl ColorFilter {
+impl XlsxColorFilter {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut filter = Self {

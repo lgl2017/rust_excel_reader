@@ -6,7 +6,7 @@ use crate::{
     helper::{string_to_bool, string_to_float, string_to_unsignedint},
 };
 
-use super::cell::Cell;
+use super::cell::XlsxCell;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.row?view=openxml-3.0.1
 ///
@@ -30,12 +30,12 @@ use super::cell::Cell;
 /// </row>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct Row {
+pub struct XlsxRow {
     /// extLst (Future Feature Data Storage Area) Not Supported
 
     /// Child Elements
     /// c (Cell)	§18.3.1.4
-    pub cells: Option<Vec<Cell>>,
+    pub cells: Option<Vec<XlsxCell>>,
 
     /// attributes
 
@@ -97,7 +97,7 @@ pub struct Row {
     pub thick_top: Option<bool>,
 }
 
-impl Row {
+impl XlsxRow {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut row = Self {
             cells: None,
@@ -115,7 +115,7 @@ impl Row {
             thick_bottom: None,
             thick_top: None,
         };
-        let mut cells: Vec<Cell> = vec![];
+        let mut cells: Vec<XlsxCell> = vec![];
 
         let attributes = e.attributes();
         for a in attributes {
@@ -187,7 +187,7 @@ impl Row {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"c" => {
-                    cells.push(Cell::load(reader, e)?);
+                    cells.push(XlsxCell::load(reader, e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"row" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file at `row`."),

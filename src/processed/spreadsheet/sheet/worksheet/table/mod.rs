@@ -1,6 +1,6 @@
 use table_style::TableStyle;
 
-use crate::{common_types::Dimension, raw::spreadsheet::table::XlsxTable as RawTable};
+use crate::{common_types::Dimension, raw::spreadsheet::table::XlsxTable};
 
 pub mod table_style;
 
@@ -33,7 +33,7 @@ pub struct Table {
 }
 
 impl Table {
-    pub(crate) fn from_raw(table: RawTable, default_table_style: Option<String>) -> Self {
+    pub(crate) fn from_raw(table: XlsxTable, default_table_style: Option<String>) -> Self {
         let column_names: Vec<String> = table
             .clone()
             .table_columns

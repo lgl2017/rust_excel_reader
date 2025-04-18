@@ -3,7 +3,7 @@ use quick_xml::events::BytesStart;
 
 use crate::excel::XmlReader;
 
-use crate::raw::drawing::color::ColorEnum;
+use crate::raw::drawing::color::XlsxColorEnum;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.fontreference?view=openxml-3.0.1
 ///
@@ -18,9 +18,9 @@ use crate::raw::drawing::color::ColorEnum;
 /// ```
 // tag: fontRef
 #[derive(Debug, Clone, PartialEq)]
-pub struct FontReference {
+pub struct XlsxFontReference {
     // Child Elements
-    color: Option<ColorEnum>,
+    color: Option<XlsxColorEnum>,
 
     // Attributes	Description
     /// Specifies the identifier of the font to reference.
@@ -32,11 +32,11 @@ pub struct FontReference {
     pub index: Option<String>,
 }
 
-impl FontReference {
+impl XlsxFontReference {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut reference = Self {
-            color: ColorEnum::load(reader, b"fontRef")?,
+            color: XlsxColorEnum::load(reader, b"fontRef")?,
             index: None,
         };
 

@@ -1,7 +1,7 @@
 use anyhow::bail;
 use quick_xml::events::BytesStart;
 
-use crate::common_types::AdjustCoordinate;
+use crate::common_types::XlsxAdjustCoordinate;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.position?view=openxml-3.0.1
 ///
@@ -14,7 +14,7 @@ use crate::common_types::AdjustCoordinate;
 /// ```
 // tag:  pos (Shape Position Coordinate)
 #[derive(Debug, Clone, PartialEq)]
-pub struct Position {
+pub struct XlsxPosition {
     // Attributes
     /// Specifies the x coordinate for this position coordinate.
     ///
@@ -22,17 +22,17 @@ pub struct Position {
     /// - `ST_Coordinate` simple type: i64
     /// - `ST_GeomGuideName`: String referencing to a geometry guide name
     // x (X-Coordinate)
-    pub x: Option<AdjustCoordinate>,
+    pub x: Option<XlsxAdjustCoordinate>,
 
     /// Specifies the y coordinate for this position coordinate
     ///
     /// value type: `ST_AdjCoordinate` defined as a union of the following
     /// - `ST_Coordinate` simple type: i64
     /// - `ST_GeomGuideName`: String referencing to a geometry guide name
-    pub y: Option<AdjustCoordinate>,
+    pub y: Option<XlsxAdjustCoordinate>,
 }
 
-impl Position {
+impl XlsxPosition {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut position = Self { x: None, y: None };
@@ -42,8 +42,8 @@ impl Position {
                 Ok(a) => {
                     let string_value = String::from_utf8(a.value.to_vec())?;
                     match a.key.local_name().as_ref() {
-                        b"x" => position.x = Some(AdjustCoordinate::from_string(&string_value)),
-                        b"y" => position.y = Some(AdjustCoordinate::from_string(&string_value)),
+                        b"x" => position.x = Some(XlsxAdjustCoordinate::from_string(&string_value)),
+                        b"y" => position.y = Some(XlsxAdjustCoordinate::from_string(&string_value)),
                         _ => {}
                     }
                 }

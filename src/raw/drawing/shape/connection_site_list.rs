@@ -1,4 +1,4 @@
-use super::connection_site::ConnectionSite;
+use super::connection_site::XlsxConnectionSite;
 use crate::excel::XmlReader;
 use anyhow::bail;
 use quick_xml::events::Event;
@@ -19,20 +19,20 @@ use quick_xml::events::Event;
 /// </a:cxnLst>
 /// ```
 // tag: cxnLst
-pub type ConnectionSiteList = Vec<ConnectionSite>;
+pub type XlsxConnectionSiteList = Vec<XlsxConnectionSite>;
 
 pub(crate) fn load_connection_site_list(
     reader: &mut XmlReader,
-) -> anyhow::Result<ConnectionSiteList> {
+) -> anyhow::Result<XlsxConnectionSiteList> {
     let mut buf = Vec::new();
-    let mut sites: Vec<ConnectionSite> = vec![];
+    let mut sites: Vec<XlsxConnectionSite> = vec![];
 
     loop {
         buf.clear();
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"cxn" => {
-                sites.push(ConnectionSite::load(reader, e)?);
+                sites.push(XlsxConnectionSite::load(reader, e)?);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"cxnLst" => break,
             Ok(Event::Eof) => bail!("unexpected end of file."),

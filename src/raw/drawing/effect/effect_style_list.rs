@@ -1,4 +1,4 @@
-use super::effect_style::EffectStyle;
+use super::effect_style::XlsxEffectStyle;
 use crate::excel::XmlReader;
 use anyhow::bail;
 use quick_xml::events::Event;
@@ -35,10 +35,12 @@ use quick_xml::events::Event;
 ///   </effectStyle>
 /// </effectStyleLst>
 /// ```
-pub type EffectStyleList = Vec<EffectStyle>;
+pub type XlsxEffectStyleList = Vec<XlsxEffectStyle>;
 
-pub(crate) fn load_effect_style_list(reader: &mut XmlReader) -> anyhow::Result<EffectStyleList> {
-    let mut styles: Vec<EffectStyle> = vec![];
+pub(crate) fn load_effect_style_list(
+    reader: &mut XmlReader,
+) -> anyhow::Result<XlsxEffectStyleList> {
+    let mut styles: Vec<XlsxEffectStyle> = vec![];
 
     let mut buf = Vec::new();
 
@@ -47,7 +49,7 @@ pub(crate) fn load_effect_style_list(reader: &mut XmlReader) -> anyhow::Result<E
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"effectStyle" => {
-                styles.push(EffectStyle::load(reader)?);
+                styles.push(XlsxEffectStyle::load(reader)?);
             }
 
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"effectStyleLst" => break,

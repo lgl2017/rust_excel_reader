@@ -17,18 +17,18 @@ use crate::{
 ///     <cellStyle name="Title" xfId="1" builtinId="15"/>
 /// </cellStyles>
 /// ```
-pub type CellStyles = Vec<CellStyle>;
+pub type XlsxCellStyles = Vec<XlsxCellStyle>;
 
-pub(crate) fn load_cell_styles(reader: &mut XmlReader) -> anyhow::Result<CellStyles> {
+pub(crate) fn load_cell_styles(reader: &mut XmlReader) -> anyhow::Result<XlsxCellStyles> {
     let mut buf: Vec<u8> = Vec::new();
-    let mut styles: Vec<CellStyle> = vec![];
+    let mut styles: Vec<XlsxCellStyle> = vec![];
 
     loop {
         buf.clear();
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"cellStyle" => {
-                let style = CellStyle::load(e)?;
+                let style = XlsxCellStyle::load(e)?;
                 styles.push(style);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"cellStyles" => break,
@@ -49,7 +49,7 @@ pub(crate) fn load_cell_styles(reader: &mut XmlReader) -> anyhow::Result<CellSty
 /// In this case, a builtinId attribute is written on the cellStyle record, but no corresponding formatting records are written.
 /// For all built-in cell styles, the builtinId determines the style, not the name. For all cell styles, Normal is applied by default.
 #[derive(Debug, Clone, PartialEq)]
-pub struct CellStyle {
+pub struct XlsxCellStyle {
     // attributes
     /// The index of a built-in cell style
     ///
@@ -76,7 +76,7 @@ pub struct CellStyle {
     pub xf_id: Option<u64>,
 }
 
-impl CellStyle {
+impl XlsxCellStyle {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut style = Self {

@@ -9,7 +9,7 @@ use crate::helper::string_to_bool;
 /// Each cell has protection properties that can be set.
 /// The cell protection properties do not take effect unless the sheet has been protected.
 #[derive(Debug, Clone, PartialEq)]
-pub struct Protection {
+pub struct XlsxCellProtection {
     // attributes
     /// A boolean value indicating if the cell is hidden.
     pub hidden: Option<bool>,
@@ -18,7 +18,7 @@ pub struct Protection {
     pub locked: Option<bool>,
 }
 
-impl Protection {
+impl XlsxCellProtection {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut protection = Self {

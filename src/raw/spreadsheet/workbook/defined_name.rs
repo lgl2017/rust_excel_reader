@@ -19,10 +19,10 @@ use crate::{
 /// </definedNames>
 /// ```
 /// definedNames (Defined Names)
-pub type DefinedNames = Vec<DefinedName>;
+pub type XlsxDefinedNames = Vec<XlsxDefinedName>;
 
-pub(crate) fn load_defined_names(reader: &mut XmlReader) -> anyhow::Result<DefinedNames> {
-    let mut names: DefinedNames = vec![];
+pub(crate) fn load_defined_names(reader: &mut XmlReader) -> anyhow::Result<XlsxDefinedNames> {
+    let mut names: XlsxDefinedNames = vec![];
 
     let mut buf = Vec::new();
     loop {
@@ -30,7 +30,7 @@ pub(crate) fn load_defined_names(reader: &mut XmlReader) -> anyhow::Result<Defin
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"definedName" => {
-                names.push(DefinedName::load(reader, e)?);
+                names.push(XlsxDefinedName::load(reader, e)?);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"definedNames" => break,
             Ok(Event::Eof) => bail!("unexpected end of file."),
@@ -54,7 +54,7 @@ pub(crate) fn load_defined_names(reader: &mut XmlReader) -> anyhow::Result<Defin
 /// ```
 /// definedName (Defined Name)
 #[derive(Debug, Clone, PartialEq)]
-pub struct DefinedName {
+pub struct XlsxDefinedName {
     /// Text
     pub value: Option<String>,
 
@@ -120,7 +120,7 @@ pub struct DefinedName {
     pub external_function: Option<bool>,
 }
 
-impl DefinedName {
+impl XlsxDefinedName {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut defined_name = Self {

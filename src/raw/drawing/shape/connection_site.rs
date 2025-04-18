@@ -3,9 +3,9 @@ use quick_xml::events::{BytesStart, Event};
 
 use crate::excel::XmlReader;
 
-use crate::common_types::AdjustAngle;
+use crate::common_types::XlsxAdjustAngle;
 
-use super::position::Position;
+use super::position::XlsxPosition;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.connectionsite?view=openxml-3.0.1
 ///
@@ -24,20 +24,20 @@ use super::position::Position;
 /// ```
 // tag: cxn
 #[derive(Debug, Clone, PartialEq)]
-pub struct ConnectionSite {
+pub struct XlsxConnectionSite {
     // Child Elements
     // pos (Shape Position Coordinate)
-    pub position: Option<Position>,
+    pub position: Option<XlsxPosition>,
 
     // Attributes
     /// Specifies the incoming connector angle.
     ///  This angle is the angle around the connection site that an incoming connector tries to be routed to.
     ///  This allows connectors to know where the shape is in relation to the connection site and route connectors so as to avoid any overlap with the shape.
     // ang (Connection Site Angle)
-    pub angle: Option<AdjustAngle>,
+    pub angle: Option<XlsxAdjustAngle>,
 }
 
-impl ConnectionSite {
+impl XlsxConnectionSite {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut site = Self {
             position: None,
@@ -52,7 +52,7 @@ impl ConnectionSite {
                     let string_value = String::from_utf8(a.value.to_vec())?;
                     match a.key.local_name().as_ref() {
                         b"ang" => {
-                            site.angle = Some(AdjustAngle::from_string(&string_value));
+                            site.angle = Some(XlsxAdjustAngle::from_string(&string_value));
                             break;
                         }
                         _ => {}
@@ -71,7 +71,7 @@ impl ConnectionSite {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"pos" => {
-                    site.position = Some(Position::load(e)?);
+                    site.position = Some(XlsxPosition::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"cxn" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

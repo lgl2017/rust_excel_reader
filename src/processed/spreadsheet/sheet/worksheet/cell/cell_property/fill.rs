@@ -5,9 +5,9 @@ use crate::{
         spreadsheet::stylesheet::{
             color::stylesheet_colors::XlsxStyleSheetColors,
             fill::{
-                gradient_fill::{GradientFill as RawGradientFill, GradientStop as RawGradientStop},
-                pattern_fill::PatternFill as RawPatternFill,
-                Fill as RawFill,
+                gradient_fill::{XlsxGradientFill, XlsxGradientStop},
+                pattern_fill::XlsxPatternFill,
+                XlsxFill,
             },
         },
     },
@@ -31,7 +31,7 @@ impl Fill {
         });
     }
     pub(crate) fn from_raw(
-        fill: Option<RawFill>,
+        fill: Option<XlsxFill>,
         stylesheet_colors: Option<XlsxStyleSheetColors>,
         color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
@@ -39,12 +39,12 @@ impl Fill {
             return Self::default();
         };
         return match fill {
-            RawFill::PatternFill(pattern_fill) => Self::PatternFill(PatternFill::from_raw(
+            XlsxFill::PatternFill(pattern_fill) => Self::PatternFill(PatternFill::from_raw(
                 pattern_fill,
                 stylesheet_colors,
                 color_scheme,
             )),
-            RawFill::GradientFill(gradient_fill) => Self::GradientFill(GradientFill::from_raw(
+            XlsxFill::GradientFill(gradient_fill) => Self::GradientFill(GradientFill::from_raw(
                 gradient_fill,
                 stylesheet_colors,
                 color_scheme,
@@ -79,7 +79,7 @@ pub struct PatternFill {
 
 impl PatternFill {
     pub(crate) fn from_raw(
-        fill: RawPatternFill,
+        fill: XlsxPatternFill,
         stylesheet_colors: Option<XlsxStyleSheetColors>,
         color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
@@ -240,7 +240,7 @@ pub struct GradientFill {
 
 impl GradientFill {
     pub(crate) fn from_raw(
-        fill: RawGradientFill,
+        fill: XlsxGradientFill,
         stylesheet_colors: Option<XlsxStyleSheetColors>,
         color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
@@ -305,7 +305,7 @@ pub struct GradientStop {
 
 impl GradientStop {
     pub(crate) fn from_raw(
-        stop: RawGradientStop,
+        stop: XlsxGradientStop,
         stylesheet_colors: Option<XlsxStyleSheetColors>,
         color_scheme: Option<XlsxColorScheme>,
     ) -> Self {

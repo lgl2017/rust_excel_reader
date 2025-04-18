@@ -6,21 +6,21 @@ use crate::{
     helper::{extract_val_attribute, string_to_bool, string_to_float, string_to_unsignedint},
 };
 
-use super::color::Color;
+use super::color::XlsxColor;
 
 /// Fonts: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.fonts?view=openxml-3.0.1
-pub type Fonts = Vec<Font>;
+pub type XlsxFonts = Vec<XlsxFont>;
 
-pub(crate) fn load_fonts(reader: &mut XmlReader) -> anyhow::Result<Fonts> {
+pub(crate) fn load_fonts(reader: &mut XmlReader) -> anyhow::Result<XlsxFonts> {
     let mut buf = Vec::new();
-    let mut fonts: Vec<Font> = vec![];
+    let mut fonts: Vec<XlsxFont> = vec![];
 
     loop {
         buf.clear();
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"font" => {
-                let font = Font::load(reader)?;
+                let font = XlsxFont::load(reader)?;
                 fonts.push(font);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"fonts" => break,
@@ -56,7 +56,7 @@ pub(crate) fn load_fonts(reader: &mut XmlReader) -> anyhow::Result<Fonts> {
 /// </fonts>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct Font {
+pub struct XlsxFont {
     // children
     /// Bold: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.bold?view=openxml-3.0.1
     ///
@@ -78,7 +78,7 @@ pub struct Font {
     pub charset: Option<String>,
 
     ///  color
-    pub color: Option<Color>,
+    pub color: Option<XlsxColor>,
 
     /// Condense: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.condense?view=openxml-3.0.1
     ///
@@ -200,7 +200,7 @@ pub struct Font {
     pub vert_align: Option<String>,
 }
 
-impl Font {
+impl XlsxFont {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
 
@@ -234,7 +234,7 @@ impl Font {
                     font.charset = extract_val_attribute(e)?;
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"color" => {
-                    font.color = Some(Color::load(e)?);
+                    font.color = Some(XlsxColor::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"condense" => {
                     let val_string = extract_val_attribute(e)?.unwrap_or("1".to_owned());

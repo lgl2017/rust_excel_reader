@@ -6,7 +6,7 @@ use zip::ZipArchive;
 
 use crate::{excel::xml_reader, helper::string_to_unsignedint};
 
-use super::shared_string_item::{load_shared_string_item, SharedStringItem};
+use super::shared_string_item::{load_shared_string_item, XlsxSharedStringItem};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.sharedstringtable?view=openxml-3.0.1
 ///
@@ -41,11 +41,11 @@ use super::shared_string_item::{load_shared_string_item, SharedStringItem};
 /// </sst>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct SharedStringTable {
+pub struct XlsxSharedStringTable {
     // Child Elements
     // extLst (Future Feature Data Storage Area)	§18.2.10
     // si (String Item)
-    pub string_item: Option<Vec<SharedStringItem>>,
+    pub string_item: Option<Vec<XlsxSharedStringItem>>,
 
     // Attributes
     /// An integer representing the total count of strings in the workbook.
@@ -59,7 +59,7 @@ pub struct SharedStringTable {
     pub unique_count: Option<u64>,
 }
 
-impl SharedStringTable {
+impl XlsxSharedStringTable {
     pub(crate) fn load(zip: &mut ZipArchive<impl Read + Seek>) -> anyhow::Result<Self> {
         let path = "xl/sharedStrings.xml";
 
@@ -73,7 +73,7 @@ impl SharedStringTable {
             return Ok(shared_string);
         };
 
-        let mut items: Vec<SharedStringItem> = vec![];
+        let mut items: Vec<XlsxSharedStringItem> = vec![];
 
         let mut buf: Vec<u8> = Vec::new();
         loop {

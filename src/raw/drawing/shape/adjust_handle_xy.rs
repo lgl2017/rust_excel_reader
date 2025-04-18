@@ -3,9 +3,9 @@ use quick_xml::events::{BytesStart, Event};
 
 use crate::excel::XmlReader;
 
-use crate::common_types::AdjustCoordinate;
+use crate::common_types::XlsxAdjustCoordinate;
 
-use super::position::Position;
+use super::position::XlsxPosition;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.adjusthandlexy?view=openxml-3.0.1
 ///
@@ -21,10 +21,10 @@ use super::position::Position;
 /// ```
 // tag: ahPolar
 #[derive(Debug, Clone, PartialEq)]
-pub struct AdjustHandleXY {
+pub struct XlsxAdjustHandleXY {
     // Child Elements
     // pos (Shape Position Coordinate)
-    pub position: Option<Position>,
+    pub position: Option<XlsxPosition>,
 
     // Attributes
     /// Specifies the name of the guide that is updated with the adjustment x position from this adjust handle.
@@ -39,28 +39,28 @@ pub struct AdjustHandleXY {
     /// If this attribute is omitted, then it is assumed that this adjust handle cannot move in the x direction.
     /// That is the maxX and minX are equal.
     // maxX (Maximum Horizontal Adjustment)
-    pub max_horizaontal_adjustment: Option<AdjustCoordinate>,
+    pub max_horizaontal_adjustment: Option<XlsxAdjustCoordinate>,
 
     /// Specifies the maximum vertical position that is allowed for this adjustment handle.
     /// If this attribute is omitted, then it is assumed that this adjust handle cannot move in the y direction.
     /// That is the maxY and minY are equal.
     // maxY (Maximum Vertical Adjustment)
-    pub max_vertical_adjustment: Option<AdjustCoordinate>,
+    pub max_vertical_adjustment: Option<XlsxAdjustCoordinate>,
 
     /// Specifies the minimum horizontal position that is allowed for this adjustment handle.
     /// If this attribute is omitted, then it is assumed that this adjust handle cannot move in the x direction.
     /// That is the maxX and minX are equal.
     // minX (Minimum Horizontal Adjustment)
-    pub min_horizaontal_adjustment: Option<AdjustCoordinate>,
+    pub min_horizaontal_adjustment: Option<XlsxAdjustCoordinate>,
 
     /// Specifies the minimum vertical position that is allowed for this adjustment handle.
     /// If this attribute is omitted, then it is assumed that this adjust handle cannot move in the y direction.
     /// That is the maxY and minY are equal.
     // minY (Minimum Vertical Adjustment)
-    pub min_vertical_adjustment: Option<AdjustCoordinate>,
+    pub min_vertical_adjustment: Option<XlsxAdjustCoordinate>,
 }
 
-impl AdjustHandleXY {
+impl XlsxAdjustHandleXY {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut polar = Self {
             position: None,
@@ -83,19 +83,19 @@ impl AdjustHandleXY {
                         b"gdRefY" => polar.vertical_guide_ref = Some(string_value),
                         b"maxX" => {
                             polar.max_horizaontal_adjustment =
-                                Some(AdjustCoordinate::from_string(&string_value))
+                                Some(XlsxAdjustCoordinate::from_string(&string_value))
                         }
                         b"maxY" => {
                             polar.max_vertical_adjustment =
-                                Some(AdjustCoordinate::from_string(&string_value))
+                                Some(XlsxAdjustCoordinate::from_string(&string_value))
                         }
                         b"minX" => {
                             polar.min_horizaontal_adjustment =
-                                Some(AdjustCoordinate::from_string(&string_value))
+                                Some(XlsxAdjustCoordinate::from_string(&string_value))
                         }
                         b"minY" => {
                             polar.min_vertical_adjustment =
-                                Some(AdjustCoordinate::from_string(&string_value))
+                                Some(XlsxAdjustCoordinate::from_string(&string_value))
                         }
                         _ => {}
                     }
@@ -113,7 +113,7 @@ impl AdjustHandleXY {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"pos" => {
-                    polar.position = Some(Position::load(e)?);
+                    polar.position = Some(XlsxPosition::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"ahXY" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

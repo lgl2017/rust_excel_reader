@@ -6,7 +6,7 @@ use crate::helper::string_to_int;
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.hsl?view=openxml-3.0.1
 // tag: hsl
 #[derive(Debug, Clone, PartialEq)]
-pub struct Hsl {
+pub struct XlsxHsl {
     // attributes:
     /// Specifies the number of degrees by which the hue is adjusted.
     pub hue: Option<i64>,
@@ -18,7 +18,7 @@ pub struct Hsl {
     pub sat: Option<i64>,
 }
 
-impl Hsl {
+impl XlsxHsl {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut hsl = Self {

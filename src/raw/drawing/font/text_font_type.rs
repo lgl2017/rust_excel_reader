@@ -2,7 +2,7 @@ use anyhow::bail;
 use quick_xml::events::BytesStart;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct TextFontType {
+pub struct XlsxTextFontType {
     // attributes
     /// Similar Character Set
     // charset
@@ -21,7 +21,7 @@ pub struct TextFontType {
     pub typeface: Option<String>,
 }
 
-impl TextFontType {
+impl XlsxTextFontType {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
 

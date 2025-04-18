@@ -1,7 +1,7 @@
+use super::XlsxPath;
+use crate::excel::XmlReader;
 use anyhow::bail;
 use quick_xml::events::Event;
-use crate::excel::XmlReader;
-use super::Path;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.pathlist?view=openxml-3.0.1
 ///
@@ -24,18 +24,18 @@ use super::Path;
 ///     </a:path>
 ///   </a:pathLst>
 /// ```
-pub type PathList = Vec<Path>;
+pub type XlsxPathList = Vec<XlsxPath>;
 
-pub(crate) fn load_path_list(reader: &mut XmlReader) -> anyhow::Result<PathList> {
+pub(crate) fn load_path_list(reader: &mut XmlReader) -> anyhow::Result<XlsxPathList> {
     let mut buf = Vec::new();
-    let mut paths: Vec<Path> = vec![];
+    let mut paths: Vec<XlsxPath> = vec![];
 
     loop {
         buf.clear();
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"path" => {
-                paths.push(Path::load(reader, e)?);
+                paths.push(XlsxPath::load(reader, e)?);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"pathLst" => break,
             Ok(Event::Eof) => bail!("unexpected end of file."),

@@ -8,4 +8,4 @@
 /// </a:pPr>
 /// ```
 // tag: buClrTx
-pub type BulletColorText = bool;
+pub type XlsxBulletColorText = bool;

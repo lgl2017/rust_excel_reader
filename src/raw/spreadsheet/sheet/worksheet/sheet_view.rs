@@ -16,7 +16,7 @@
 /// ```
 /// sheetView (Worksheet View)
 #[derive(Debug, Clone, PartialEq)]
-pub struct SheetView {
+pub struct XlsxSheetView {
     // extLst (Future Feature Data Storage Area) Not supported
 
     // Child Elements

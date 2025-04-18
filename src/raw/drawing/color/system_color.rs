@@ -6,7 +6,7 @@ use crate::excel::XmlReader;
 use crate::common_types::HexColor;
 use crate::helper::{extract_val_attribute, hex_to_rgba, rgba_to_hex};
 
-use super::color_transforms::{apply_color_transformations, ColorTransform};
+use super::color_transforms::{apply_color_transformations, XlsxColorTransform};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.systemcolor?view=openxml-3.0.1
 ///
@@ -16,7 +16,7 @@ use super::color_transforms::{apply_color_transformations, ColorTransform};
 /// ```
 // tag: sysClr
 #[derive(Debug, Clone, PartialEq)]
-pub struct SystemColor {
+pub struct XlsxSystemColor {
     // attributes:
 
     // tag: lastClr
@@ -26,10 +26,10 @@ pub struct SystemColor {
     pub val: Option<String>,
 
     // children
-    pub color_transforms: Option<Vec<ColorTransform>>,
+    pub color_transforms: Option<Vec<XlsxColorTransform>>,
 }
 
-impl SystemColor {
+impl XlsxSystemColor {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let val = extract_val_attribute(e)?;
         let mut color = Self {
@@ -58,12 +58,12 @@ impl SystemColor {
             }
         }
 
-        color.color_transforms = Some(ColorTransform::load_list(reader, b"sysClr")?);
+        color.color_transforms = Some(XlsxColorTransform::load_list(reader, b"sysClr")?);
         Ok(color)
     }
 }
 
-impl SystemColor {
+impl XlsxSystemColor {
     pub(crate) fn to_hex(&self) -> Option<HexColor> {
         if self.last_clr.is_none() {
             return None;

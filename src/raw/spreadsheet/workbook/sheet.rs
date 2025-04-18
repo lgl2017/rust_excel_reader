@@ -17,10 +17,10 @@ use crate::{excel::XmlReader, helper::string_to_unsignedint};
 /// </sheets>
 /// ```
 /// sheets (Sheets)
-pub type Sheets = Vec<Sheet>;
+pub type XlsxSheets = Vec<XlsxSheet>;
 
-pub(crate) fn load_sheets(reader: &mut XmlReader) -> anyhow::Result<Sheets> {
-    let mut sheets: Sheets = vec![];
+pub(crate) fn load_sheets(reader: &mut XmlReader) -> anyhow::Result<XlsxSheets> {
+    let mut sheets: XlsxSheets = vec![];
 
     let mut buf = Vec::new();
     loop {
@@ -28,7 +28,7 @@ pub(crate) fn load_sheets(reader: &mut XmlReader) -> anyhow::Result<Sheets> {
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"sheet" => {
-                sheets.push(Sheet::load(e)?);
+                sheets.push(XlsxSheet::load(e)?);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"sheets" => break,
             Ok(Event::Eof) => bail!("unexpected end of file."),
@@ -50,7 +50,7 @@ pub(crate) fn load_sheets(reader: &mut XmlReader) -> anyhow::Result<Sheets> {
 /// ```
 /// sheet (Sheet Information)
 #[derive(Debug, Clone, PartialEq)]
-pub struct Sheet {
+pub struct XlsxSheet {
     // Attributes
     /// id (Relationship Id)
     ///
@@ -81,7 +81,7 @@ pub struct Sheet {
     pub visible_state: Option<String>,
 }
 
-impl Sheet {
+impl XlsxSheet {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut sheet = Self {

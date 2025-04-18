@@ -6,27 +6,27 @@ use quick_xml::events::{BytesStart, Event};
 use crate::excel::XmlReader;
 
 use crate::raw::drawing::{
-    effect::{effect_container::EffectDag, effect_list::EffectList},
+    effect::{effect_container::XlsxEffectDag, effect_list::XlsxEffectList},
     fill::{
-        blip_fill::BlipFill, gradient_fill::GradientFill, group_fill::GroupFill, no_fill::NoFill,
-        pattern_fill::PatternFill, solid_fill::SolidFill,
+        blip_fill::XlsxBlipFill, gradient_fill::XlsxGradientFill, group_fill::XlsxGroupFill,
+        no_fill::XlsxNoFill, pattern_fill::XlsxPatternFill, solid_fill::XlsxSolidFill,
     },
     font::{
-        complex_sript_font::ComplexScriptFont, east_asian_font::EastAsianFont,
-        latin_font::LatinFont,
+        complex_sript_font::XlsxComplexScriptFont, east_asian_font::XlsxEastAsianFont,
+        latin_font::XlsxLatinFont,
     },
-    line::outline::Outline,
+    line::outline::XlsxOutline,
 };
 
 use super::{
-    highlight_color::HighlightColor,
-    hyperlink_on_event::{HyperlinkOnClick, HyperlinkOnMouseOver},
-    right_to_left::RightToLeft,
-    symbol_font::SymbolFont,
-    underline::Underline,
-    underline_fill::UnderlineFill,
-    underline_fill_text::UnderlineFillText,
-    underline_follow_text::UnderlineFollowsText,
+    highlight_color::XlsxHighlightColor,
+    hyperlink_on_event::{XlsxHyperlinkOnClick, XlsxHyperlinkOnMouseOver},
+    right_to_left::XlsxRightToLeft,
+    symbol_font::XlsxSymbolFont,
+    underline::XlsxUnderline,
+    underline_fill::XlsxUnderlineFill,
+    underline_fill_text::XlsxUnderlineFillText,
+    underline_follow_text::XlsxUnderlineFollowsText,
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.defaultrunproperties?view=openxml-3.0.1
@@ -34,78 +34,78 @@ use super::{
 /// These properties are to be used when overriding properties have not been defined within the rPr element
 // tag: defRPr
 #[derive(Debug, Clone, PartialEq)]
-pub struct DefaultTextRunProperties {
+pub struct XlsxDefaultTextRunProperties {
     // extLst (Extension List)	Not supported
 
     // Child Elements	Subclause
     // blipFill (Picture Fill)	§20.1.8.14
-    pub blip_fill: Option<BlipFill>,
+    pub blip_fill: Option<XlsxBlipFill>,
 
     // cs (Complex Script Font)	§21.1.2.3.1
-    pub cs: Option<ComplexScriptFont>,
+    pub cs: Option<XlsxComplexScriptFont>,
 
     // ea (East Asian Font)	§21.1.2.3.3
-    pub ea: Option<EastAsianFont>,
+    pub ea: Option<XlsxEastAsianFont>,
 
     // effectDag (Effect Container)	§20.1.8.25
-    pub effect_dag: Option<EffectDag>,
+    pub effect_dag: Option<XlsxEffectDag>,
 
     // effectLst (Effect Container)	§20.1.8.26
-    pub effect_list: Option<EffectList>,
+    pub effect_list: Option<XlsxEffectList>,
 
     // gradFill (Gradient Fill)	§20.1.8.33
-    pub gradient_fill: Option<GradientFill>,
+    pub gradient_fill: Option<XlsxGradientFill>,
 
     // grpFill (Group Fill)	§20.1.8.35
-    pub group_fill: Option<GroupFill>,
+    pub group_fill: Option<XlsxGroupFill>,
 
     // highlight (Highlight Color)	§21.1.2.3.4
-    pub highlight: Option<HighlightColor>,
+    pub highlight: Option<XlsxHighlightColor>,
 
     // hlinkClick (Click Hyperlink)	§21.1.2.3.5
-    pub hlink_click: Option<HyperlinkOnClick>,
+    pub hlink_click: Option<XlsxHyperlinkOnClick>,
 
     // hlinkMouseOver (Mouse-Over Hyperlink)	§21.1.2.3.6
-    pub hlink_mouse_over: Option<HyperlinkOnMouseOver>,
+    pub hlink_mouse_over: Option<XlsxHyperlinkOnMouseOver>,
 
     // latin (Latin Font)	§21.1.2.3.7
-    pub latin: Option<LatinFont>,
+    pub latin: Option<XlsxLatinFont>,
 
     // ln (Outline)	§20.1.2.2.24
-    pub outline: Option<Outline>,
+    pub outline: Option<XlsxOutline>,
 
     // noFill (No Fill)	§20.1.8.44
-    pub no_fill: Option<NoFill>,
+    pub no_fill: Option<XlsxNoFill>,
 
     // pattFill (Pattern Fill)	§20.1.8.47
-    pub pattern_fill: Option<PatternFill>,
+    pub pattern_fill: Option<XlsxPatternFill>,
 
     // rtl (Right to Left Run)	§21.1.2.2.8
-    pub rtl: Option<RightToLeft>,
+    pub rtl: Option<XlsxRightToLeft>,
 
     // solidFill (Solid Fill)	§20.1.8.54
-    pub solid_fill: Option<SolidFill>,
+    pub solid_fill: Option<XlsxSolidFill>,
 
     // sym (Symbol Font)	§21.1.2.3.10
-    pub symbol_font: Option<SymbolFont>,
+    pub symbol_font: Option<XlsxSymbolFont>,
 
     // uFill (Underline Fill)	§21.1.2.3.12
-    pub underline_fill: Option<UnderlineFill>,
+    pub underline_fill: Option<XlsxUnderlineFill>,
 
     // uFillTx (Underline Fill Properties Follow Text)	§21.1.2.3.13
-    pub underline_fill_text: Option<UnderlineFillText>,
+    pub underline_fill_text: Option<XlsxUnderlineFillText>,
 
     // uLn (Underline Stroke)	§21.1.2.3.14
-    pub underline_stroke: Option<Underline>,
+    pub underline_stroke: Option<XlsxUnderline>,
 
     // uLnTx (Underline Follows Text)
-    pub underline_follow_text: Option<UnderlineFollowsText>,
+    pub underline_follow_text: Option<XlsxUnderlineFollowsText>,
 
     // attributes: undocumented
     pub extended_attributes: Option<BTreeMap<String, String>>,
 }
 
-impl DefaultTextRunProperties {
+impl XlsxDefaultTextRunProperties {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
 
@@ -159,64 +159,64 @@ impl DefaultTextRunProperties {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"blipFill" => {
-                    defaults.blip_fill = Some(BlipFill::load(reader, e)?);
+                    defaults.blip_fill = Some(XlsxBlipFill::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"cs" => {
-                    defaults.cs = Some(ComplexScriptFont::load(e)?);
+                    defaults.cs = Some(XlsxComplexScriptFont::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"ea" => {
-                    defaults.ea = Some(EastAsianFont::load(e)?);
+                    defaults.ea = Some(XlsxEastAsianFont::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"effectDag" => {
-                    defaults.effect_dag = Some(EffectDag::load_effect_dag(reader, e)?);
+                    defaults.effect_dag = Some(XlsxEffectDag::load_effect_dag(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"effectLst" => {
-                    defaults.effect_list = Some(EffectList::load(reader)?);
+                    defaults.effect_list = Some(XlsxEffectList::load(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"gradFill" => {
-                    defaults.gradient_fill = Some(GradientFill::load(reader, e)?);
+                    defaults.gradient_fill = Some(XlsxGradientFill::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"grpFill" => {
                     defaults.group_fill = Some(true);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"highlight" => {
-                    defaults.highlight = HighlightColor::load(reader, e)?;
+                    defaults.highlight = XlsxHighlightColor::load(reader, e)?;
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"hlinkClick" => {
-                    defaults.hlink_click = Some(HyperlinkOnClick::load(reader, e)?);
+                    defaults.hlink_click = Some(XlsxHyperlinkOnClick::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"hlinkMouseOver" => {
-                    defaults.hlink_mouse_over = Some(HyperlinkOnMouseOver::load(reader, e)?);
+                    defaults.hlink_mouse_over = Some(XlsxHyperlinkOnMouseOver::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"latin" => {
-                    defaults.latin = Some(LatinFont::load(e)?);
+                    defaults.latin = Some(XlsxLatinFont::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"ln" => {
-                    defaults.outline = Some(Outline::load(reader, e)?);
+                    defaults.outline = Some(XlsxOutline::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"noFill" => {
                     defaults.no_fill = Some(true);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"pattFill" => {
-                    defaults.pattern_fill = Some(PatternFill::load(reader, e)?);
+                    defaults.pattern_fill = Some(XlsxPatternFill::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"rtl" => {
-                    defaults.rtl = Some(RightToLeft::load(e)?);
+                    defaults.rtl = Some(XlsxRightToLeft::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"solidFill" => {
-                    defaults.solid_fill = SolidFill::load(reader, b"solidFill")?;
+                    defaults.solid_fill = XlsxSolidFill::load(reader, b"solidFill")?;
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"sym" => {
-                    defaults.symbol_font = Some(SymbolFont::load(e)?);
+                    defaults.symbol_font = Some(XlsxSymbolFont::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"uFill" => {
-                    defaults.underline_fill = UnderlineFill::load(reader, b"uFill")?;
+                    defaults.underline_fill = XlsxUnderlineFill::load(reader, b"uFill")?;
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"uFillTx" => {
                     defaults.underline_fill_text = Some(true);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"uLn" => {
-                    defaults.underline_stroke = Some(Underline::load(reader, e)?);
+                    defaults.underline_stroke = Some(XlsxUnderline::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"uLnTx" => {
                     defaults.underline_follow_text = Some(true);

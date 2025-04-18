@@ -23,7 +23,7 @@ use quick_xml::events::Event;
 /// </a:schemeClr>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub enum ColorTransform {
+pub enum XlsxColorTransform {
     /// Alpha: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alpha?view=openxml-3.0.1
     // tag: alpha, attribute: val
     Alpha(i64),
@@ -159,7 +159,7 @@ pub enum ColorTransform {
     Tint(i64),
 }
 
-impl ColorTransform {
+impl XlsxColorTransform {
     pub fn load_list(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Vec<Self>> {
         let mut transforms: Vec<Self> = vec![];
 
@@ -174,7 +174,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::Alpha(num));
+                        transforms.push(XlsxColorTransform::Alpha(num));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"alphaMod" => {
@@ -182,7 +182,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::AlphaModulation(num));
+                        transforms.push(XlsxColorTransform::AlphaModulation(num));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"alphaOff" => {
@@ -190,7 +190,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::AlphaOffset(num));
+                        transforms.push(XlsxColorTransform::AlphaOffset(num));
                     }
                 }
 
@@ -199,7 +199,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::Blue(num));
+                        transforms.push(XlsxColorTransform::Blue(num));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"blueMod" => {
@@ -207,7 +207,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::BlueModulation(num));
+                        transforms.push(XlsxColorTransform::BlueModulation(num));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"blueOff" => {
@@ -215,7 +215,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::BlueOffset(num));
+                        transforms.push(XlsxColorTransform::BlueOffset(num));
                     }
                 }
 
@@ -224,7 +224,7 @@ impl ColorTransform {
                     let val_string = extract_val_attribute(e)?.unwrap_or("1".to_owned());
                     if let Some(bool) = string_to_bool(&val_string) {
                         if bool {
-                            transforms.push(ColorTransform::Comp);
+                            transforms.push(XlsxColorTransform::Comp);
                         }
                     }
                 }
@@ -232,7 +232,7 @@ impl ColorTransform {
                     let val_string = extract_val_attribute(e)?.unwrap_or("1".to_owned());
                     if let Some(bool) = string_to_bool(&val_string) {
                         if bool {
-                            transforms.push(ColorTransform::Gamma);
+                            transforms.push(XlsxColorTransform::Gamma);
                         }
                     }
                 }
@@ -240,7 +240,7 @@ impl ColorTransform {
                     let val_string = extract_val_attribute(e)?.unwrap_or("1".to_owned());
                     if let Some(bool) = string_to_bool(&val_string) {
                         if bool {
-                            transforms.push(ColorTransform::Gray);
+                            transforms.push(XlsxColorTransform::Gray);
                         }
                     }
                 }
@@ -250,7 +250,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::Green(num));
+                        transforms.push(XlsxColorTransform::Green(num));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"greenMod" => {
@@ -258,7 +258,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::GreenModulation(num));
+                        transforms.push(XlsxColorTransform::GreenModulation(num));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"greenOff" => {
@@ -266,7 +266,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::GreenOffset(num));
+                        transforms.push(XlsxColorTransform::GreenOffset(num));
                     }
                 }
 
@@ -275,7 +275,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::Hue(num));
+                        transforms.push(XlsxColorTransform::Hue(num));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"hueMod" => {
@@ -283,7 +283,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::HueModulation(num));
+                        transforms.push(XlsxColorTransform::HueModulation(num));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"hueOff" => {
@@ -291,7 +291,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::HueOffset(num));
+                        transforms.push(XlsxColorTransform::HueOffset(num));
                     }
                 }
 
@@ -299,7 +299,7 @@ impl ColorTransform {
                     let val_string = extract_val_attribute(e)?.unwrap_or("1".to_owned());
                     if let Some(bool) = string_to_bool(&val_string) {
                         if bool {
-                            transforms.push(ColorTransform::Inverse);
+                            transforms.push(XlsxColorTransform::Inverse);
                         }
                     }
                 }
@@ -308,7 +308,7 @@ impl ColorTransform {
                     let val_string = extract_val_attribute(e)?.unwrap_or("1".to_owned());
                     if let Some(bool) = string_to_bool(&val_string) {
                         if bool {
-                            transforms.push(ColorTransform::InverseGamma);
+                            transforms.push(XlsxColorTransform::InverseGamma);
                         }
                     }
                 }
@@ -318,7 +318,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::Lum(num));
+                        transforms.push(XlsxColorTransform::Lum(num));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"lumMod" => {
@@ -326,7 +326,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::LumModulation(num));
+                        transforms.push(XlsxColorTransform::LumModulation(num));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"lumOff" => {
@@ -334,7 +334,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::LumOffset(num));
+                        transforms.push(XlsxColorTransform::LumOffset(num));
                     }
                 }
 
@@ -343,7 +343,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::Red(num));
+                        transforms.push(XlsxColorTransform::Red(num));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"redMod" => {
@@ -351,7 +351,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::RedModulation(num));
+                        transforms.push(XlsxColorTransform::RedModulation(num));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"redOff" => {
@@ -359,7 +359,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::RedOffset(num));
+                        transforms.push(XlsxColorTransform::RedOffset(num));
                     }
                 }
 
@@ -368,7 +368,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::Sat(num));
+                        transforms.push(XlsxColorTransform::Sat(num));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"satMod" => {
@@ -376,7 +376,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::SatModulation(num));
+                        transforms.push(XlsxColorTransform::SatModulation(num));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"satOff" => {
@@ -384,7 +384,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::SatOffset(num));
+                        transforms.push(XlsxColorTransform::SatOffset(num));
                     }
                 }
 
@@ -393,7 +393,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::Shade(num));
+                        transforms.push(XlsxColorTransform::Shade(num));
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"tint" => {
@@ -401,7 +401,7 @@ impl ColorTransform {
                         continue;
                     };
                     if let Some(num) = string_to_int(&val_string) {
-                        transforms.push(ColorTransform::Tint(num));
+                        transforms.push(XlsxColorTransform::Tint(num));
                     }
                 }
 
@@ -416,7 +416,7 @@ impl ColorTransform {
     }
 }
 
-impl ColorTransform {
+impl XlsxColorTransform {
     pub(crate) fn apply(&self, rgba: (u32, u32, u32, f64)) -> (u32, u32, u32, f64) {
         // let (mut r, mut g, mut b, mut a) = rgba;
         let (mut r, mut g, mut b) = (
@@ -427,23 +427,23 @@ impl ColorTransform {
         let mut a = rgba.3;
 
         match self {
-            ColorTransform::Alpha(alpha) => a = percentage_int_to_float(*alpha),
-            ColorTransform::AlphaModulation(modulation) => a = apply_modulation(a, *modulation),
-            ColorTransform::AlphaOffset(offset) => a = apply_offset(a, *offset),
+            XlsxColorTransform::Alpha(alpha) => a = percentage_int_to_float(*alpha),
+            XlsxColorTransform::AlphaModulation(modulation) => a = apply_modulation(a, *modulation),
+            XlsxColorTransform::AlphaOffset(offset) => a = apply_offset(a, *offset),
 
-            ColorTransform::Blue(blue) => b = percentage_int_to_float(*blue),
-            ColorTransform::BlueModulation(modulation) => b = apply_modulation(b, *modulation),
-            ColorTransform::BlueOffset(offset) => b = apply_offset(b, *offset),
+            XlsxColorTransform::Blue(blue) => b = percentage_int_to_float(*blue),
+            XlsxColorTransform::BlueModulation(modulation) => b = apply_modulation(b, *modulation),
+            XlsxColorTransform::BlueOffset(offset) => b = apply_offset(b, *offset),
 
-            ColorTransform::Green(green) => g = percentage_int_to_float(*green),
-            ColorTransform::GreenModulation(modulation) => g = apply_modulation(g, *modulation),
-            ColorTransform::GreenOffset(offset) => g = apply_offset(g, *offset),
+            XlsxColorTransform::Green(green) => g = percentage_int_to_float(*green),
+            XlsxColorTransform::GreenModulation(modulation) => g = apply_modulation(g, *modulation),
+            XlsxColorTransform::GreenOffset(offset) => g = apply_offset(g, *offset),
 
-            ColorTransform::Red(red) => r = percentage_int_to_float(*red),
-            ColorTransform::RedModulation(modulation) => r = apply_modulation(r, *modulation),
-            ColorTransform::RedOffset(offset) => r = apply_offset(r, *offset),
+            XlsxColorTransform::Red(red) => r = percentage_int_to_float(*red),
+            XlsxColorTransform::RedModulation(modulation) => r = apply_modulation(r, *modulation),
+            XlsxColorTransform::RedOffset(offset) => r = apply_offset(r, *offset),
 
-            ColorTransform::Hue(hue) => {
+            XlsxColorTransform::Hue(hue) => {
                 if let Ok(mut hsla) = rgba_to_hsla(rgba) {
                     hsla.0 = percentage_int_to_float(*hue) * 360.0;
                     match hsla_to_rgba(hsla) {
@@ -452,7 +452,7 @@ impl ColorTransform {
                     }
                 }
             }
-            ColorTransform::HueModulation(modulation) => {
+            XlsxColorTransform::HueModulation(modulation) => {
                 if let Ok(mut hsla) = rgba_to_hsla(rgba) {
                     hsla.0 = apply_modulation(hsla.0 / 360.0, *modulation) * 360.0;
                     match hsla_to_rgba(hsla) {
@@ -461,7 +461,7 @@ impl ColorTransform {
                     }
                 }
             }
-            ColorTransform::HueOffset(offset) => {
+            XlsxColorTransform::HueOffset(offset) => {
                 if let Ok(mut hsla) = rgba_to_hsla(rgba) {
                     hsla.0 = apply_offset(hsla.0 / 360.0, *offset) * 360.0;
                     match hsla_to_rgba(hsla) {
@@ -470,7 +470,7 @@ impl ColorTransform {
                     }
                 }
             }
-            ColorTransform::Sat(sat) => {
+            XlsxColorTransform::Sat(sat) => {
                 if let Ok(mut hsla) = rgba_to_hsla(rgba) {
                     hsla.1 = percentage_int_to_float(*sat) * 100.0;
                     match hsla_to_rgba(hsla) {
@@ -479,7 +479,7 @@ impl ColorTransform {
                     }
                 }
             }
-            ColorTransform::SatModulation(modulation) => {
+            XlsxColorTransform::SatModulation(modulation) => {
                 if let Ok(mut hsla) = rgba_to_hsla(rgba) {
                     hsla.1 = apply_modulation(hsla.1 / 100.0, *modulation) * 100.0;
                     match hsla_to_rgba(hsla) {
@@ -488,7 +488,7 @@ impl ColorTransform {
                     }
                 }
             }
-            ColorTransform::SatOffset(offset) => {
+            XlsxColorTransform::SatOffset(offset) => {
                 if let Ok(mut hsla) = rgba_to_hsla(rgba) {
                     hsla.1 = apply_offset(hsla.1 / 100.0, *offset) * 100.0;
                     match hsla_to_rgba(hsla) {
@@ -498,7 +498,7 @@ impl ColorTransform {
                 }
             }
 
-            ColorTransform::Lum(lum) => {
+            XlsxColorTransform::Lum(lum) => {
                 if let Ok(mut hsla) = rgba_to_hsla(rgba) {
                     hsla.2 = percentage_int_to_float(*lum) * 100.0;
                     match hsla_to_rgba(hsla) {
@@ -507,7 +507,7 @@ impl ColorTransform {
                     }
                 }
             }
-            ColorTransform::LumModulation(modulation) => {
+            XlsxColorTransform::LumModulation(modulation) => {
                 if let Ok(mut hsla) = rgba_to_hsla(rgba) {
                     hsla.2 = apply_modulation(hsla.2 / 100.0, *modulation) * 100.0;
                     match hsla_to_rgba(hsla) {
@@ -516,7 +516,7 @@ impl ColorTransform {
                     }
                 }
             }
-            ColorTransform::LumOffset(offset) => {
+            XlsxColorTransform::LumOffset(offset) => {
                 if let Ok(mut hsla) = rgba_to_hsla(rgba) {
                     hsla.2 = apply_offset(hsla.2 / 100.0, *offset) * 100.0;
                     match hsla_to_rgba(hsla) {
@@ -525,39 +525,41 @@ impl ColorTransform {
                     }
                 }
             }
-            ColorTransform::Comp => match complementary(rgba) {
+            XlsxColorTransform::Comp => match complementary(rgba) {
                 Ok(new) => return new,
                 Err(_) => return rgba,
             },
-            ColorTransform::Gamma => match gamma_shift(rgba) {
-                Ok(new) => return new,
-                Err(_) => return rgba,
-            },
-
-            ColorTransform::Gray => match grayscale(rgba) {
+            XlsxColorTransform::Gamma => match gamma_shift(rgba) {
                 Ok(new) => return new,
                 Err(_) => return rgba,
             },
 
-            ColorTransform::Inverse => match inverse(rgba) {
-                Ok(new) => return new,
-                Err(_) => return rgba,
-            },
-            ColorTransform::InverseGamma => match inverse_gamma_shift(rgba) {
+            XlsxColorTransform::Gray => match grayscale(rgba) {
                 Ok(new) => return new,
                 Err(_) => return rgba,
             },
 
-            ColorTransform::Shade(shade) => {
+            XlsxColorTransform::Inverse => match inverse(rgba) {
+                Ok(new) => return new,
+                Err(_) => return rgba,
+            },
+            XlsxColorTransform::InverseGamma => match inverse_gamma_shift(rgba) {
+                Ok(new) => return new,
+                Err(_) => return rgba,
+            },
+
+            XlsxColorTransform::Shade(shade) => {
                 match apply_tint(rgba, -percentage_int_to_float(*shade)) {
                     Ok(new) => return new,
                     Err(_) => return rgba,
                 }
             }
-            ColorTransform::Tint(tint) => match apply_tint(rgba, percentage_int_to_float(*tint)) {
-                Ok(new) => return new,
-                Err(_) => return rgba,
-            },
+            XlsxColorTransform::Tint(tint) => {
+                match apply_tint(rgba, percentage_int_to_float(*tint)) {
+                    Ok(new) => return new,
+                    Err(_) => return rgba,
+                }
+            }
         }
 
         return (
@@ -571,7 +573,7 @@ impl ColorTransform {
 
 pub(crate) fn apply_color_transformations(
     rgba: (u32, u32, u32, f64),
-    transformations: Vec<ColorTransform>,
+    transformations: Vec<XlsxColorTransform>,
 ) -> (u32, u32, u32, f64) {
     let mut rgba = rgba;
     for transform in transformations {

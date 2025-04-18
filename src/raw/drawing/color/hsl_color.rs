@@ -5,7 +5,7 @@ use crate::common_types::HexColor;
 use crate::excel::XmlReader;
 use crate::helper::{hsla_to_rgba, percentage_int_to_float, rgba_to_hex, string_to_int};
 
-use super::color_transforms::{apply_color_transformations, ColorTransform};
+use super::color_transforms::{apply_color_transformations, XlsxColorTransform};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.hslcolor?view=openxml-3.0.1
 ///
@@ -17,7 +17,7 @@ use super::color_transforms::{apply_color_transformations, ColorTransform};
 /// A perceptual gamma of 2.2 is assumed.
 // tag: hslClr
 #[derive(Debug, Clone, PartialEq)]
-pub struct HslColor {
+pub struct XlsxHslColor {
     // attributes:
     /// Specifies the angular value describing the wavelength. Expressed in 1/60000ths of a degree.
     pub hue: Option<i64>,
@@ -35,10 +35,10 @@ pub struct HslColor {
     pub sat: Option<i64>,
 
     // children
-    pub color_transforms: Option<Vec<ColorTransform>>,
+    pub color_transforms: Option<Vec<XlsxColorTransform>>,
 }
 
-impl HslColor {
+impl XlsxHslColor {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut color = Self {
@@ -71,13 +71,13 @@ impl HslColor {
             }
         }
 
-        color.color_transforms = Some(ColorTransform::load_list(reader, b"hslClr")?);
+        color.color_transforms = Some(XlsxColorTransform::load_list(reader, b"hslClr")?);
 
         Ok(color)
     }
 }
 
-impl HslColor {
+impl XlsxHslColor {
     #[allow(dead_code)]
     pub(crate) fn to_hex(&self) -> Option<HexColor> {
         if self.hue.is_none() || self.sat.is_none() || self.lum.is_none() {

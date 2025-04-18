@@ -1,9 +1,11 @@
+use crate::excel::XmlReader;
+use crate::raw::drawing::{
+    scene::scene_3d_type::XlsxScene3DType, shape::shape_3d_type::XlsxShape3DType,
+};
 use anyhow::bail;
 use quick_xml::events::Event;
-use crate::excel::XmlReader;
-use crate::raw::drawing::{scene::scene_3d_type::Scene3DType, shape::shape_3d_type::Shape3DType};
 
-use super::{effect_container::EffectDag, effect_list::EffectList};
+use super::{effect_container::XlsxEffectDag, effect_list::XlsxEffectList};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.effectstyle?view=openxml-3.0.1
 ///
@@ -22,23 +24,23 @@ use super::{effect_container::EffectDag, effect_list::EffectList};
 /// </effectStyle>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct EffectStyle {
+pub struct XlsxEffectStyle {
     /// Child Elements
 
     /// effectDag (Effect Container)	§20.1.8.25
-    pub effect_dag: Option<EffectDag>,
+    pub effect_dag: Option<XlsxEffectDag>,
 
     /// effectLst (Effect Container)	§20.1.8.26
-    pub effect_lst: Option<EffectList>,
+    pub effect_lst: Option<XlsxEffectList>,
 
     /// scene3d (3D Scene Properties)	§20.1.4.1.26
-    pub scene3d: Option<Scene3DType>,
+    pub scene3d: Option<XlsxScene3DType>,
 
     // sp3d (Apply 3D shape properties)
-    pub shape3d: Option<Shape3DType>,
+    pub shape3d: Option<XlsxShape3DType>,
 }
 
-impl EffectStyle {
+impl XlsxEffectStyle {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
         let mut style = Self {
             effect_dag: None,
@@ -54,16 +56,16 @@ impl EffectStyle {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"effectDag" => {
-                    style.effect_dag = Some(EffectDag::load_effect_dag(reader, e)?);
+                    style.effect_dag = Some(XlsxEffectDag::load_effect_dag(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"effectLst" => {
-                    style.effect_lst = Some(EffectList::load(reader)?);
+                    style.effect_lst = Some(XlsxEffectList::load(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"scene3d" => {
-                    style.scene3d = Some(Scene3DType::load(reader)?);
+                    style.scene3d = Some(XlsxScene3DType::load(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"sp3d" => {
-                    style.shape3d = Some(Shape3DType::load(reader, e)?);
+                    style.shape3d = Some(XlsxShape3DType::load(reader, e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"effectStyle" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

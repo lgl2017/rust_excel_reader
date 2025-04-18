@@ -3,7 +3,7 @@ use quick_xml::events::{BytesStart, Event};
 
 use crate::excel::XmlReader;
 
-use super::adjust_value_list::{load_adjust_value_list, AdjustValueList};
+use super::adjust_value_list::{load_adjust_value_list, XlsxAdjustValueList};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.presetgeometry?view=openxml-3.0.1
 ///
@@ -15,10 +15,10 @@ use super::adjust_value_list::{load_adjust_value_list, AdjustValueList};
 /// </a:prstGeom>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct PresetGeometry {
+pub struct XlsxPresetGeometry {
     // Child Elements
     // avLst (List of Shape Adjust Values)	§20.1.9.5
-    pub adjust_value_list: Option<AdjustValueList>,
+    pub adjust_value_list: Option<XlsxAdjustValueList>,
 
     // attributes
     /// Preset Shape.
@@ -27,7 +27,7 @@ pub struct PresetGeometry {
     pub preset: Option<String>,
 }
 
-impl PresetGeometry {
+impl XlsxPresetGeometry {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut geom = Self {
             adjust_value_list: None,

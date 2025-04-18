@@ -5,7 +5,7 @@ use crate::excel::XmlReader;
 use crate::common_types::HexColor;
 use crate::helper::extract_val_attribute;
 
-use super::color_transforms::ColorTransform;
+use super::color_transforms::XlsxColorTransform;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.presetcolor?view=openxml-3.0.1
 /// Example
@@ -14,16 +14,16 @@ use super::color_transforms::ColorTransform;
 /// ```
 // tag: prstClr
 #[derive(Debug, Clone, PartialEq)]
-pub struct PresetColor {
+pub struct XlsxPresetColor {
     // attributes:
     /// Allowed value: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.presetcolorvalues?view=openxml-3.0.1
     pub val: Option<String>,
 
     // children
-    pub color_transforms: Option<Vec<ColorTransform>>,
+    pub color_transforms: Option<Vec<XlsxColorTransform>>,
 }
 
-impl PresetColor {
+impl XlsxPresetColor {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let val = extract_val_attribute(e)?;
         let mut color = Self {
@@ -31,13 +31,13 @@ impl PresetColor {
             color_transforms: None,
         };
 
-        color.color_transforms = Some(ColorTransform::load_list(reader, b"prstClr")?);
+        color.color_transforms = Some(XlsxColorTransform::load_list(reader, b"prstClr")?);
 
         Ok(color)
     }
 }
 
-impl PresetColor {
+impl XlsxPresetColor {
     #[allow(dead_code)]
     pub(crate) fn to_hex(&self) -> Option<HexColor> {
         if self.val.is_none() {

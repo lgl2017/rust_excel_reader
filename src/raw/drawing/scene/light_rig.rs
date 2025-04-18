@@ -3,7 +3,7 @@ use quick_xml::events::{BytesStart, Event};
 
 use crate::excel::XmlReader;
 
-use super::rotation::Rotation;
+use super::rotation::XlsxRotation;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.lightrig?view=openxml-3.0.1
 ///
@@ -14,9 +14,9 @@ use super::rotation::Rotation;
 /// </a:lightRig>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct LightRig {
+pub struct XlsxLightRig {
     // children
-    pub rot: Option<Rotation>,
+    pub rot: Option<XlsxRotation>,
 
     // attributes
     /// Direction
@@ -28,7 +28,7 @@ pub struct LightRig {
     pub rig: Option<String>,
 }
 
-impl LightRig {
+impl XlsxLightRig {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut rig = Self {
@@ -64,7 +64,7 @@ impl LightRig {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"rot" => {
-                    rig.rot = Some(Rotation::load(e)?);
+                    rig.rot = Some(XlsxRotation::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"lightRig" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

@@ -3,18 +3,18 @@ use quick_xml::events::{BytesStart, Event};
 
 use crate::excel::XmlReader;
 
-use super::{spacing_percent::SpacingPercent, spacing_points::SpacingPoints};
+use super::{spacing_percent::XlsxSpacingPercent, spacing_points::XlsxSpacingPoints};
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum SpacingEnum {
+pub enum XlsxSpacingEnum {
     // Child Elements
     // spcPct (Spacing Percent)	§21.1.2.2.11
-    SpacingPercent(SpacingPercent),
+    SpacingPercent(XlsxSpacingPercent),
     // spcPts (Spacing Points)
-    SpacingPoints(SpacingPoints),
+    SpacingPoints(XlsxSpacingPoints),
 }
 
-impl SpacingEnum {
+impl XlsxSpacingEnum {
     pub(crate) fn load(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Option<Self>> {
         let mut buf = Vec::new();
 
@@ -23,7 +23,7 @@ impl SpacingEnum {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) => {
-                    return SpacingEnum::load_helper(e);
+                    return XlsxSpacingEnum::load_helper(e);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == tag => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),
@@ -38,12 +38,12 @@ impl SpacingEnum {
     fn load_helper(e: &BytesStart) -> anyhow::Result<Option<Self>> {
         match e.local_name().as_ref() {
             b"spcPct" => {
-                let spacing = SpacingPercent::load(e)?;
-                return Ok(Some(SpacingEnum::SpacingPercent(spacing)));
+                let spacing = XlsxSpacingPercent::load(e)?;
+                return Ok(Some(XlsxSpacingEnum::SpacingPercent(spacing)));
             }
             b"spcPts" => {
-                let spacing = SpacingPoints::load(e)?;
-                return Ok(Some(SpacingEnum::SpacingPoints(spacing)));
+                let spacing = XlsxSpacingPoints::load(e)?;
+                return Ok(Some(XlsxSpacingEnum::SpacingPoints(spacing)));
             }
             _ => return Ok(None),
         }

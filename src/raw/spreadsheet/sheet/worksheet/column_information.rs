@@ -17,10 +17,10 @@ use crate::{
 ///   <col min="5" max="5" width="9.140625" style="3"/>
 /// </cols>
 /// ```
-pub type ColumnInformations = Vec<ColumnInformation>;
+pub type XlsxColumnInformations = Vec<XlsxColumnInformation>;
 
-pub(crate) fn load_column_infos(reader: &mut XmlReader) -> anyhow::Result<ColumnInformations> {
-    let mut cols: ColumnInformations = vec![];
+pub(crate) fn load_column_infos(reader: &mut XmlReader) -> anyhow::Result<XlsxColumnInformations> {
+    let mut cols: XlsxColumnInformations = vec![];
 
     let mut buf = Vec::new();
     loop {
@@ -28,7 +28,7 @@ pub(crate) fn load_column_infos(reader: &mut XmlReader) -> anyhow::Result<Column
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"col" => {
-                cols.push(ColumnInformation::load(e)?);
+                cols.push(XlsxColumnInformation::load(e)?);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"cols" => break,
             Ok(Event::Eof) => bail!("unexpected end of file."),
@@ -51,7 +51,7 @@ pub(crate) fn load_column_infos(reader: &mut XmlReader) -> anyhow::Result<Column
 /// ```
 /// col (Column Width & Formatting)
 #[derive(Debug, Clone, PartialEq)]
-pub struct ColumnInformation {
+pub struct XlsxColumnInformation {
     /// Attributes
     /// bestFit (Best Fit Column Width)
     ///
@@ -131,7 +131,7 @@ pub struct ColumnInformation {
     pub width: Option<f64>,
 }
 
-impl ColumnInformation {
+impl XlsxColumnInformation {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut info = Self {

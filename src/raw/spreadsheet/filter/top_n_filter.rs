@@ -16,7 +16,7 @@ use crate::helper::{string_to_bool, string_to_float};
 ///
 /// top10 (Top 10)
 #[derive(Debug, Clone, PartialEq)]
-pub struct TopNFilter {
+pub struct XlsxTopNFilter {
     // Attributes
     /// filterVal (Filter Value)
     ///
@@ -40,7 +40,7 @@ pub struct TopNFilter {
     /// Top or bottom value to use as the filter criteria.
     pub val: Option<f64>,
 }
-impl TopNFilter {
+impl XlsxTopNFilter {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut filter = Self {

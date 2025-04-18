@@ -5,7 +5,7 @@ use crate::helper::{string_to_bool, string_to_int};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.reflection?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-pub struct Reflection {
+pub struct XlsxReflection {
     /// attributes
     /// Specifies shadow alignment; alignment happens first, effectively setting the origin for scale, skew, and offset.
     /// Allowed values: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.rectanglealignmentvalues?view=openxml-3.0.1
@@ -58,7 +58,7 @@ pub struct Reflection {
     pub sy: Option<i64>,
 }
 
-impl Reflection {
+impl XlsxReflection {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut reflection = Self {

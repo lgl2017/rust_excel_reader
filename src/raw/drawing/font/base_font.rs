@@ -2,11 +2,11 @@ use anyhow::bail;
 use quick_xml::events::BytesStart;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct BaseFont {
+pub struct XlsxBaseFont {
     pub typeface: Option<String>,
 }
 
-impl BaseFont {
+impl XlsxBaseFont {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut font = Self { typeface: None };

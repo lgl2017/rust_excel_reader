@@ -1,4 +1,4 @@
-use super::spacing::SpacingEnum;
+use super::spacing::XlsxSpacingEnum;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.spaceafter?view=openxml-3.0.1
 ///
@@ -17,4 +17,4 @@ use super::spacing::SpacingEnum;
 /// </a:pPr>
 /// ```
 // tag: spcAft
-pub type SpaceAfter = SpacingEnum;
+pub type XlsxSpaceAfter = XlsxSpacingEnum;

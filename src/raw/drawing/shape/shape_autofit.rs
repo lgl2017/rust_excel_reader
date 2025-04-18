@@ -9,4 +9,4 @@
 ///     <a:spAutoFit />
 /// </a:bodyPr>
 /// ```
-pub type ShapeAutofit = bool;
+pub type XlsxShapeAutofit = bool;

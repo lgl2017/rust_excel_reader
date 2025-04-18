@@ -16,7 +16,7 @@ use crate::helper::string_to_int;
 /// ```
 // tag: ext
 #[derive(Debug, Clone, PartialEq)]
-pub struct Extents {
+pub struct XlsxExtents {
     // attributes
     /// Extent Length
     // tag: cx
@@ -27,7 +27,7 @@ pub struct Extents {
     pub width: Option<i64>,
 }
 
-impl Extents {
+impl XlsxExtents {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut position = Self {

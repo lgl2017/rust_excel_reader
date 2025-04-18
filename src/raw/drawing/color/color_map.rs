@@ -11,7 +11,7 @@ use quick_xml::events::BytesStart;
 /// Possible values for all attributes:
 /// ColorSchemeIndexValues: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.colorschemeindexvalues?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-pub struct ColorMap {
+pub struct XlsxColorMap {
     /// attributes
 
     /// accent1 (Accent 1)	Specifies a color defined which is associated as the accent 1 color.
@@ -51,7 +51,7 @@ pub struct ColorMap {
     pub tx2: Option<String>,
 }
 
-impl ColorMap {
+impl XlsxColorMap {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut map = Self {

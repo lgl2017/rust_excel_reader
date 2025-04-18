@@ -26,12 +26,12 @@ use crate::{
 ///
 /// filters (Filter Criteria)
 #[derive(Debug, Clone, PartialEq)]
-pub struct FilterCriteriaGroup {
+pub struct XlsxFilterCriteriaGroup {
     // Child Elements
     /// dateGroupItem (Date Grouping)
-    pub date_group_item: Option<Vec<DateGroupItem>>,
+    pub date_group_item: Option<Vec<XlsxDateGroupItem>>,
     /// filter (Filter)	§18.3.2.6
-    pub value_filters: Option<Vec<ValueFilter>>,
+    pub value_filters: Option<Vec<XlsxValueFilter>>,
 
     // Attributes
     /// blank (Filter by Blank)
@@ -48,7 +48,7 @@ pub struct FilterCriteriaGroup {
     pub calendar_type: Option<String>,
 }
 
-impl FilterCriteriaGroup {
+impl XlsxFilterCriteriaGroup {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut creteria = Self {
             date_group_item: None,
@@ -57,8 +57,8 @@ impl FilterCriteriaGroup {
             calendar_type: None,
         };
 
-        let mut date_group_items: Vec<DateGroupItem> = vec![];
-        let mut value_filters: Vec<ValueFilter> = vec![];
+        let mut date_group_items: Vec<XlsxDateGroupItem> = vec![];
+        let mut value_filters: Vec<XlsxValueFilter> = vec![];
 
         let attributes = e.attributes();
         for a in attributes {
@@ -87,10 +87,10 @@ impl FilterCriteriaGroup {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"filter" => {
-                    value_filters.push(ValueFilter::load(e)?);
+                    value_filters.push(XlsxValueFilter::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"dateGroupItem" => {
-                    date_group_items.push(DateGroupItem::load(e)?);
+                    date_group_items.push(XlsxDateGroupItem::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"filters" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file at `filters`."),
@@ -117,7 +117,7 @@ impl FilterCriteriaGroup {
 ///
 /// filter (Filter)
 #[derive(Debug, Clone, PartialEq)]
-pub struct ValueFilter {
+pub struct XlsxValueFilter {
     // Attributes
     /// val (Filter Value)
     ///
@@ -125,7 +125,7 @@ pub struct ValueFilter {
     pub filter_value: Option<String>,
 }
 
-impl ValueFilter {
+impl XlsxValueFilter {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let val = extract_val_attribute(e)?;
         Ok(Self { filter_value: val })
@@ -144,7 +144,7 @@ impl ValueFilter {
 ///
 /// dateGroupItem (Date Grouping)
 #[derive(Debug, Clone, PartialEq)]
-pub struct DateGroupItem {
+pub struct XlsxDateGroupItem {
     // Attributes
     /// dateTimeGrouping (Date Time Grouping)
     ///
@@ -184,7 +184,7 @@ pub struct DateGroupItem {
     pub year: Option<u64>,
 }
 
-impl DateGroupItem {
+impl XlsxDateGroupItem {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut item = Self {

@@ -1,7 +1,7 @@
 use anyhow::bail;
 use quick_xml::events::BytesStart;
 
-use crate::{common_types::XSDDatetime, helper::string_to_datetime};
+use crate::{common_types::XlsxDatetime, helper::string_to_datetime};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.dynamicfilter?view=openxml-3.0.1
 ///
@@ -18,7 +18,7 @@ use crate::{common_types::XSDDatetime, helper::string_to_datetime};
 ///
 /// dynamicFilter (Dynamic Filter)
 #[derive(Debug, Clone, PartialEq)]
-pub struct DynamicFilter {
+pub struct XlsxDynamicFilter {
     // Attributes
     /// maxValIso (Max ISO Value)
     ///
@@ -36,7 +36,7 @@ pub struct DynamicFilter {
     ///
     /// These types of dynamic filters shall use valIso and shall not use maxValIso:
     /// - aboveAverage and belowAverage
-    pub max_val_iso: Option<XSDDatetime>,
+    pub max_val_iso: Option<XlsxDatetime>,
 
     /// type (Dynamic filter type)
     ///
@@ -48,10 +48,10 @@ pub struct DynamicFilter {
     /// valIso (ISO Value)
     ///
     /// A minimum value for dynamic filter.
-    pub min_val_iso: Option<XSDDatetime>,
+    pub min_val_iso: Option<XlsxDatetime>,
 }
 
-impl DynamicFilter {
+impl XlsxDynamicFilter {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut filter = Self {

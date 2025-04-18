@@ -3,4 +3,4 @@
 /// This element specifies the ending of a series of lines and curves in the creation path of a custom geometric shape.
 /// When this element is encountered, the generating application should consider the corresponding path closed.
 
-pub type CloseShapePath = bool;
+pub type XlsxCloseShapePath = bool;

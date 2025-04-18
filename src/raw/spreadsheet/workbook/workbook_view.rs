@@ -19,10 +19,10 @@ use crate::{
 /// </bookViews>
 /// ```
 /// bookViews (Workbook Views)
-pub type WorkbookViews = Vec<WorkbookView>;
+pub type XlsxWorkbookViews = Vec<XlsxWorkbookView>;
 
-pub(crate) fn load_bookviews(reader: &mut XmlReader) -> anyhow::Result<WorkbookViews> {
-    let mut views: WorkbookViews = vec![];
+pub(crate) fn load_bookviews(reader: &mut XmlReader) -> anyhow::Result<XlsxWorkbookViews> {
+    let mut views: XlsxWorkbookViews = vec![];
 
     let mut buf = Vec::new();
     loop {
@@ -30,7 +30,7 @@ pub(crate) fn load_bookviews(reader: &mut XmlReader) -> anyhow::Result<WorkbookV
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"workbookView" => {
-                views.push(WorkbookView::load(reader, e)?);
+                views.push(XlsxWorkbookView::load(reader, e)?);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"bookViews" => break,
             Ok(Event::Eof) => bail!("unexpected end of file."),
@@ -54,7 +54,7 @@ pub(crate) fn load_bookviews(reader: &mut XmlReader) -> anyhow::Result<WorkbookV
 /// <workbookView xWindow="120" yWindow="45" windowWidth="15135" windowHeight="7650" activeTab="4"/>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct WorkbookView {
+pub struct XlsxWorkbookView {
     // extLst (Future Feature Data Storage Area) Not supported
 
     // Attributes
@@ -147,7 +147,7 @@ pub struct WorkbookView {
     pub y_window: Option<i64>,
 }
 
-impl WorkbookView {
+impl XlsxWorkbookView {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut view = Self {

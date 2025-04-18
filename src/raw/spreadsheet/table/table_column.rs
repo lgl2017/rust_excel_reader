@@ -4,8 +4,8 @@ use quick_xml::events::{BytesStart, Event};
 use crate::{excel::XmlReader, helper::string_to_unsignedint};
 
 use super::{
-    calculated_column_formula::CalculatedColumnFormula, totals_row_formula::TotalsRowFormula,
-    xml_column_properties::XmlColumnProperties,
+    calculated_column_formula::XlsxCalculatedColumnFormula,
+    totals_row_formula::XlsxTotalsRowFormula, xml_column_properties::XlsxXmlColumnProperties,
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.tablecolumns?view=openxml-3.0.1
@@ -22,18 +22,18 @@ use super::{
 /// ```
 ///
 /// tableColumns (Table Columns)
-pub type TableColumns = Vec<TableColumn>;
+pub type XlsxTableColumns = Vec<XlsxTableColumn>;
 
-pub(crate) fn load_table_columns(reader: &mut XmlReader) -> anyhow::Result<TableColumns> {
+pub(crate) fn load_table_columns(reader: &mut XmlReader) -> anyhow::Result<XlsxTableColumns> {
     let mut buf = Vec::new();
-    let mut columns: TableColumns = vec![];
+    let mut columns: XlsxTableColumns = vec![];
 
     loop {
         buf.clear();
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"tableColumn" => {
-                columns.push(TableColumn::load(reader, e)?);
+                columns.push(XlsxTableColumn::load(reader, e)?);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"tableColumns" => break,
             Ok(Event::Eof) => bail!("unexpected end of file at `tableColumns`."),
@@ -60,18 +60,18 @@ pub(crate) fn load_table_columns(reader: &mut XmlReader) -> anyhow::Result<Table
 ///
 /// tableColumn (Table Column)
 #[derive(Debug, Clone, PartialEq)]
-pub struct TableColumn {
+pub struct XlsxTableColumn {
     /// extLst (Future Feature Data Storage Area)	Not supported
 
     /// Child Elements	Subclause
     /// calculatedColumnFormula (Calculated Column Formula)	§18.5.1.1
-    pub calculated_column_formula: Option<CalculatedColumnFormula>,
+    pub calculated_column_formula: Option<XlsxCalculatedColumnFormula>,
 
     /// totalsRowFormula (Totals Row Formula)	§18.5.1.6
-    pub totals_row_formula: Option<TotalsRowFormula>,
+    pub totals_row_formula: Option<XlsxTotalsRowFormula>,
 
     /// xmlColumnPr (XML Column Properties)	§18.5.1.7
-    pub xml_column_properties: Option<XmlColumnProperties>,
+    pub xml_column_properties: Option<XlsxXmlColumnProperties>,
 
     // Attributes
     /// dataCellStyle (Data Area Style Name)
@@ -158,7 +158,7 @@ pub struct TableColumn {
     pub unique_name: Option<String>,
 }
 
-impl TableColumn {
+impl XlsxTableColumn {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut column = Self {
@@ -242,13 +242,13 @@ impl TableColumn {
                     if e.local_name().as_ref() == b"calculatedColumnFormula" =>
                 {
                     column.calculated_column_formula =
-                        Some(CalculatedColumnFormula::load(reader, e)?)
+                        Some(XlsxCalculatedColumnFormula::load(reader, e)?)
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"totalsRowFormula" => {
-                    column.totals_row_formula = Some(TotalsRowFormula::load(reader, e)?);
+                    column.totals_row_formula = Some(XlsxTotalsRowFormula::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"xmlColumnPr" => {
-                    column.xml_column_properties = Some(XmlColumnProperties::load(reader, e)?);
+                    column.xml_column_properties = Some(XlsxXmlColumnProperties::load(reader, e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"tableColumn" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file at `tableColumn`."),

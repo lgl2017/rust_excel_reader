@@ -8,4 +8,4 @@
 ///     <a:buNone/>
 /// </a:pPr>
 /// ```
-pub type NoBullet = bool;
+pub type XlsxNoBullet = bool;

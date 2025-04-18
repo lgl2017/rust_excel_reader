@@ -5,7 +5,7 @@ use crate::excel::XmlReader;
 use crate::common_types::HexColor;
 use crate::helper::{extract_val_attribute, hex_to_rgba, rgba_to_hex};
 
-use super::color_transforms::{apply_color_transformations, ColorTransform};
+use super::color_transforms::{apply_color_transformations, XlsxColorTransform};
 
 /// RgbColorModelHex: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.rgbcolormodelhex?view=openxml-3.0.1
 ///
@@ -16,29 +16,29 @@ use super::color_transforms::{apply_color_transformations, ColorTransform};
 /// ```
 // tag: srgbClr
 #[derive(Debug, Clone, PartialEq)]
-pub struct SrgbColor {
+pub struct XlsxSrgbColor {
     // attributes
     /// The actual color value. Expressed as a sequence of hex digits RRGGBB
     pub val: Option<String>,
 
     // children
-    pub color_transforms: Option<Vec<ColorTransform>>,
+    pub color_transforms: Option<Vec<XlsxColorTransform>>,
 }
 
-impl SrgbColor {
+impl XlsxSrgbColor {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let val = extract_val_attribute(e)?;
         let mut color = Self {
             val,
             color_transforms: None,
         };
-        color.color_transforms = Some(ColorTransform::load_list(reader, b"srgbClr")?);
+        color.color_transforms = Some(XlsxColorTransform::load_list(reader, b"srgbClr")?);
 
         Ok(color)
     }
 }
 
-impl SrgbColor {
+impl XlsxSrgbColor {
     pub(crate) fn to_hex(&self) -> Option<HexColor> {
         if self.val.is_none() {
             return None;

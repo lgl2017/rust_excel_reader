@@ -15,7 +15,7 @@ use crate::helper::string_to_int;
 /// ```
 // tag: buAutoNum
 #[derive(Debug, Clone, PartialEq)]
-pub struct AutoNumberedBullet {
+pub struct XlsxAutoNumberedBullet {
     // Attributes
     /// Specifies the number that starts a given sequence of automatically numbered bullets.
     /// When the numbering is alphabetical, the number should map to the appropriate letter.
@@ -31,7 +31,7 @@ pub struct AutoNumberedBullet {
     pub r#type: Option<String>,
 }
 
-impl AutoNumberedBullet {
+impl XlsxAutoNumberedBullet {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut bullet = Self {

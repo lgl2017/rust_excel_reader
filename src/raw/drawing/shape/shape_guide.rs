@@ -14,7 +14,7 @@ use quick_xml::events::BytesStart;
 /// </a:gdLst>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct ShapeGuide {
+pub struct XlsxShapeGuide {
     // Attributes
     /// Specifies the formula that is used to calculate the value for a guide.
     /// Each formula has a certain number of arguments and a specific set of operations to perform on these arguments in order to generate a value for a guide.
@@ -28,7 +28,7 @@ pub struct ShapeGuide {
     pub name: Option<String>,
 }
 
-impl ShapeGuide {
+impl XlsxShapeGuide {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut guide = Self {

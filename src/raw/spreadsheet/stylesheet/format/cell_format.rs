@@ -6,7 +6,7 @@ use crate::{
     helper::{string_to_bool, string_to_unsignedint},
 };
 
-use super::{alignment::Alignment, protection::Protection};
+use super::{alignment::XlsxAlignment, protection::XlsxCellProtection};
 
 /// CellFormat: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.cellformat?view=openxml-3.0.1
 /// Example:
@@ -26,10 +26,10 @@ use super::{alignment::Alignment, protection::Protection};
 /// </cellXfs>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct CellFormat {
+pub struct XlsxCellFormat {
     // children
-    pub alignment: Option<Alignment>,
-    pub protection: Option<Protection>,
+    pub alignment: Option<XlsxAlignment>,
+    pub protection: Option<XlsxCellProtection>,
 
     // attributes
     /// A boolean value indicating whether the alignment formatting specified for this xf should be applied.
@@ -87,7 +87,7 @@ pub struct CellFormat {
     pub xf_id: Option<u64>,
 }
 
-impl CellFormat {
+impl XlsxCellFormat {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut format = Self {
@@ -173,11 +173,11 @@ impl CellFormat {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"alignment" => {
-                    let alignment = Alignment::load(e)?;
+                    let alignment = XlsxAlignment::load(e)?;
                     format.alignment = Some(alignment)
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"protection" => {
-                    let protection = Protection::load(e)?;
+                    let protection = XlsxCellProtection::load(e)?;
                     format.protection = Some(protection)
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"xf" => break,

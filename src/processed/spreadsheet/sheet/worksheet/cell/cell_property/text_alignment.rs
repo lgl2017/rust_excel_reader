@@ -1,4 +1,4 @@
-use crate::raw::spreadsheet::stylesheet::format::alignment::XlsxAlignment as RawAlignment;
+use crate::raw::spreadsheet::stylesheet::format::alignment::XlsxAlignment;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.alignment?view=openxml-3.0.1
 ///
@@ -65,7 +65,7 @@ impl TextAlignment {
             wrap_text: false,
         };
     }
-    pub(crate) fn from_raw(alignment: Option<RawAlignment>) -> Self {
+    pub(crate) fn from_raw(alignment: Option<XlsxAlignment>) -> Self {
         let Some(alignment) = alignment else {
             return Self::default();
         };

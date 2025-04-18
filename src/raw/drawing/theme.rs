@@ -7,10 +7,10 @@ use zip::ZipArchive;
 use crate::excel::xml_reader;
 
 use super::{
-    color::custom_color::{load_custom_color_list, CustomColorList},
-    default::object_defaults::ObjectDefaults,
-    scheme::extra_color_scheme::{load_extra_color_scheme_list, ExtraColorSchemeList},
-    theme_elements::ThemeElements,
+    color::custom_color::{load_custom_color_list, XlsxCustomColorList},
+    default::object_defaults::XlsxObjectDefaults,
+    scheme::extra_color_scheme::{load_extra_color_scheme_list, XlsxExtraColorSchemeList},
+    theme_elements::XlsxThemeElements,
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.theme?view=openxml-3.0.1
@@ -19,27 +19,27 @@ use super::{
 ///
 /// theme (Theme)
 #[derive(Debug, Clone, PartialEq)]
-pub struct Theme {
+pub struct XlsxTheme {
     // child: extLst (Extension List)	§20.1.2.2.15 Not supported
 
     // children
     // tag: custClrLst
-    pub custom_color_list: Option<Box<CustomColorList>>,
+    pub custom_color_list: Option<Box<XlsxCustomColorList>>,
 
     // tag: extraClrSchemeLst
-    pub extra_color_scheme_list: Option<Box<ExtraColorSchemeList>>,
+    pub extra_color_scheme_list: Option<Box<XlsxExtraColorSchemeList>>,
 
     // objectDefaults (Object Defaults)	§20.1.6.7
-    pub object_defaults: Option<Box<ObjectDefaults>>,
+    pub object_defaults: Option<Box<XlsxObjectDefaults>>,
 
     // tag: themeElements
-    pub theme_elements: Option<Box<ThemeElements>>,
+    pub theme_elements: Option<Box<XlsxThemeElements>>,
 
     // attributes
     pub name: Option<String>,
 }
 
-impl Theme {
+impl XlsxTheme {
     pub(crate) fn load(
         zip: &mut ZipArchive<impl Read + Seek>,
         path: Vec<String>,
@@ -98,11 +98,11 @@ impl Theme {
                     theme.extra_color_scheme_list = Some(Box::new(schemes));
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"objectDefaults" => {
-                    let defaults: ObjectDefaults = ObjectDefaults::load(&mut reader)?;
+                    let defaults: XlsxObjectDefaults = XlsxObjectDefaults::load(&mut reader)?;
                     theme.object_defaults = Some(Box::new(defaults));
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"themeElements" => {
-                    let theme_elements = ThemeElements::load(&mut reader)?;
+                    let theme_elements = XlsxThemeElements::load(&mut reader)?;
                     theme.theme_elements = Some(Box::new(theme_elements));
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"theme" => break,

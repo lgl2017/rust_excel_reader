@@ -3,7 +3,7 @@ use quick_xml::events::Event;
 
 use crate::{common_types::HexColor, excel::XmlReader, helper::format_hex_string};
 
-use super::{rgb_color::RgbColor, Color};
+use super::{rgb_color::XlsxRgbColor, XlsxColor};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.colors?view=openxml-3.0.1
 ///
@@ -11,7 +11,7 @@ use super::{rgb_color::RgbColor, Color};
 /// When a custom color has been selected, the mruColors collection is written.
 // tag: colors
 #[derive(Debug, Clone, PartialEq)]
-pub struct StyleSheetColors {
+pub struct XlsxStyleSheetColors {
     // children
     /// indexedColors
     ///
@@ -24,13 +24,13 @@ pub struct StyleSheetColors {
     ///     <rgbColor rgb="ffffffff" />
     ///  </indexedColors>
     /// ```
-    pub indexed_colors: Vec<RgbColor>,
+    pub indexed_colors: Vec<XlsxRgbColor>,
 
     // tag: mruColors
-    pub mru_colors: Vec<Color>,
+    pub mru_colors: Vec<XlsxColor>,
 }
 
-impl StyleSheetColors {
+impl XlsxStyleSheetColors {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
         let mut colors = Self {
@@ -59,7 +59,7 @@ impl StyleSheetColors {
     }
 }
 
-impl StyleSheetColors {
+impl XlsxStyleSheetColors {
     pub(crate) fn get_indexed_color(&self, index: u64) -> Option<HexColor> {
         let Ok(index) = TryInto::<usize>::try_into(index) else {
             return None;
@@ -79,8 +79,8 @@ impl StyleSheetColors {
     }
 }
 
-fn load_mru_colors(reader: &mut XmlReader) -> anyhow::Result<Vec<Color>> {
-    let mut colors: Vec<Color> = vec![];
+fn load_mru_colors(reader: &mut XmlReader) -> anyhow::Result<Vec<XlsxColor>> {
+    let mut colors: Vec<XlsxColor> = vec![];
     let mut buf = Vec::new();
 
     loop {
@@ -88,7 +88,7 @@ fn load_mru_colors(reader: &mut XmlReader) -> anyhow::Result<Vec<Color>> {
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"color" => {
-                let color = Color::load(e)?;
+                let color = XlsxColor::load(e)?;
                 colors.push(color);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"mruColors" => break,
@@ -101,8 +101,8 @@ fn load_mru_colors(reader: &mut XmlReader) -> anyhow::Result<Vec<Color>> {
     return Ok(colors);
 }
 
-fn load_indexed_colors(reader: &mut XmlReader) -> anyhow::Result<Vec<RgbColor>> {
-    let mut colors: Vec<RgbColor> = vec![];
+fn load_indexed_colors(reader: &mut XmlReader) -> anyhow::Result<Vec<XlsxRgbColor>> {
+    let mut colors: Vec<XlsxRgbColor> = vec![];
     let mut buf = Vec::new();
 
     loop {
@@ -110,7 +110,7 @@ fn load_indexed_colors(reader: &mut XmlReader) -> anyhow::Result<Vec<RgbColor>> 
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"rgbColor" => {
-                let color = RgbColor::load(e)?;
+                let color = XlsxRgbColor::load(e)?;
                 colors.push(color);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"indexedColors" => break,

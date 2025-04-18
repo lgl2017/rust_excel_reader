@@ -28,7 +28,7 @@ use super::text::load_text;
 /// The phonetic text character, "カ" is displayed over the "課" character and the phonetic text "ケ" is displayed above the "毛" character, using the font record in the style sheet at index 1.
 // tag: rPh
 #[derive(Debug, Clone, PartialEq)]
-pub struct PhoneticRun {
+pub struct XlsxPhoneticRun {
     // child
     // t (Text)
     pub text: Option<Text>,
@@ -47,7 +47,7 @@ pub struct PhoneticRun {
     pub base_text_start_index: Option<u64>,
 }
 
-impl PhoneticRun {
+impl XlsxPhoneticRun {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut run = Self {
             text: None,

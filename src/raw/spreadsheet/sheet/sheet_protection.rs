@@ -8,7 +8,7 @@
 /// ```
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct SheetProtection {
+pub struct XlsxSheetProtection {
     //     AlgorithmName
     // Cryptographic Algorithm Name
     // Represents the following attribute in the schema: algorithmName

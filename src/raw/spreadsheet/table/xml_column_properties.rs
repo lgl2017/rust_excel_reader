@@ -19,7 +19,7 @@ use crate::{
 /// ```
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct XmlColumnProperties {
+pub struct XlsxXmlColumnProperties {
     // extLst (Future Feature Data Storage Area) Not supported
 
     // attributes
@@ -38,7 +38,7 @@ pub struct XmlColumnProperties {
     pub xml_path: Option<String>,
 }
 
-impl XmlColumnProperties {
+impl XlsxXmlColumnProperties {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut properties = Self {

@@ -1,4 +1,4 @@
-use crate::raw::spreadsheet::table::table_style_info::TableStyleInfo;
+use crate::raw::spreadsheet::table::table_style_info::XlsxTableStyleInfo;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct TableStyle {
@@ -28,7 +28,7 @@ pub struct TableStyle {
 
 impl TableStyle {
     pub(crate) fn from_raw(
-        style: Option<TableStyleInfo>,
+        style: Option<XlsxTableStyleInfo>,
         default_table_style: Option<String>,
     ) -> Self {
         let Some(style) = style else {

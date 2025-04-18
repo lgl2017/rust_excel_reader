@@ -1,13 +1,13 @@
 use std::io::{Read, Seek};
 
 use anyhow::bail;
-use calculation_properties::CalculationProperties;
-use custom_workbook_view::{load_custom_bookviews, CustomWorkbookViews};
-use defined_name::{load_defined_names, DefinedNames};
+use calculation_properties::XlsxCalculationProperties;
+use custom_workbook_view::{load_custom_bookviews, XlsxCustomWorkbookViews};
+use defined_name::{load_defined_names, XlsxDefinedNames};
 use quick_xml::events::Event;
-use sheet::{load_sheets, Sheets};
-use workbook_properties::WorkbookProperties;
-use workbook_view::{load_bookviews, WorkbookViews};
+use sheet::{load_sheets, XlsxSheets};
+use workbook_properties::XlsxWorkbookProperties;
+use workbook_view::{load_bookviews, XlsxWorkbookViews};
 use zip::ZipArchive;
 
 use crate::excel::xml_reader;
@@ -15,7 +15,6 @@ use crate::excel::xml_reader;
 pub mod calculation_properties;
 pub mod custom_workbook_view;
 pub mod defined_name;
-pub mod externam_reference;
 pub mod sheet;
 pub mod workbook_properties;
 pub mod workbook_view;
@@ -58,21 +57,21 @@ pub mod workbook_view;
 /// ```
 /// xml tag: workbook
 #[derive(Debug, Clone, PartialEq)]
-pub struct Workbook {
+pub struct XlsxWorkbook {
     // extLst (Future Feature Data Storage Area)	Not supported
 
     // Child Elements
     // bookViews (Workbook Views)	§18.2.1
-    pub bookviews: Option<WorkbookViews>,
+    pub bookviews: Option<XlsxWorkbookViews>,
 
     // calcPr (Calculation Properties)	§18.2.2
-    pub calculation_propertis: Option<CalculationProperties>,
+    pub calculation_propertis: Option<XlsxCalculationProperties>,
 
     // customWorkbookViews (Custom Workbook Views)	§18.2.4
-    pub custom_workbook_views: Option<CustomWorkbookViews>,
+    pub custom_workbook_views: Option<XlsxCustomWorkbookViews>,
 
     // definedNames (Defined Names)	§18.2.6
-    pub defined_names: Option<DefinedNames>,
+    pub defined_names: Option<XlsxDefinedNames>,
     // externalReferences (External References)	§18.2.9
     // fileRecoveryPr (File Recovery Properties)	§18.2.11
     // fileSharing (File Sharing)	§18.2.12
@@ -81,17 +80,17 @@ pub struct Workbook {
     // oleSize (Embedded Object Size)	§18.2.16
     // pivotCaches (PivotCaches)	§18.2.18
     // sheets (Sheets)	§18.2.20
-    pub sheets: Option<Sheets>,
+    pub sheets: Option<XlsxSheets>,
     // smartTagPr (Smart Tag Properties)	§18.2.21
     // smartTagTypes (Smart Tag Types)	§18.2.23
     // webPublishing (Web Publishing Properties)	§18.2.24
     // webPublishObjects (Web Publish Objects)	§18.2.26
     // workbookPr (Workbook Properties)	§18.2.28
-    pub workbook_properties: Option<WorkbookProperties>,
+    pub workbook_properties: Option<XlsxWorkbookProperties>,
     // workbookProtection (Workbook Protection)
 }
 
-impl Workbook {
+impl XlsxWorkbook {
     pub(crate) fn load(zip: &mut ZipArchive<impl Read + Seek>) -> anyhow::Result<Self> {
         let path = "xl/workbook.xml";
         let mut workbook = Self {
@@ -120,7 +119,7 @@ impl Workbook {
                     workbook.bookviews = Some(load_bookviews(&mut reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"calcPr" => {
-                    workbook.calculation_propertis = Some(CalculationProperties::load(e)?);
+                    workbook.calculation_propertis = Some(XlsxCalculationProperties::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"customWorkbookViews" => {
                     workbook.custom_workbook_views = Some(load_custom_bookviews(&mut reader)?);
@@ -132,7 +131,7 @@ impl Workbook {
                     workbook.sheets = Some(load_sheets(&mut reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"workbookPr" => {
-                    workbook.workbook_properties = Some(WorkbookProperties::load(e)?);
+                    workbook.workbook_properties = Some(XlsxWorkbookProperties::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"workbook" => break,
                 Ok(Event::Eof) => break,

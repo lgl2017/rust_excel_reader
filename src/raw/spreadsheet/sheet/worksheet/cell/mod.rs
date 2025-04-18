@@ -1,7 +1,7 @@
 use anyhow::bail;
-use cell_formula::CellFormula;
-use cell_value::CellValue;
-use inline_string::{load_inline_string, InlineString};
+use cell_formula::XlsxCellFormula;
+use cell_value::XlsxCellValue;
+use inline_string::{load_inline_string, XlsxInlineString};
 use quick_xml::events::{BytesStart, Event};
 
 use crate::{
@@ -42,18 +42,18 @@ pub mod inline_string;
 /// </c>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct Cell {
+pub struct XlsxCell {
     /// extLst (Future Feature Data Storage Area)	Not supporte
 
     /// Child Elements
     /// f (Formula)	§18.3.1.40
-    pub formula: Option<CellFormula>,
+    pub formula: Option<XlsxCellFormula>,
 
     /// is (Rich Text Inline)	§18.3.1.53
-    pub inline_string: Option<InlineString>,
+    pub inline_string: Option<XlsxInlineString>,
 
     /// v (Cell Value)
-    pub cell_value: Option<CellValue>,
+    pub cell_value: Option<XlsxCellValue>,
 
     /// Attributes	Description
     /// cm (Cell Metadata Index)
@@ -98,7 +98,7 @@ pub struct Cell {
     pub value_metadata: Option<u64>,
 }
 
-impl Cell {
+impl XlsxCell {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut cell = Self {
             formula: None,
@@ -154,13 +154,13 @@ impl Cell {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"f" => {
-                    cell.formula = Some(CellFormula::load(reader, e)?);
+                    cell.formula = Some(XlsxCellFormula::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"is" => {
                     cell.inline_string = Some(load_inline_string(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"v" => {
-                    cell.cell_value = Some(CellValue::load(reader, e)?);
+                    cell.cell_value = Some(XlsxCellValue::load(reader, e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"c" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file at `c`."),

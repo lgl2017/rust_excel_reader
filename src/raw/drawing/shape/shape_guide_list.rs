@@ -1,7 +1,7 @@
+use super::shape_guide::XlsxShapeGuide;
+use crate::excel::XmlReader;
 use anyhow::bail;
 use quick_xml::events::Event;
-use crate::excel::XmlReader;
-use super::shape_guide::ShapeGuide;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.shapeguidelist?view=openxml-3.0.1
 ///
@@ -14,18 +14,18 @@ use super::shape_guide::ShapeGuide;
 /// </a:gdLst>
 /// ```
 
-pub type ShapeGuideList = Vec<ShapeGuide>;
+pub type XlsxShapeGuideList = Vec<XlsxShapeGuide>;
 
-pub(crate) fn load_shape_guide_list(reader: &mut XmlReader) -> anyhow::Result<ShapeGuideList> {
+pub(crate) fn load_shape_guide_list(reader: &mut XmlReader) -> anyhow::Result<XlsxShapeGuideList> {
     let mut buf = Vec::new();
-    let mut guides: Vec<ShapeGuide> = vec![];
+    let mut guides: Vec<XlsxShapeGuide> = vec![];
 
     loop {
         buf.clear();
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"gd" => {
-                guides.push(ShapeGuide::load(e)?);
+                guides.push(XlsxShapeGuide::load(e)?);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"gdLst" => break,
             Ok(Event::Eof) => bail!("unexpected end of file."),
@@ -35,34 +35,3 @@ pub(crate) fn load_shape_guide_list(reader: &mut XmlReader) -> anyhow::Result<Sh
     }
     Ok(guides)
 }
-
-// #[derive(Debug, Clone, PartialEq)]
-// pub struct ShapeGuideList {
-//     // children
-//     // gd (Shape Guide)
-//     pub guide: Option<Vec<ShapeGuide>>,
-// }
-
-// impl ShapeGuideList {
-//     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
-//         let mut buf = Vec::new();
-//         let mut guides: Vec<ShapeGuide> = vec![];
-
-//         loop {
-//             buf.clear();
-
-//             match reader.read_event_into(&mut buf) {
-//                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"gd" => {
-//                     guides.push(ShapeGuide::load(e)?);
-//                 }
-//                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"gdLst" => break,
-//                 Ok(Event::Eof) => bail!("unexpected end of file."),
-//                 Err(e) => bail!(e.to_string()),
-//                 _ => (),
-//             }
-//         }
-//         Ok(Self {
-//             guide: Some(guides),
-//         })
-//     }
-// }

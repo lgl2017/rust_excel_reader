@@ -3,7 +3,7 @@ use quick_xml::events::BytesStart;
 
 use crate::excel::XmlReader;
 
-use crate::{helper::string_to_int, raw::drawing::color::ColorEnum};
+use crate::{helper::string_to_int, raw::drawing::color::XlsxColorEnum};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.glow?view=openxml-3.0.1
 /// specifies a glow effect, in which a color blurred outline is added outside the edges of the object.
@@ -20,15 +20,15 @@ use crate::{helper::string_to_int, raw::drawing::color::ColorEnum};
 /// ```
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Glow {
+pub struct XlsxGlow {
     // children
-    pub color: Option<ColorEnum>,
+    pub color: Option<XlsxColorEnum>,
 
     // attribute
     pub rad: Option<i64>,
 }
 
-impl Glow {
+impl XlsxGlow {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut glow = Self {
@@ -54,7 +54,7 @@ impl Glow {
             }
         }
 
-        glow.color = ColorEnum::load(reader, b"glow")?;
+        glow.color = XlsxColorEnum::load(reader, b"glow")?;
 
         Ok(glow)
     }

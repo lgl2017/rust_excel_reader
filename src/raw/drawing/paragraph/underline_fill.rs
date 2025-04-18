@@ -1,4 +1,4 @@
-use crate::raw::drawing::fill::FillStyleEnum;
+use crate::raw::drawing::fill::XlsxFillStyleEnum;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.underlinefill?view=openxml-3.0.1
 ///
@@ -14,4 +14,4 @@ use crate::raw::drawing::fill::FillStyleEnum;
 ///     </a:uFill>
 /// </a:rPr>
 /// ```
-pub type UnderlineFill = FillStyleEnum;
+pub type XlsxUnderlineFill = XlsxFillStyleEnum;

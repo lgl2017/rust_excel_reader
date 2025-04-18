@@ -3,8 +3,8 @@ use crate::{
     raw::{
         drawing::scheme::color_scheme::XlsxColorScheme,
         spreadsheet::{
-            string_item::run_properties::RunProperties as RawRunProperties,
-            stylesheet::{color::stylesheet_colors::XlsxStyleSheetColors, font::Font as RawFont},
+            string_item::run_properties::XlsxRunProperties,
+            stylesheet::{color::stylesheet_colors::XlsxStyleSheetColors, font::XlsxFont},
         },
     },
 };
@@ -100,7 +100,7 @@ impl Font {
     }
 
     pub(crate) fn from_raw_font(
-        font: Option<RawFont>,
+        font: Option<XlsxFont>,
         stylesheet_colors: Option<XlsxStyleSheetColors>,
         color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
@@ -131,7 +131,7 @@ impl Font {
     }
 
     pub(crate) fn from_raw_run_properties(
-        r_pr: Option<RawRunProperties>,
+        r_pr: Option<XlsxRunProperties>,
         stylesheet_colors: Option<XlsxStyleSheetColors>,
         color_scheme: Option<XlsxColorScheme>,
     ) -> Self {

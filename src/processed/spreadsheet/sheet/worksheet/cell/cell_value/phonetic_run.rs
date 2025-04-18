@@ -1,6 +1,4 @@
-use crate::{
-    common_types::Text, raw::spreadsheet::string_item::phonetic_run::PhoneticRun as RawRun,
-};
+use crate::{common_types::Text, raw::spreadsheet::string_item::phonetic_run::XlsxPhoneticRun};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.phoneticrun?view=openxml-3.0.1
 ///
@@ -39,7 +37,7 @@ pub struct PhoneticRun {
 }
 
 impl PhoneticRun {
-    pub(crate) fn from_raw(run: RawRun) -> Option<Self> {
+    pub(crate) fn from_raw(run: XlsxPhoneticRun) -> Option<Self> {
         let (Some(t), Some(s), Some(e)) =
             (run.text, run.base_text_start_index, run.base_text_end_index)
         else {

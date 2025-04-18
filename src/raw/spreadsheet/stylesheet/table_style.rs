@@ -22,10 +22,10 @@ use crate::{
 /// ```
 // tag: tableStyles
 #[derive(Debug, Clone, PartialEq)]
-pub struct TableStyles {
+pub struct XlsxTableStyles {
     // children
     // tag: tableStyle
-    pub table_style: Option<Vec<TableStyle>>,
+    pub table_style: Option<Vec<XlsxTableStyle>>,
 
     // attributes
     /// Name of the default table style to apply to new PivotTable
@@ -37,7 +37,7 @@ pub struct TableStyles {
     pub default_table_style: Option<String>,
 }
 
-impl TableStyles {
+impl XlsxTableStyles {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut table_styles = Self {
             table_style: None,
@@ -45,7 +45,7 @@ impl TableStyles {
             default_table_style: None,
         };
 
-        let mut table_style: Vec<TableStyle> = vec![];
+        let mut table_style: Vec<XlsxTableStyle> = vec![];
 
         let attributes = e.attributes();
 
@@ -76,7 +76,7 @@ impl TableStyles {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"tableStyle" => {
-                    let style = TableStyle::load(reader, e)?;
+                    let style = XlsxTableStyle::load(reader, e)?;
                     table_style.push(style);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"tableStyles" => break,
@@ -95,7 +95,7 @@ impl TableStyles {
 /// TableStyle: https:// - learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.tablestyle?view=openxml-3.0.1
 // tag: tableStyle
 #[derive(Debug, Clone, PartialEq)]
-pub struct TableStyle {
+pub struct XlsxTableStyle {
     // children
     /// [TableStyleElement]
     // tag: tableStyleElement
@@ -112,7 +112,7 @@ pub struct TableStyle {
     table: Option<bool>,
 }
 
-impl TableStyle {
+impl XlsxTableStyle {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut style = Self {

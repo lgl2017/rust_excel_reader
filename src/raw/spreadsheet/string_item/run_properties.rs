@@ -4,7 +4,7 @@ use quick_xml::events::Event;
 use crate::{
     excel::XmlReader,
     helper::{extract_val_attribute, string_to_bool, string_to_float, string_to_unsignedint},
-    raw::spreadsheet::stylesheet::color::Color,
+    raw::spreadsheet::stylesheet::color::XlsxColor,
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.runproperties?view=openxml-3.0.1
@@ -25,7 +25,7 @@ use crate::{
 /// ```
 /// rPr (Rich Text Run)
 #[derive(Debug, Clone, PartialEq)]
-pub struct RunProperties {
+pub struct XlsxRunProperties {
     // children
     /// Bold: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.bold?view=openxml-3.0.1
     ///
@@ -47,7 +47,7 @@ pub struct RunProperties {
     pub charset: Option<String>,
 
     ///  color
-    pub color: Option<Color>,
+    pub color: Option<XlsxColor>,
 
     /// Condense: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.condense?view=openxml-3.0.1
     ///
@@ -167,7 +167,7 @@ pub struct RunProperties {
     pub vert_align: Option<String>,
 }
 
-impl RunProperties {
+impl XlsxRunProperties {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
 
@@ -201,7 +201,7 @@ impl RunProperties {
                     properties.charset = extract_val_attribute(e)?;
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"color" => {
-                    properties.color = Some(Color::load(e)?);
+                    properties.color = Some(XlsxColor::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"condense" => {
                     let val_string = extract_val_attribute(e)?.unwrap_or("1".to_owned());

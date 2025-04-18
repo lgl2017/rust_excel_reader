@@ -14,26 +14,26 @@ use crate::excel::xml_reader;
 ///   <Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml" />
 /// </Relationships>
 /// ```
-pub type Relationships = Vec<Relationship>;
+pub type XlsxRelationships = Vec<XlsxRelationship>;
 
 /// get relationships of a workbook
 pub(crate) fn load_workbook_relationships(
     zip: &mut ZipArchive<impl Read + Seek>,
-) -> anyhow::Result<Relationships> {
+) -> anyhow::Result<XlsxRelationships> {
     let path = "xl/_rels/workbook.xml.rels";
     let Some(mut reader) = xml_reader(zip, path) else {
         bail!("Failed to get relationships.");
     };
 
     let mut buf = Vec::new();
-    let mut relationships: Vec<Relationship> = vec![];
+    let mut relationships: Vec<XlsxRelationship> = vec![];
 
     loop {
         buf.clear();
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"Relationship" => {
-                let Some(rel) = Relationship::load(e)? else {
+                let Some(rel) = XlsxRelationship::load(e)? else {
                     continue;
                 };
 
@@ -53,7 +53,7 @@ pub(crate) fn load_workbook_relationships(
 pub(crate) fn load_sheet_relationships(
     zip: &mut ZipArchive<impl Read + Seek>,
     sheet_path: &str,
-) -> anyhow::Result<Relationships> {
+) -> anyhow::Result<XlsxRelationships> {
     let last_folder_index = sheet_path
         .rfind('/')
         .context("sheet is not within a folder.")?;
@@ -65,14 +65,14 @@ pub(crate) fn load_sheet_relationships(
     };
 
     let mut buf = Vec::new();
-    let mut relationships: Vec<Relationship> = vec![];
+    let mut relationships: Vec<XlsxRelationship> = vec![];
 
     loop {
         buf.clear();
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"Relationship" => {
-                let Some(mut rel) = Relationship::load(e)? else {
+                let Some(mut rel) = XlsxRelationship::load(e)? else {
                     continue;
                 };
                 let target = rel.clone().target;
@@ -101,13 +101,13 @@ pub(crate) fn load_sheet_relationships(
 ///
 /// defines an association between a source Package or PackagePart to a target PackagePart or external resource.
 #[derive(Debug, Clone, PartialEq)]
-pub struct Relationship {
+pub struct XlsxRelationship {
     id: String,
     r#type: String,
     target: String,
 }
 
-impl Relationship {
+impl XlsxRelationship {
     pub fn load(e: &BytesStart) -> anyhow::Result<Option<Self>> {
         let attributes = e.attributes();
 
@@ -144,7 +144,10 @@ impl Relationship {
     }
 }
 
-pub(crate) fn zip_path_for_type(relationships: &Vec<Relationship>, r#type: &str) -> Vec<String> {
+pub(crate) fn zip_path_for_type(
+    relationships: &Vec<XlsxRelationship>,
+    r#type: &str,
+) -> Vec<String> {
     let filtered: Vec<String> = relationships
         .iter()
         .filter(|r| {
@@ -158,7 +161,7 @@ pub(crate) fn zip_path_for_type(relationships: &Vec<Relationship>, r#type: &str)
     return filtered;
 }
 
-pub(crate) fn zip_path_for_id(relationships: &Vec<Relationship>, id: &str) -> Option<String> {
+pub(crate) fn zip_path_for_id(relationships: &Vec<XlsxRelationship>, id: &str) -> Option<String> {
     let filtered: Vec<String> = relationships
         .iter()
         .filter(|r| r.to_owned().id.eq_ignore_ascii_case(&id))
@@ -167,7 +170,7 @@ pub(crate) fn zip_path_for_id(relationships: &Vec<Relationship>, id: &str) -> Op
     return filtered.first().cloned();
 }
 
-pub(crate) fn raw_target_for_id(relationships: &Vec<Relationship>, id: &str) -> Option<String> {
+pub(crate) fn raw_target_for_id(relationships: &Vec<XlsxRelationship>, id: &str) -> Option<String> {
     let filtered: Vec<String> = relationships
         .into_iter()
         .filter(|r| r.to_owned().id.eq_ignore_ascii_case(&id))

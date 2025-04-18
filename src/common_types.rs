@@ -8,24 +8,26 @@ use crate::helper::r1c1_dimension_to_row_col;
 use crate::helper::string_to_int;
 
 /// Hex representation of RGBA (alpha last)
+///
 /// ex: #88f94eff
 pub type HexColor = String;
 
 pub type Text = String;
 
-pub type SimplePercentage = i64;
+pub type XlsxSimplePercentage = i64;
 
 /// https://c-rex.net/samples/ooxml/e1/Part4/OOXML_P4_DOCX_ST_AdjCoordinate_topic_ID0E14KNB.html
+///
 /// `ST_AdjCoordinate` defined as a union of the following
 /// - `ST_Coordinate` simple type: i64
 /// - `ST_GeomGuideName`: String referencing to a geometry guide name
 #[derive(Debug, Clone, PartialEq)]
-pub enum AdjustCoordinate {
+pub enum XlsxAdjustCoordinate {
     GuideName(String),
     Coordinate(i64),
 }
 
-impl AdjustCoordinate {
+impl XlsxAdjustCoordinate {
     pub fn from_string(str: &str) -> Self {
         return if let Some(coordinate) = string_to_int(str) {
             Self::Coordinate(coordinate)
@@ -40,12 +42,12 @@ impl AdjustCoordinate {
 /// - `ST_Angle` simple type: i64
 /// - `ST_GeomGuideName`: String referencing to a geometry guide name
 #[derive(Debug, Clone, PartialEq)]
-pub enum AdjustAngle {
+pub enum XlsxAdjustAngle {
     GuideName(String),
     Angle(i64),
 }
 
-impl AdjustAngle {
+impl XlsxAdjustAngle {
     pub fn from_string(str: &str) -> Self {
         return if let Some(angle) = string_to_int(str) {
             Self::Angle(angle)
@@ -117,7 +119,7 @@ impl Dimension {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
-pub struct XSDDatetime {
+pub struct XlsxDatetime {
     pub datetime: NaiveDateTime,
     pub offset: Option<FixedOffset>,
 }

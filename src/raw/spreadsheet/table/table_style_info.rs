@@ -18,7 +18,7 @@ use crate::helper::string_to_bool;
 ///
 /// tableStyleInfo (Table Style)
 #[derive(Debug, Clone, PartialEq)]
-pub struct TableStyleInfo {
+pub struct XlsxTableStyleInfo {
     // Attributes
     /// name (Style Name)
     ///
@@ -51,7 +51,7 @@ pub struct TableStyleInfo {
     pub show_row_stripes: Option<bool>,
 }
 
-impl TableStyleInfo {
+impl XlsxTableStyleInfo {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut info = Self {

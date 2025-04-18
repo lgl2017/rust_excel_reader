@@ -9,11 +9,11 @@ use crate::helper::string_to_bool;
 /// True when this element’s present without `val` attribute or the `val` attribute is true
 // tag: rtl
 #[derive(Debug, Clone, PartialEq)]
-pub struct RightToLeft {
+pub struct XlsxRightToLeft {
     pub val: Option<bool>,
 }
 
-impl RightToLeft {
+impl XlsxRightToLeft {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut rtl = Self { val: Some(true) };

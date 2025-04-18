@@ -1,7 +1,8 @@
-use anyhow::bail;
-use outline::Outline;
-use quick_xml::events::Event;
 use crate::excel::XmlReader;
+use anyhow::bail;
+use outline::XlsxOutline;
+use quick_xml::events::Event;
+
 pub mod custom_dash;
 pub mod head_end;
 pub mod line_join_bevel;
@@ -11,7 +12,7 @@ pub mod outline;
 pub mod round_line_join;
 pub mod tail_end;
 
-/// LineStyleList: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.linestylelist?view=openxml-3.0.1
+/// XlsxLineStyleList: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.linestylelist?view=openxml-3.0.1
 /// defines a list of three line styles for use within a theme.
 /// The three line styles are arranged in order from subtle to moderate to intense versions of lines.
 ///
@@ -41,11 +42,10 @@ pub mod tail_end;
 ///   </ln>
 /// </lnStyleLst>
 /// ```
-// tag: lnStyleLst
-pub type LineStyleList = Vec<Outline>;
+pub type XlsxLineStyleList = Vec<XlsxOutline>;
 
-pub(crate) fn load_line_style_list(reader: &mut XmlReader) -> anyhow::Result<LineStyleList> {
-    let mut outlines: Vec<Outline> = vec![];
+pub(crate) fn load_line_style_list(reader: &mut XmlReader) -> anyhow::Result<XlsxLineStyleList> {
+    let mut outlines: Vec<XlsxOutline> = vec![];
 
     let mut buf = Vec::new();
 
@@ -54,7 +54,7 @@ pub(crate) fn load_line_style_list(reader: &mut XmlReader) -> anyhow::Result<Lin
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"ln" => {
-                outlines.push(Outline::load(reader, e)?);
+                outlines.push(XlsxOutline::load(reader, e)?);
             }
 
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"lnStyleLst" => break,

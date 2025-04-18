@@ -1,11 +1,7 @@
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
-use crate::{
-    common_types::{Coordinate, Dimension},
-    excel::XmlReader,
-    helper::a1_dimension_to_row_col,
-};
+use crate::{common_types::Dimension, excel::XmlReader};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.mergecells?view=openxml-3.0.1
 ///
@@ -19,10 +15,10 @@ use crate::{
 ///   <mergeCell ref="E19:G19"/>
 /// </mergeCells>
 /// ```
-pub type MergeCells = Vec<MergeCell>;
+pub type XlsxMergeCells = Vec<XlsxMergeCell>;
 
-pub(crate) fn load_merge_cells(reader: &mut XmlReader) -> anyhow::Result<MergeCells> {
-    let mut cells: MergeCells = vec![];
+pub(crate) fn load_merge_cells(reader: &mut XmlReader) -> anyhow::Result<XlsxMergeCells> {
+    let mut cells: XlsxMergeCells = vec![];
 
     let mut buf = Vec::new();
     loop {
@@ -52,8 +48,9 @@ pub(crate) fn load_merge_cells(reader: &mut XmlReader) -> anyhow::Result<MergeCe
 /// ```
 /// <mergeCell ref="A1:B1" />
 /// ```
-pub type MergeCell = Dimension;
-pub(crate) fn load_merge_cell(e: &BytesStart) -> anyhow::Result<Option<MergeCell>> {
+pub type XlsxMergeCell = Dimension;
+
+pub(crate) fn load_merge_cell(e: &BytesStart) -> anyhow::Result<Option<XlsxMergeCell>> {
     let attributes = e.attributes();
 
     for a in attributes {
@@ -61,11 +58,7 @@ pub(crate) fn load_merge_cell(e: &BytesStart) -> anyhow::Result<Option<MergeCell
             Ok(a) => match a.key.local_name().as_ref() {
                 b"ref" => {
                     let value = a.value.as_ref();
-                    let dimension = a1_dimension_to_row_col(value)?;
-                    return Ok(Some(MergeCell {
-                        start: Coordinate::from_point(dimension.0),
-                        end: Coordinate::from_point(dimension.1),
-                    }));
+                    return Ok(XlsxMergeCell::from_a1(value));
                 }
                 _ => {}
             },

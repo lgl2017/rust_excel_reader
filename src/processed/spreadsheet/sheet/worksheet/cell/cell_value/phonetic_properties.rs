@@ -3,8 +3,7 @@ use crate::{
     raw::{
         drawing::scheme::color_scheme::XlsxColorScheme,
         spreadsheet::{
-            string_item::phonetic_properties::PhoneticProperties as RawProperties,
-            stylesheet::StyleSheet,
+            string_item::phonetic_properties::XlsxPhoneticProperties, stylesheet::XlsxStyleSheet,
         },
     },
 };
@@ -53,8 +52,8 @@ pub struct PhoneticProperties {
 
 impl PhoneticProperties {
     pub(crate) fn from_raw(
-        properties: RawProperties,
-        stylesheet: StyleSheet,
+        properties: XlsxPhoneticProperties,
+        stylesheet: XlsxStyleSheet,
         color_scheme: Option<XlsxColorScheme>,
     ) -> Self {
         let font_id = properties.font_id.unwrap_or(0).try_into().unwrap_or(0);

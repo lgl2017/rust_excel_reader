@@ -1,31 +1,32 @@
-use std::io::{Read, Seek};
-
-use anyhow::bail;
-use column_information::{load_column_infos, ColumnInformations};
-use merge_cell::{load_merge_cells, MergeCells};
-use quick_xml::events::Event;
-use sheet_data::SheetData;
-use sheet_dimension::{load_sheet_dimension, SheetDimension};
-use table_part::{load_table_parts, TableParts};
-use zip::ZipArchive;
-
-use crate::{
-    excel::xml_reader,
-    raw::spreadsheet::{
-        filter::auto_filter::AutoFilter, string_item::phonetic_properties::PhoneticProperties,
-    },
-};
-
-use super::sheet_format_properties::SheetFormatProperties;
-
 pub mod cell;
 pub mod column_information;
+pub mod hyperlink;
 pub mod merge_cell;
 pub mod row;
 pub mod sheet_data;
 pub mod sheet_dimension;
 pub mod sheet_view;
 pub mod table_part;
+
+use anyhow::bail;
+use column_information::{load_column_infos, XlsxColumnInformations};
+use hyperlink::{load_hyperlinks, XlsxHyperlinks};
+use merge_cell::{load_merge_cells, XlsxMergeCells};
+use quick_xml::events::Event;
+use sheet_data::XlsxSheetData;
+use sheet_dimension::{load_sheet_dimension, XlsxSheetDimension};
+use std::io::{Read, Seek};
+use table_part::{load_table_parts, XlsxTableParts};
+use zip::ZipArchive;
+
+use super::sheet_format_properties::XlsxSheetFormatProperties;
+use crate::{
+    excel::xml_reader,
+    raw::spreadsheet::{
+        filter::auto_filter::XlsxAutoFilter,
+        string_item::phonetic_properties::XlsxPhoneticProperties,
+    },
+};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.worksheet?view=openxml-3.0.1
 ///
@@ -68,17 +69,17 @@ pub mod table_part;
 /// ```
 /// worksheet (Worksheet)
 #[derive(Debug, Clone, PartialEq)]
-pub struct Worksheet {
+pub struct XlsxWorksheet {
     // extLst (Future Feature Data Storage Area) Not supported
 
     // Child Elements	Subclause
     // autoFilter (AutoFilter Settings)	§18.3.1.2
-    pub auto_filter: Option<AutoFilter>,
+    pub auto_filter: Option<XlsxAutoFilter>,
     // cellWatches (Cell Watch Items)	§18.3.1.9
     // colBreaks (Vertical Page Breaks)	§18.3.1.14
 
     // cols (Column Information)	§18.3.1.17
-    pub column_infos: Option<ColumnInformations>,
+    pub column_infos: Option<XlsxColumnInformations>,
     // conditionalFormatting (Conditional Formatting)	§18.3.1.18
     // controls (Embedded Controls)	§18.3.1.21
     // customProperties (Custom Properties)	§18.3.1.23
@@ -87,21 +88,24 @@ pub struct Worksheet {
     // dataValidations (Data Validations)	§18.3.1.33
 
     // dimension (Worksheet Dimensions)	§18.3.1.35
-    pub dimension: Option<SheetDimension>,
+    pub dimension: Option<XlsxSheetDimension>,
     // drawing (Drawing)	§18.3.1.36
     // drawingHF (Drawing Reference in Header Footer)	§18.3.1.37
     // headerFooter (Header Footer Settings)	§18.3.1.46
-    // hyperlinks (Hyperlinks)	§18.3.1.48
+
+    // hyperlinks (Hyperlinks)
+    pub hyperlinks: Option<XlsxHyperlinks>,
+
     // ignoredErrors (Ignored Errors)	§18.3.1.51
 
     // mergeCells (Merge Cells)	§18.3.1.55
-    pub merge_cells: Option<MergeCells>,
+    pub merge_cells: Option<XlsxMergeCells>,
 
     // oleObjects (Embedded Objects)	§18.3.1.60
     // pageMargins (Page Margins)	§18.3.1.62
     // pageSetup (Page Setup Settings)	§18.3.1.63
     // phoneticPr (Phonetic Properties)	§18.4.3
-    pub phonetic_properties: Option<PhoneticProperties>,
+    pub phonetic_properties: Option<XlsxPhoneticProperties>,
 
     // picture (Background Image)	§18.3.1.67
     // printOptions (Print Options)	§18.3.1.70
@@ -111,10 +115,10 @@ pub struct Worksheet {
     // sheetCalcPr (Sheet Calculation Properties)	§18.3.1.79
 
     // sheetData (Sheet Data)	§18.3.1.80
-    pub sheet_data: Option<SheetData>,
+    pub sheet_data: Option<XlsxSheetData>,
 
     // sheetFormatPr (Sheet Format Properties)	§18.3.1.81
-    pub sheet_format_properties: Option<SheetFormatProperties>,
+    pub sheet_format_properties: Option<XlsxSheetFormatProperties>,
     // sheetPr (Sheet Properties)	§18.3.1.82
     // sheetProtection (Sheet Protection Options)	§18.3.1.85
     // sheetViews (Sheet Views)	§18.3.1.88
@@ -122,15 +126,16 @@ pub struct Worksheet {
     // sortState (Sort State)	§18.3.1.92
 
     // tableParts (Table Parts)	§18.3.1.95
-    pub table_parts: Option<TableParts>, // webPublishItems (Web Publishing Items)
+    pub table_parts: Option<XlsxTableParts>, // webPublishItems (Web Publishing Items)
 }
 
-impl Worksheet {
+impl XlsxWorksheet {
     pub(crate) fn load(zip: &mut ZipArchive<impl Read + Seek>, path: &str) -> anyhow::Result<Self> {
         let mut worksheet = Self {
             auto_filter: None,
             column_infos: None,
             dimension: None,
+            hyperlinks: None,
             merge_cells: None,
             phonetic_properties: None,
             sheet_data: None,
@@ -152,7 +157,7 @@ impl Worksheet {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"autoFilter" => {
-                    worksheet.auto_filter = Some(AutoFilter::load(&mut reader, e)?);
+                    worksheet.auto_filter = Some(XlsxAutoFilter::load(&mut reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"cols" => {
                     worksheet.column_infos = Some(load_column_infos(&mut reader)?);
@@ -160,18 +165,20 @@ impl Worksheet {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"dimension" => {
                     worksheet.dimension = load_sheet_dimension(e)?;
                 }
-
+                Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"hyperlinks" => {
+                    worksheet.hyperlinks = Some(load_hyperlinks(&mut reader)?);
+                }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"mergeCells" => {
                     worksheet.merge_cells = Some(load_merge_cells(&mut reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"phoneticPr" => {
-                    worksheet.phonetic_properties = Some(PhoneticProperties::load(e)?);
+                    worksheet.phonetic_properties = Some(XlsxPhoneticProperties::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"sheetData" => {
-                    worksheet.sheet_data = Some(SheetData::load(&mut reader)?);
+                    worksheet.sheet_data = Some(XlsxSheetData::load(&mut reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"sheetFormatPr" => {
-                    worksheet.sheet_format_properties = Some(SheetFormatProperties::load(e)?);
+                    worksheet.sheet_format_properties = Some(XlsxSheetFormatProperties::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"tableParts" => {
                     worksheet.table_parts = Some(load_table_parts(&mut reader)?);

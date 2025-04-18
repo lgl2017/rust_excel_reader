@@ -1,16 +1,12 @@
-use crate::excel::XmlReader;
-
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
-use crate::{
-    helper::{string_to_bool, string_to_int},
-    raw::drawing::image::blip::Blip,
-};
+use super::rectangle::{XlsxFillRectangle, XlsxSourceRectangle};
+use crate::excel::XmlReader;
+use crate::helper::{string_to_bool, string_to_int};
+use crate::raw::drawing::image::blip::XlsxBlip;
 
-use super::rectangle::{FillRectangle, SourceRectangle};
-
-/// Blip Fill (Picture Fill): https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blipfill?view=openxml-3.0.1
+/// XlsxBlipFill (Picture Fill): https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blipfill?view=openxml-3.0.1
 ///
 /// Example:
 /// ```
@@ -22,16 +18,16 @@ use super::rectangle::{FillRectangle, SourceRectangle};
 /// </p:blipFill>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct BlipFill {
+pub struct XlsxBlipFill {
     //     Child Elements	Subclause
     // blip (Blip)	§20.1.8.13
-    pub blip: Option<Blip>,
+    pub blip: Option<XlsxBlip>,
     // srcRect (Source Rectangle)	§20.1.8.55
-    pub source_rect: Option<SourceRectangle>,
+    pub source_rect: Option<XlsxSourceRectangle>,
     // stretch (Stretch)	§20.1.8.56
-    pub stretch: Option<Stretch>,
+    pub stretch: Option<XlsxStretch>,
     // tile (Tile)
-    pub tile: Option<Tile>,
+    pub tile: Option<XlsxTile>,
 
     //  Attributes
     /// Specifies the DPI (dots per inch) used to calculate the size of the blip.
@@ -44,7 +40,7 @@ pub struct BlipFill {
     pub rot_with_shape: Option<bool>,
 }
 
-impl BlipFill {
+impl XlsxBlipFill {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut fill = Self {
@@ -84,16 +80,16 @@ impl BlipFill {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"blip" => {
-                    fill.blip = Some(Blip::load(reader, e)?);
+                    fill.blip = Some(XlsxBlip::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"srcRect" => {
-                    fill.source_rect = Some(SourceRectangle::load(e)?);
+                    fill.source_rect = Some(XlsxSourceRectangle::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"stretch" => {
-                    fill.stretch = Some(Stretch::load(reader)?);
+                    fill.stretch = Some(XlsxStretch::load(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"tile" => {
-                    fill.tile = Some(Tile::load(e)?);
+                    fill.tile = Some(XlsxTile::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"blipFill" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),
@@ -112,13 +108,13 @@ impl BlipFill {
 /// When stretching of an image is specified, a source rectangle, srcRect, is scaled to fit the specified fill rectangle.
 // tag: stretch
 #[derive(Debug, Clone, PartialEq)]
-pub struct Stretch {
+pub struct XlsxStretch {
     // Child Elements	Subclause
     // fillRect (Fill Rectangle)
-    pub fill_rectangle: Option<FillRectangle>,
+    pub fill_rectangle: Option<XlsxFillRectangle>,
 }
 
-impl Stretch {
+impl XlsxStretch {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
         let mut stretch = Self {
             fill_rectangle: None,
@@ -131,7 +127,7 @@ impl Stretch {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"fillRect" => {
-                    stretch.fill_rectangle = Some(FillRectangle::load(e)?);
+                    stretch.fill_rectangle = Some(XlsxFillRectangle::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"stretch" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),
@@ -146,7 +142,7 @@ impl Stretch {
 
 // tag: tile
 #[derive(Debug, Clone, PartialEq)]
-pub struct Tile {
+pub struct XlsxTile {
     // Attributes	Description
     /// Specifies where to align the first tile with respect to the shape.
     /// Alignment happens after the scaling, but before the additional offset.
@@ -177,7 +173,7 @@ pub struct Tile {
     pub ty: Option<i64>,
 }
 
-impl Tile {
+impl XlsxTile {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut tile = Self {

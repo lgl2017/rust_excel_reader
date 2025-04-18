@@ -3,7 +3,7 @@ use quick_xml::events::Event;
 
 use crate::{common_types::Text, excel::XmlReader};
 
-use super::{run_properties::RunProperties, text::load_text};
+use super::{run_properties::XlsxRunProperties, text::load_text};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.run?view=openxml-3.0.1
 ///
@@ -36,16 +36,16 @@ use super::{run_properties::RunProperties, text::load_text};
 /// ```
 /// r (Rich Text Run)
 #[derive(Debug, Clone, PartialEq)]
-pub struct Run {
+pub struct XlsxRichTextRun {
     // Child Elements	Subclause
     // rPr (Run Properties)	§18.4.7
-    pub run_properties: Option<RunProperties>,
+    pub run_properties: Option<XlsxRunProperties>,
 
     // t (Text)
     pub text: Option<Text>,
 }
 
-impl Run {
+impl XlsxRichTextRun {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
         let mut run = Self {
             run_properties: None,
@@ -57,7 +57,7 @@ impl Run {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"rPr" => {
-                    run.run_properties = Some(RunProperties::load(reader)?);
+                    run.run_properties = Some(XlsxRunProperties::load(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"t" => {
                     run.text = Some(load_text(reader)?);

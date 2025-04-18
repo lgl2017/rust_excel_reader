@@ -15,7 +15,7 @@ use crate::helper::{extract_val_attribute, string_to_int};
 /// ```
 // tag: buSzPts
 #[derive(Debug, Clone, PartialEq)]
-pub struct BulletSizePoints {
+pub struct XlsxBulletSizePoints {
     // Attributes
     /// Specifies the size of the bullets in point size.
     ///  Whole points are specified in increments of 100 starting with 100 being a point size of 1.
@@ -23,7 +23,7 @@ pub struct BulletSizePoints {
     pub val: Option<i64>,
 }
 
-impl BulletSizePoints {
+impl XlsxBulletSizePoints {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let mut bullet = Self { val: None };
         if let Some(val) = extract_val_attribute(e)? {

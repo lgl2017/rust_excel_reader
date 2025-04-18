@@ -5,7 +5,7 @@ use crate::excel::XmlReader;
 
 use crate::helper::string_to_int;
 
-use super::color_transforms::ColorTransform;
+use super::color_transforms::XlsxColorTransform;
 
 /// RgbColorModelPercentage: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.rgbcolormodelpercentage?view=openxml-3.0.1
 ///
@@ -16,16 +16,16 @@ use super::color_transforms::ColorTransform;
 /// ```
 // tag: scrgbClr
 #[derive(Debug, Clone, PartialEq)]
-pub struct ScrgbColor {
+pub struct XlsxScrgbColor {
     // attributes: b, g, r
     pub r: Option<i64>,
     pub g: Option<i64>,
     pub b: Option<i64>,
     // children
-    pub color_transforms: Option<Vec<ColorTransform>>,
+    pub color_transforms: Option<Vec<XlsxColorTransform>>,
 }
 
-impl ScrgbColor {
+impl XlsxScrgbColor {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut color = Self {
@@ -58,7 +58,7 @@ impl ScrgbColor {
             }
         }
 
-        color.color_transforms = Some(ColorTransform::load_list(reader, b"scrgbClr")?);
+        color.color_transforms = Some(XlsxColorTransform::load_list(reader, b"scrgbClr")?);
 
         Ok(color)
     }

@@ -3,7 +3,7 @@ use quick_xml::events::Event;
 
 use crate::excel::XmlReader;
 
-use super::row::Row;
+use super::row::XlsxRow;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.sheetdata?view=openxml-3.0.1
 ///
@@ -38,15 +38,15 @@ use super::row::Row;
 ///
 /// sheetData (Sheet Data)
 #[derive(Debug, Clone, PartialEq)]
-pub struct SheetData {
+pub struct XlsxSheetData {
     // Child Elements
     /// row (Row)
-    pub rows: Option<Vec<Row>>,
+    pub rows: Option<Vec<XlsxRow>>,
 }
 
-impl SheetData {
+impl XlsxSheetData {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
-        let mut rows: Vec<Row> = vec![];
+        let mut rows: Vec<XlsxRow> = vec![];
 
         let mut buf: Vec<u8> = Vec::new();
         loop {
@@ -54,7 +54,7 @@ impl SheetData {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"row" => {
-                    rows.push(Row::load(reader, e)?);
+                    rows.push(XlsxRow::load(reader, e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"sheetData" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file at `row`."),

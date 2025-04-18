@@ -3,13 +3,13 @@ use quick_xml::events::{BytesStart, Event};
 
 use crate::excel::XmlReader;
 
-use crate::raw::drawing::color::ColorEnum;
+use crate::raw::drawing::color::XlsxColorEnum;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.backgroundcolor?view=openxml-3.0.1
-pub type BackgroundColor = ColorEnum;
+pub type XlsxBackgroundColor = XlsxColorEnum;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.foregroundcolor?view=openxml-3.0.1
-pub type ForegroundColor = ColorEnum;
+pub type XlsxForegroundColor = XlsxColorEnum;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.patternfill?view=openxml-3.0.1
 ///
@@ -31,15 +31,15 @@ pub type ForegroundColor = ColorEnum;
 /// </a:pattFill>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct PatternFill {
+pub struct XlsxPatternFill {
     // Child Elements
     /// [BackgroundColor]
     // bgClr (Background color)	§20.1.8.10
-    pub bg_clr: Option<BackgroundColor>,
+    pub bg_clr: Option<XlsxBackgroundColor>,
 
     /// [ForegroundColor]
     // fgClr (Foreground color)
-    pub fg_clr: Option<ForegroundColor>,
+    pub fg_clr: Option<XlsxForegroundColor>,
 
     // Attributes
     /// Specifies one of a set of preset patterns to fill the object
@@ -48,7 +48,7 @@ pub struct PatternFill {
     pub prst: Option<String>,
 }
 
-impl PatternFill {
+impl XlsxPatternFill {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut fill = Self {
@@ -81,10 +81,10 @@ impl PatternFill {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"bgClr" => {
-                    fill.bg_clr = BackgroundColor::load(reader, b"bgClr")?;
+                    fill.bg_clr = XlsxBackgroundColor::load(reader, b"bgClr")?;
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"fgClr" => {
-                    fill.fg_clr = BackgroundColor::load(reader, b"fgClr")?;
+                    fill.fg_clr = XlsxForegroundColor::load(reader, b"fgClr")?;
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"pattFill" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

@@ -3,13 +3,13 @@ use chrono::{DateTime, NaiveDateTime};
 use quick_xml::events::BytesStart;
 use regex::Regex;
 
-use crate::common_types::XSDDatetime;
+use crate::common_types::XlsxDatetime;
 
 /// Converting Attributes string to datetime
-pub(crate) fn string_to_datetime(str: &str) -> Option<XSDDatetime> {
+pub(crate) fn string_to_datetime(str: &str) -> Option<XlsxDatetime> {
     // with time zone: YYYY-MM-DDThh:mm:ssZ
     if let Ok(date_time) = DateTime::parse_from_rfc3339(str) {
-        return Some(XSDDatetime {
+        return Some(XlsxDatetime {
             datetime: date_time.naive_utc(),
             offset: Some(date_time.offset().to_owned()),
         });
@@ -17,7 +17,7 @@ pub(crate) fn string_to_datetime(str: &str) -> Option<XSDDatetime> {
 
     // without time zone: YYYY-MM-DDThh:mm:ss
     if let Ok(naive_date_time) = NaiveDateTime::parse_from_str(&str, "%Y-%m-%dT%H:%M:%S") {
-        return Some(XSDDatetime {
+        return Some(XlsxDatetime {
             datetime: naive_date_time,
             offset: None,
         });

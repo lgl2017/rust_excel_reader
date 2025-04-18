@@ -1,4 +1,4 @@
-use crate::{excel::XmlReader, raw::spreadsheet::string_item::StringItem};
+use crate::{excel::XmlReader, raw::spreadsheet::string_item::XlsxStringItem};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.sharedstringitem?view=openxml-3.0.1
 ///
@@ -40,8 +40,10 @@ use crate::{excel::XmlReader, raw::spreadsheet::string_item::StringItem};
 ///     </r>
 /// </si>
 /// ```
-pub type SharedStringItem = StringItem;
+pub type XlsxSharedStringItem = XlsxStringItem;
 
-pub(crate) fn load_shared_string_item(reader: &mut XmlReader) -> anyhow::Result<SharedStringItem> {
-    return StringItem::load(reader, b"si");
+pub(crate) fn load_shared_string_item(
+    reader: &mut XmlReader,
+) -> anyhow::Result<XlsxSharedStringItem> {
+    return XlsxStringItem::load(reader, b"si");
 }

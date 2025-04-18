@@ -5,7 +5,7 @@ use crate::helper::string_to_int;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.relativeoffset?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-pub struct RelativeOffset {
+pub struct XlsxRelativeOffset {
     // attributes
     /// Specifies the X offset in percentage
     pub tx: Option<i64>,
@@ -14,7 +14,7 @@ pub struct RelativeOffset {
     pub ty: Option<i64>,
 }
 
-impl RelativeOffset {
+impl XlsxRelativeOffset {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut offset = Self { tx: None, ty: None };

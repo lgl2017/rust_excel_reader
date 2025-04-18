@@ -5,10 +5,10 @@ pub mod run_properties;
 pub mod text;
 
 use anyhow::bail;
-use phonetic_properties::PhoneticProperties;
-use phonetic_run::PhoneticRun;
+use phonetic_properties::XlsxPhoneticProperties;
+use phonetic_run::XlsxPhoneticRun;
 use quick_xml::events::Event;
-use rich_text_run::Run;
+use rich_text_run::XlsxRichTextRun;
 use text::load_text;
 
 use crate::{common_types::Text, excel::XmlReader};
@@ -52,19 +52,19 @@ use crate::{common_types::Text, excel::XmlReader};
 /// </c>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct StringItem {
+pub struct XlsxStringItem {
     // Child Elements
     // phoneticPr (Phonetic Properties)	§18.4.3
-    pub phonetic_properties: Option<PhoneticProperties>,
+    pub phonetic_properties: Option<XlsxPhoneticProperties>,
     // r (Rich Text Run)	§18.4.4
-    pub rich_text_run: Option<Vec<Run>>,
+    pub rich_text_run: Option<Vec<XlsxRichTextRun>>,
     // rPh (Phonetic Run)	§18.4.6
-    pub phonetic_run: Option<Vec<PhoneticRun>>,
+    pub phonetic_run: Option<Vec<XlsxPhoneticRun>>,
     // t (Text)
     pub text: Option<Text>,
 }
 
-impl StringItem {
+impl XlsxStringItem {
     pub(crate) fn load(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Self> {
         let mut item = Self {
             phonetic_properties: None,
@@ -72,8 +72,8 @@ impl StringItem {
             phonetic_run: None,
             text: None,
         };
-        let mut rich_text_runs: Vec<Run> = vec![];
-        let mut phonetic_runs: Vec<PhoneticRun> = vec![];
+        let mut rich_text_runs: Vec<XlsxRichTextRun> = vec![];
+        let mut phonetic_runs: Vec<XlsxPhoneticRun> = vec![];
 
         let mut buf: Vec<u8> = Vec::new();
         loop {
@@ -81,13 +81,13 @@ impl StringItem {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"phoneticPr" => {
-                    item.phonetic_properties = Some(PhoneticProperties::load(e)?);
+                    item.phonetic_properties = Some(XlsxPhoneticProperties::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"r" => {
-                    rich_text_runs.push(Run::load(reader)?);
+                    rich_text_runs.push(XlsxRichTextRun::load(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"rPh" => {
-                    phonetic_runs.push(PhoneticRun::load(reader, e)?);
+                    phonetic_runs.push(XlsxPhoneticRun::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"t" => {
                     item.text = Some(load_text(reader)?);

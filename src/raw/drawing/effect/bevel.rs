@@ -5,7 +5,7 @@ use crate::helper::string_to_int;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.bevel?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-pub struct Bevel {
+pub struct XlsxBevel {
     // Attributes
     /// Specifies the height of the bevel, or how far above the shape it is applied.
     // h (Height)
@@ -21,7 +21,7 @@ pub struct Bevel {
     pub prst: Option<String>,
 }
 
-impl Bevel {
+impl XlsxBevel {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut bevel = Self {

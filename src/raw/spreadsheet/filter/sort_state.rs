@@ -2,9 +2,9 @@ use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
 use crate::{
-    common_types::{Coordinate, Dimension},
+    common_types::Dimension,
     excel::XmlReader,
-    helper::{a1_dimension_to_row_col, string_to_bool, string_to_unsignedint},
+    helper::{string_to_bool, string_to_unsignedint},
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.sortstate?view=openxml-3.0.1
@@ -22,14 +22,14 @@ use crate::{
 ///
 /// sortState (Sort State)
 #[derive(Debug, Clone, PartialEq)]
-pub struct SortState {
+pub struct XlsxSortState {
     // extLst (Future Feature Data Storage Area) Not supported
 
     // Child Elements
     /// sortCondition (Sort Condition)
     ///
     /// When more than one sortCondition is specified, the first condition is applied first, then the second condition is applied, and so on.
-    pub sort_condition: Option<Vec<SortCondition>>,
+    pub sort_condition: Option<Vec<XlsxSortCondition>>,
 
     // Attributes
     /// caseSensitive (Case Sensitive)
@@ -61,7 +61,7 @@ pub struct SortState {
     pub sort_method: Option<String>,
 }
 
-impl SortState {
+impl XlsxSortState {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut sort_state = Self {
@@ -71,7 +71,7 @@ impl SortState {
             r#ref: None,
             sort_method: None,
         };
-        let mut conditions: Vec<SortCondition> = vec![];
+        let mut conditions: Vec<XlsxSortCondition> = vec![];
 
         for a in attributes {
             match a {
@@ -86,11 +86,7 @@ impl SortState {
                         }
                         b"ref" => {
                             let value = a.value.as_ref();
-                            let dimension = a1_dimension_to_row_col(value)?;
-                            sort_state.r#ref = Some(Dimension {
-                                start: Coordinate::from_point(dimension.0),
-                                end: Coordinate::from_point(dimension.1),
-                            });
+                            sort_state.r#ref = Dimension::from_a1(value);
                         }
                         b"sortMethod" => {
                             sort_state.sort_method = Some(string_value);
@@ -114,7 +110,7 @@ impl SortState {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"sortCondition" => {
-                    conditions.push(SortCondition::load(e)?);
+                    conditions.push(XlsxSortCondition::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"sortState" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file at `sortState`."),
@@ -141,7 +137,7 @@ impl SortState {
 ///
 /// sortCondition (Sort Condition)
 #[derive(Debug, Clone, PartialEq)]
-pub struct SortCondition {
+pub struct XlsxSortCondition {
     // Attributes	Description
     /// customList (Custom List)	Sort by a custom list.
     pub custom_list: Option<String>,
@@ -182,7 +178,7 @@ pub struct SortCondition {
     pub sort_by: Option<String>,
 }
 
-impl SortCondition {
+impl XlsxSortCondition {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut condition = Self {
@@ -215,11 +211,7 @@ impl SortCondition {
                         }
                         b"ref" => {
                             let value = a.value.as_ref();
-                            let dimension = a1_dimension_to_row_col(value)?;
-                            condition.r#ref = Some(Dimension {
-                                start: Coordinate::from_point(dimension.0),
-                                end: Coordinate::from_point(dimension.1),
-                            });
+                            condition.r#ref = Dimension::from_a1(value);
                         }
                         b"sortBy" => {
                             condition.sort_by = Some(string_value);

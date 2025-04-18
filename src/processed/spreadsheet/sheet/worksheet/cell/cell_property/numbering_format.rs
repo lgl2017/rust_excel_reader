@@ -1,5 +1,5 @@
 use crate::raw::spreadsheet::stylesheet::format::numbering_format::{
-    get_builtin_format_code, NumberingFormat as RawNumberingFormat,
+    get_builtin_format_code, XlsxNumberingFormat,
 };
 
 static DEFAULT_FORMAT_CODE: &str = "general";
@@ -20,7 +20,7 @@ impl NumberingFormat {
         };
     }
 
-    pub(crate) fn from_raw(format: Option<RawNumberingFormat>) -> Self {
+    pub(crate) fn from_raw(format: Option<XlsxNumberingFormat>) -> Self {
         let Some(format) = format else {
             return Self::default();
         };

@@ -11,7 +11,7 @@ use crate::{excel::XmlReader, helper::string_to_bool};
 ///
 /// totalsRowFormula (Totals Row Formula)
 #[derive(Debug, Clone, PartialEq)]
-pub struct TotalsRowFormula {
+pub struct XlsxTotalsRowFormula {
     // text content
     pub formula: String,
 
@@ -22,7 +22,7 @@ pub struct TotalsRowFormula {
     pub array: Option<bool>,
 }
 
-impl TotalsRowFormula {
+impl XlsxTotalsRowFormula {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut text = String::new();
         let mut buf: Vec<u8> = Vec::new();

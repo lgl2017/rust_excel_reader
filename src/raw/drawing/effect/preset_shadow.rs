@@ -3,7 +3,7 @@ use quick_xml::events::BytesStart;
 
 use crate::excel::XmlReader;
 
-use crate::{helper::string_to_int, raw::drawing::color::ColorEnum};
+use crate::{helper::string_to_int, raw::drawing::color::XlsxColorEnum};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.presetshadow?view=openxml-3.0.1
 /// specifies that a preset shadow is to be used.
@@ -23,9 +23,9 @@ use crate::{helper::string_to_int, raw::drawing::color::ColorEnum};
 /// ```
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct PresetShadow {
+pub struct XlsxPresetShadow {
     // children
-    pub color: Option<ColorEnum>,
+    pub color: Option<XlsxColorEnum>,
 
     // attribute
     /// Specifies the direction to offset the shadow as angle
@@ -39,7 +39,7 @@ pub struct PresetShadow {
     pub prst: Option<String>,
 }
 
-impl PresetShadow {
+impl XlsxPresetShadow {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut shadow = Self {
@@ -70,7 +70,7 @@ impl PresetShadow {
             }
         }
 
-        shadow.color = ColorEnum::load(reader, b"prstShdw")?;
+        shadow.color = XlsxColorEnum::load(reader, b"prstShdw")?;
 
         Ok(shadow)
     }

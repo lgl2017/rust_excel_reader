@@ -15,7 +15,7 @@ use crate::helper::string_to_unsignedint;
 /// </filterColumn>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct IconFilter {
+pub struct XlsxIconFilter {
     // Attributes
     /// iconId (Icon Id)
     ///
@@ -31,7 +31,7 @@ pub struct IconFilter {
     pub icon_set: Option<String>,
 }
 
-impl IconFilter {
+impl XlsxIconFilter {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut filter = Self {

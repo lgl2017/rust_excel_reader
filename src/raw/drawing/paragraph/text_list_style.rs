@@ -1,16 +1,17 @@
-use anyhow::bail;
-use quick_xml::events::Event;
 use crate::excel::XmlReader;
 use crate::raw::drawing::paragraph::paragraph_properties::{
     load_default_paragraph_properties, load_level1_paragraph_properties,
     load_level2_paragraph_properties, load_level3_paragraph_properties,
     load_level4_paragraph_properties, load_level5_paragraph_properties,
     load_level6_paragraph_properties, load_level7_paragraph_properties,
-    load_level8_paragraph_properties, load_level9_paragraph_properties, DefaultParagraphProperties,
-    Level1ParagraphProperties, Level2ParagraphProperties, Level3ParagraphProperties,
-    Level4ParagraphProperties, Level5ParagraphProperties, Level6ParagraphProperties,
-    Level7ParagraphProperties, Level8ParagraphProperties, Level9ParagraphProperties,
+    load_level8_paragraph_properties, load_level9_paragraph_properties,
+    XlsxDefaultParagraphProperties, XlsxLevel1ParagraphProperties, XlsxLevel2ParagraphProperties,
+    XlsxLevel3ParagraphProperties, XlsxLevel4ParagraphProperties, XlsxLevel5ParagraphProperties,
+    XlsxLevel6ParagraphProperties, XlsxLevel7ParagraphProperties, XlsxLevel8ParagraphProperties,
+    XlsxLevel9ParagraphProperties,
 };
+use anyhow::bail;
+use quick_xml::events::Event;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.liststyle?view=openxml-3.0.1
 ///
@@ -27,42 +28,42 @@ use crate::raw::drawing::paragraph::paragraph_properties::{
 /// </a:lstStyle>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct ListStyle {
+pub struct XlsxTextListStyle {
     // child: extLst (Extension List) Not supported
 
     // Child Elements	Subclause
     // defPPr (Default Paragraph Style)	§21.1.2.2.2
-    pub default_paragraph_style: Option<Box<DefaultParagraphProperties>>,
+    pub default_paragraph_style: Option<Box<XlsxDefaultParagraphProperties>>,
 
     // lvl1pPr (List Level 1 Text Style)	§21.1.2.4.13
-    pub level1_paragraph_style: Option<Box<Level1ParagraphProperties>>,
+    pub level1_paragraph_style: Option<Box<XlsxLevel1ParagraphProperties>>,
 
     // lvl2pPr (List Level 2 Text Style)	§21.1.2.4.14
-    pub level2_paragraph_style: Option<Box<Level2ParagraphProperties>>,
+    pub level2_paragraph_style: Option<Box<XlsxLevel2ParagraphProperties>>,
 
     // lvl3pPr (List Level 3 Text Style)	§21.1.2.4.15
-    pub level3_paragraph_style: Option<Box<Level3ParagraphProperties>>,
+    pub level3_paragraph_style: Option<Box<XlsxLevel3ParagraphProperties>>,
 
     // lvl4pPr (List Level 4 Text Style)	§21.1.2.4.16
-    pub level4_paragraph_style: Option<Box<Level4ParagraphProperties>>,
+    pub level4_paragraph_style: Option<Box<XlsxLevel4ParagraphProperties>>,
 
     // lvl5pPr (List Level 5 Text Style)	§21.1.2.4.17
-    pub level5_paragraph_style: Option<Box<Level5ParagraphProperties>>,
+    pub level5_paragraph_style: Option<Box<XlsxLevel5ParagraphProperties>>,
 
     // lvl6pPr (List Level 6 Text Style)	§21.1.2.4.18
-    pub level6_paragraph_style: Option<Box<Level6ParagraphProperties>>,
+    pub level6_paragraph_style: Option<Box<XlsxLevel6ParagraphProperties>>,
 
     // lvl7pPr (List Level 7 Text Style)	§21.1.2.4.19
-    pub level7_paragraph_style: Option<Box<Level7ParagraphProperties>>,
+    pub level7_paragraph_style: Option<Box<XlsxLevel7ParagraphProperties>>,
 
     // lvl8pPr (List Level 8 Text Style)	§21.1.2.4.20
-    pub level8_paragraph_style: Option<Box<Level8ParagraphProperties>>,
+    pub level8_paragraph_style: Option<Box<XlsxLevel8ParagraphProperties>>,
 
     // lvl9pPr (List Level 9 Text Style)
-    pub level9_paragraph_style: Option<Box<Level9ParagraphProperties>>,
+    pub level9_paragraph_style: Option<Box<XlsxLevel9ParagraphProperties>>,
 }
 
-impl ListStyle {
+impl XlsxTextListStyle {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
 

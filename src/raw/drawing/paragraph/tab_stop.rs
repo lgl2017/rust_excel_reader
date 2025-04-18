@@ -17,7 +17,7 @@ use crate::helper::string_to_int;
 /// </a:tabLst>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct TabStop {
+pub struct XlsxTabStop {
     // attributes
     /// Specifies the alignment that is to be applied to text using this tab stop.
     /// If this attribute is omitted then the application default for the generating application.
@@ -32,7 +32,7 @@ pub struct TabStop {
     pub position: Option<i64>,
 }
 
-impl TabStop {
+impl XlsxTabStop {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut stop = Self {

@@ -13,7 +13,7 @@ use crate::helper::{string_to_bool, string_to_float, string_to_int};
 /// ```
 /// calcPr (Calculation Properties)
 #[derive(Debug, Clone, PartialEq)]
-pub struct CalculationProperties {
+pub struct XlsxCalculationProperties {
     /// Calc Completed
     // tag: calcCompleted
     pub calculation_completed: Option<bool>,
@@ -68,7 +68,7 @@ pub struct CalculationProperties {
     pub reference_mode: Option<String>,
 }
 
-impl CalculationProperties {
+impl XlsxCalculationProperties {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut properties = Self {

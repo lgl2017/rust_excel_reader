@@ -4,9 +4,11 @@ use quick_xml::events::{BytesStart, Event};
 use crate::excel::XmlReader;
 
 use crate::raw::drawing::{
-    effect::effect_style_list::{load_effect_style_list, EffectStyleList},
-    fill::{load_bg_fill_style_lst, load_fill_style_lst, BackgroundFillStyleList, FillStyleList},
-    line::{load_line_style_list, LineStyleList},
+    effect::effect_style_list::{load_effect_style_list, XlsxEffectStyleList},
+    fill::{
+        load_bg_fill_style_lst, load_fill_style_lst, XlsxBackgroundFillStyleList, XlsxFillStyleList,
+    },
+    line::{load_line_style_list, XlsxLineStyleList},
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.formatscheme?view=openxml-3.0.1
@@ -67,7 +69,7 @@ use crate::raw::drawing::{
 /// ```
 // tag: fmtScheme
 #[derive(Debug, Clone, PartialEq)]
-pub struct FormatScheme {
+pub struct XlsxFormatScheme {
     // attribute
     pub name: Option<String>,
 
@@ -76,28 +78,28 @@ pub struct FormatScheme {
     /// This element defines a set of three fill styles that are used within a theme.
     /// The three fill styles are arranged in order from subtle to moderate to intense.
     // tag: fillStyleLst
-    pub fill_style_lst: Option<FillStyleList>,
+    pub fill_style_lst: Option<XlsxFillStyleList>,
 
     /// BackgroundFillStyleList: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.backgroundfillstylelist?view=openxml-3.0.1
     /// This element defines a set of three background fills that are used within a theme.
     /// The three fill styles are arranged in order from subtle to moderate to intense.
     // tag: bgFillStyleLst
-    pub bg_fill_style_lst: Option<BackgroundFillStyleList>,
+    pub bg_fill_style_lst: Option<XlsxBackgroundFillStyleList>,
 
     /// EffectStyleList: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.effectstylelist?view=openxml-3.0.1
     /// This element defines a set of three effect styles that create the effect style list for a theme.
     /// The effect styles are arranged in order of subtle to moderate to intense.
     // tag: effectStyleLst
-    pub effect_style_lst: Option<EffectStyleList>,
+    pub effect_style_lst: Option<XlsxEffectStyleList>,
 
     /// LineStyleList: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.linestylelist?view=openxml-3.0.1
     /// defines a list of three line styles for use within a theme.
     /// The three line styles are arranged in order from subtle to moderate to intense versions of lines.
     // tag: lnStyleLst
-    pub line_style_lst: Option<LineStyleList>,
+    pub line_style_lst: Option<XlsxLineStyleList>,
 }
 
-impl FormatScheme {
+impl XlsxFormatScheme {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
         let mut scheme = Self {

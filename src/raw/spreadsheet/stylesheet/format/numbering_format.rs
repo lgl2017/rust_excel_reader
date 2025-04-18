@@ -12,18 +12,18 @@ use crate::{excel::XmlReader, helper::string_to_unsignedint};
 /// </numFmts>
 /// ```
 // tag: numFmts
-pub type NumberingFormats = Vec<NumberingFormat>;
+pub type XlsxNumberingFormats = Vec<XlsxNumberingFormat>;
 
-pub(crate) fn load_number_formats(reader: &mut XmlReader) -> anyhow::Result<NumberingFormats> {
+pub(crate) fn load_number_formats(reader: &mut XmlReader) -> anyhow::Result<XlsxNumberingFormats> {
     let mut buf: Vec<u8> = Vec::new();
-    let mut formats: Vec<NumberingFormat> = vec![];
+    let mut formats: Vec<XlsxNumberingFormat> = vec![];
 
     loop {
         buf.clear();
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"numFmt" => {
-                let format = NumberingFormat::load(e)?;
+                let format = XlsxNumberingFormat::load(e)?;
                 formats.push(format);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"numFmts" => break,
@@ -70,7 +70,7 @@ pub type FormatCode = String;
 ///
 /// tag: numFmt
 #[derive(Debug, Clone, PartialEq)]
-pub struct NumberingFormat {
+pub struct XlsxNumberingFormat {
     // attributes
     /// The number format code for this number format.
     // tag: formatCode
@@ -82,7 +82,7 @@ pub struct NumberingFormat {
     pub num_fmt_id: Option<u64>,
 }
 
-impl NumberingFormat {
+impl XlsxNumberingFormat {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut format = Self {

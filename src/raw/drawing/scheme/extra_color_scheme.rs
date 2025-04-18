@@ -1,26 +1,26 @@
+use crate::excel::XmlReader;
+use crate::raw::drawing::color::color_map::XlsxColorMap;
 use anyhow::bail;
 use quick_xml::events::Event;
-use crate::excel::XmlReader;
-use crate::raw::drawing::color::color_map::ColorMap;
 
-use super::color_scheme::ColorScheme;
+use super::color_scheme::XlsxColorScheme;
 
 /// ExtraColorSchemeList: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.extracolorschemelist?view=openxml-3.0.1
 // tag: extraClrSchemeLst
-pub type ExtraColorSchemeList = Vec<ExtraColorScheme>;
+pub type XlsxExtraColorSchemeList = Vec<XlsxExtraColorScheme>;
 
 pub(crate) fn load_extra_color_scheme_list(
     reader: &mut XmlReader,
-) -> anyhow::Result<Vec<ExtraColorScheme>> {
+) -> anyhow::Result<Vec<XlsxExtraColorScheme>> {
     let mut buf = Vec::new();
-    let mut schemes: Vec<ExtraColorScheme> = vec![];
+    let mut schemes: Vec<XlsxExtraColorScheme> = vec![];
 
     loop {
         buf.clear();
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"extraClrScheme" => {
-                let scheme = ExtraColorScheme::load(reader)?;
+                let scheme = XlsxExtraColorScheme::load(reader)?;
                 schemes.push(scheme);
             }
             Ok(Event::End(ref e)) if e.local_name().as_ref() == b"extraClrSchemeLst" => break,
@@ -80,16 +80,16 @@ pub(crate) fn load_extra_color_scheme_list(
 /// </extraClrScheme>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct ExtraColorScheme {
+pub struct XlsxExtraColorScheme {
     // children
     // tag: clrScheme
-    pub color_scheme: Option<ColorScheme>,
+    pub color_scheme: Option<XlsxColorScheme>,
 
     // tag: clrMap
-    pub color_map: Option<ColorMap>,
+    pub color_map: Option<XlsxColorMap>,
 }
 
-impl ExtraColorScheme {
+impl XlsxExtraColorScheme {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
         let mut scheme = Self {
@@ -102,11 +102,11 @@ impl ExtraColorScheme {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"clrScheme" => {
-                    let color_scheme = ColorScheme::load(reader, e)?;
+                    let color_scheme = XlsxColorScheme::load(reader, e)?;
                     scheme.color_scheme = Some(color_scheme);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"clrMap" => {
-                    let map = ColorMap::load(e)?;
+                    let map = XlsxColorMap::load(e)?;
                     scheme.color_map = Some(map);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"extraClrScheme" => break,

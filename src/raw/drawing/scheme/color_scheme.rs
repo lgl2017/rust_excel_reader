@@ -2,9 +2,9 @@ use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
 use crate::excel::XmlReader;
-use crate::raw::drawing::color::srgb_color::SrgbColor;
-use crate::raw::drawing::color::system_color::SystemColor;
-use crate::raw::drawing::color::ColorEnum;
+use crate::raw::drawing::color::srgb_color::XlsxSrgbColor;
+use crate::raw::drawing::color::system_color::XlsxSystemColor;
+use crate::raw::drawing::color::XlsxColorEnum;
 
 // use crate::raw::drawing::color::{
 //     Accent1Color, Accent2Color, Accent3Color, Accent4Color, Accent5Color, Accent6Color, ColorEnum,
@@ -61,7 +61,7 @@ use crate::common_types::HexColor;
 /// </clrScheme>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct ColorScheme {
+pub struct XlsxColorScheme {
     // attribute
     pub name: Option<String>,
 
@@ -120,22 +120,22 @@ pub struct ColorScheme {
 ///
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.colorscheme?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-pub enum SchemeColorEnum {
+pub enum XlsxSchemeColorEnum {
     // srgbClr
-    SrgbColor(SrgbColor),
+    SrgbColor(XlsxSrgbColor),
     // sysClr
-    SystemColor(SystemColor),
+    SystemColor(XlsxSystemColor),
 }
 
-impl SchemeColorEnum {
+impl XlsxSchemeColorEnum {
     pub(crate) fn load(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Option<Self>> {
-        let color_enum = ColorEnum::load(reader, tag)?;
+        let color_enum = XlsxColorEnum::load(reader, tag)?;
         if color_enum.is_none() {
             return Ok(None);
         }
         return match color_enum.unwrap() {
-            ColorEnum::SrgbColor(srgb_color) => return Ok(Some(Self::SrgbColor(srgb_color))),
-            ColorEnum::SystemColor(system_color) => {
+            XlsxColorEnum::SrgbColor(srgb_color) => return Ok(Some(Self::SrgbColor(srgb_color))),
+            XlsxColorEnum::SystemColor(system_color) => {
                 return Ok(Some(Self::SystemColor(system_color)))
             }
             _ => Ok(None),
@@ -143,16 +143,16 @@ impl SchemeColorEnum {
     }
 }
 
-impl SchemeColorEnum {
+impl XlsxSchemeColorEnum {
     pub(crate) fn to_hex(&self) -> Option<HexColor> {
         return match self {
-            SchemeColorEnum::SrgbColor(srgb_color) => srgb_color.to_hex(),
-            SchemeColorEnum::SystemColor(system_color) => system_color.to_hex(),
+            XlsxSchemeColorEnum::SrgbColor(srgb_color) => srgb_color.to_hex(),
+            XlsxSchemeColorEnum::SystemColor(system_color) => system_color.to_hex(),
         };
     }
 }
 
-impl ColorScheme {
+impl XlsxColorScheme {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
 
@@ -197,62 +197,62 @@ impl ColorScheme {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"accent1" => {
-                    if let Some(c) = SchemeColorEnum::load(reader, b"accent1")? {
+                    if let Some(c) = XlsxSchemeColorEnum::load(reader, b"accent1")? {
                         color.accent1 = c.to_hex()
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"accent2" => {
-                    if let Some(c) = SchemeColorEnum::load(reader, b"accent2")? {
+                    if let Some(c) = XlsxSchemeColorEnum::load(reader, b"accent2")? {
                         color.accent2 = c.to_hex()
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"accent3" => {
-                    if let Some(c) = SchemeColorEnum::load(reader, b"accent3")? {
+                    if let Some(c) = XlsxSchemeColorEnum::load(reader, b"accent3")? {
                         color.accent3 = c.to_hex()
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"accent4" => {
-                    if let Some(c) = SchemeColorEnum::load(reader, b"accent4")? {
+                    if let Some(c) = XlsxSchemeColorEnum::load(reader, b"accent4")? {
                         color.accent4 = c.to_hex()
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"accent5" => {
-                    if let Some(c) = SchemeColorEnum::load(reader, b"accent5")? {
+                    if let Some(c) = XlsxSchemeColorEnum::load(reader, b"accent5")? {
                         color.accent5 = c.to_hex()
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"accent6" => {
-                    if let Some(c) = SchemeColorEnum::load(reader, b"accent6")? {
+                    if let Some(c) = XlsxSchemeColorEnum::load(reader, b"accent6")? {
                         color.accent6 = c.to_hex()
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"dk1" => {
-                    if let Some(c) = SchemeColorEnum::load(reader, b"dk1")? {
+                    if let Some(c) = XlsxSchemeColorEnum::load(reader, b"dk1")? {
                         color.dk1 = c.to_hex()
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"dk2" => {
-                    if let Some(c) = SchemeColorEnum::load(reader, b"dk2")? {
+                    if let Some(c) = XlsxSchemeColorEnum::load(reader, b"dk2")? {
                         color.dk2 = c.to_hex()
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"folHlink" => {
-                    if let Some(c) = SchemeColorEnum::load(reader, b"folHlink")? {
+                    if let Some(c) = XlsxSchemeColorEnum::load(reader, b"folHlink")? {
                         color.fol_hlink = c.to_hex()
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"hlink" => {
-                    if let Some(c) = SchemeColorEnum::load(reader, b"hlink")? {
+                    if let Some(c) = XlsxSchemeColorEnum::load(reader, b"hlink")? {
                         color.hlink = c.to_hex()
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"lt1" => {
-                    if let Some(c) = SchemeColorEnum::load(reader, b"lt1")? {
+                    if let Some(c) = XlsxSchemeColorEnum::load(reader, b"lt1")? {
                         color.lt1 = c.to_hex()
                     }
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"lt2" => {
-                    if let Some(c) = SchemeColorEnum::load(reader, b"lt2")? {
+                    if let Some(c) = XlsxSchemeColorEnum::load(reader, b"lt2")? {
                         color.lt2 = c.to_hex()
                     }
                 }
@@ -267,7 +267,7 @@ impl ColorScheme {
     }
 }
 
-impl ColorScheme {
+impl XlsxColorScheme {
     pub(crate) fn get_color(&self, index: u64) -> Option<HexColor> {
         return match index {
             0 => self.lt1.clone(),

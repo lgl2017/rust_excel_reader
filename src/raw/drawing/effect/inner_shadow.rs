@@ -3,7 +3,7 @@ use quick_xml::events::BytesStart;
 
 use crate::excel::XmlReader;
 
-use crate::{helper::string_to_int, raw::drawing::color::ColorEnum};
+use crate::{helper::string_to_int, raw::drawing::color::XlsxColorEnum};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.innershadow?view=openxml-3.0.1
 /// specifies an inner shadow effect.
@@ -21,9 +21,9 @@ use crate::{helper::string_to_int, raw::drawing::color::ColorEnum};
 /// ```
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct InnerShadow {
+pub struct XlsxInnerShadow {
     // children
-    pub color: Option<ColorEnum>,
+    pub color: Option<XlsxColorEnum>,
 
     // attribute
     /// Specifies the blur radius
@@ -37,7 +37,7 @@ pub struct InnerShadow {
     pub dist: Option<i64>,
 }
 
-impl InnerShadow {
+impl XlsxInnerShadow {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut shadow = Self {
@@ -70,7 +70,7 @@ impl InnerShadow {
             }
         }
 
-        shadow.color = ColorEnum::load(reader, b"innerShdw")?;
+        shadow.color = XlsxColorEnum::load(reader, b"innerShdw")?;
 
         Ok(shadow)
     }

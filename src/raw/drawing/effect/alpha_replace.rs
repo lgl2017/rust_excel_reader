@@ -5,13 +5,13 @@ use crate::helper::string_to_int;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alphareplace?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-pub struct AlphaReplace {
+pub struct XlsxAlphaReplace {
     // attributes
     /// Specifies the new opacity value.
     pub a: Option<i64>,
 }
 
-impl AlphaReplace {
+impl XlsxAlphaReplace {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut effect = Self { a: None };

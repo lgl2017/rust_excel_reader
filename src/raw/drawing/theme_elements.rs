@@ -1,5 +1,5 @@
 use super::scheme::{
-    color_scheme::ColorScheme, font_scheme::FontScheme, format_scheme::FormatScheme,
+    color_scheme::XlsxColorScheme, font_scheme::XlsxFontScheme, format_scheme::XlsxFormatScheme,
 };
 use crate::excel::XmlReader;
 use anyhow::bail;
@@ -29,21 +29,21 @@ use quick_xml::events::Event;
 ///   </themeElements>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct ThemeElements {
+pub struct XlsxThemeElements {
     // extLst (Extension List)	§20.1.2.2.15 Not Supported
 
     // children
     // tag: clrScheme
-    pub color_scheme: Option<ColorScheme>,
+    pub color_scheme: Option<XlsxColorScheme>,
 
     // tag: fmtScheme
-    pub format_scheme: Option<FormatScheme>,
+    pub format_scheme: Option<XlsxFormatScheme>,
 
     // fontScheme (Font Scheme)
-    pub font_scheme: Option<FontScheme>,
+    pub font_scheme: Option<XlsxFontScheme>,
 }
 
-impl ThemeElements {
+impl XlsxThemeElements {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
         let mut scheme = Self {
@@ -60,15 +60,15 @@ impl ThemeElements {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"clrScheme" => {
-                    let color_scheme = ColorScheme::load(reader, e)?;
+                    let color_scheme = XlsxColorScheme::load(reader, e)?;
                     scheme.color_scheme = Some(color_scheme);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"fmtScheme" => {
-                    let format_scheme = FormatScheme::load(reader, e)?;
+                    let format_scheme = XlsxFormatScheme::load(reader, e)?;
                     scheme.format_scheme = Some(format_scheme);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"fontScheme" => {
-                    let font_scheme = FontScheme::load(reader, e)?;
+                    let font_scheme = XlsxFontScheme::load(reader, e)?;
                     scheme.font_scheme = Some(font_scheme);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"themeElements" => break,

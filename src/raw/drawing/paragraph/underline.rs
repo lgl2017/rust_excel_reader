@@ -1,4 +1,4 @@
-use crate::raw::drawing::line::outline::Outline;
+use crate::raw::drawing::line::outline::XlsxOutline;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.underline?view=openxml-3.0.1
 ///
@@ -10,4 +10,4 @@ use crate::raw::drawing::line::outline::Outline;
 ///     <a:uLn algn="r">
 /// </a:rPr>
 /// ```
-pub type Underline = Outline;
+pub type XlsxUnderline = XlsxOutline;

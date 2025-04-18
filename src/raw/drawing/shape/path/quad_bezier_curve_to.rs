@@ -1,7 +1,7 @@
+use super::path_point::XlsxPoint;
+use crate::excel::XmlReader;
 use anyhow::bail;
 use quick_xml::events::Event;
-use crate::excel::XmlReader;
-use super::path_point::Point;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.quadraticbeziercurveto?view=openxml-3.0.1
 ///
@@ -11,14 +11,14 @@ use super::path_point::Point;
 /// The first is a control point used in the quadratic bezier calculation and the last is the ending point for the curve.
 // tag: quadBezTo
 #[derive(Debug, Clone, PartialEq)]
-pub struct QuadraticBezierCurveTo {
+pub struct XlsxQuadraticBezierCurveTo {
     // Child
-    points: Option<Vec<Point>>,
+    points: Option<Vec<XlsxPoint>>,
 }
 
-impl QuadraticBezierCurveTo {
+impl XlsxQuadraticBezierCurveTo {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
-        let mut points: Vec<Point> = vec![];
+        let mut points: Vec<XlsxPoint> = vec![];
 
         let mut buf = Vec::new();
 
@@ -27,7 +27,7 @@ impl QuadraticBezierCurveTo {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"pt" => {
-                    points.push(Point::load(e)?);
+                    points.push(XlsxPoint::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"quadBezTo" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

@@ -14,7 +14,7 @@ use quick_xml::events::BytesStart;
 /// ```
 // tag: buChar
 #[derive(Debug, Clone, PartialEq)]
-pub struct CharacterBullet {
+pub struct XlsxCharacterBullet {
     // Attributes
     ///	Specifies the character to be used in place of the standard bullet point.
     /// This character can be any character for the specified font that is supported by the system upon which this document is being viewed.
@@ -22,7 +22,7 @@ pub struct CharacterBullet {
     pub char: Option<String>,
 }
 
-impl CharacterBullet {
+impl XlsxCharacterBullet {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut bullet = Self { char: None };

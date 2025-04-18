@@ -8,7 +8,7 @@ use quick_xml::events::BytesStart;
 /// <headEnd len="lg" type="arrowhead" w="sm"/>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct HeadEnd {
+pub struct XlsxHeadEnd {
     // attributes
     /// Specifies the line end length in relation to the line width.
     /// possible values: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.lineendlengthvalues?view=openxml-3.0.1
@@ -32,7 +32,7 @@ pub struct HeadEnd {
     pub w: Option<String>,
 }
 
-impl HeadEnd {
+impl XlsxHeadEnd {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut stop = Self {

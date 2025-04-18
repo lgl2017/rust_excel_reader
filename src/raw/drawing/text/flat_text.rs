@@ -7,14 +7,15 @@ use crate::helper::string_to_int;
 /// Keep text out of 3D scene entirely
 // tag: flatTx
 #[derive(Debug, Clone, PartialEq)]
-pub struct FlatText {
+pub struct XlsxFlatText {
     // Attributes
+    /// z (Z Coordinate)
+    ///
     /// Specifies the Z coordinate to be used in positioning the flat text within the 3D scene.
-    // z (Z Coordinate)
     pub z: Option<i64>,
 }
 
-impl FlatText {
+impl XlsxFlatText {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut flat_text = Self { z: None };

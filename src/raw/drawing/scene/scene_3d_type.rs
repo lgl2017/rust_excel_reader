@@ -1,7 +1,7 @@
+use super::{backdrop::XlsxBackDrop, camera::XlsxCamera, light_rig::XlsxLightRig};
+use crate::excel::XmlReader;
 use anyhow::bail;
 use quick_xml::events::Event;
-use crate::excel::XmlReader;
-use super::{backdrop::BackDrop, camera::Camera, light_rig::LightRig};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.scene3dtype?view=openxml-3.0.1
 ///
@@ -22,21 +22,21 @@ use super::{backdrop::BackDrop, camera::Camera, light_rig::LightRig};
 /// </<a:scene3d>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct Scene3DType {
+pub struct XlsxScene3DType {
     // extLst (Extension List)	§20.1.2.2.15 Not supported
 
     // children
     // backdrop (Backdrop Plane)	§20.1.5.2
-    pub backdrop: Option<BackDrop>,
+    pub backdrop: Option<XlsxBackDrop>,
 
     // camera (Camera)	§20.1.5.5
-    pub camera: Option<Camera>,
+    pub camera: Option<XlsxCamera>,
 
     // lightRig (Light Rig)
-    pub light_rig: Option<LightRig>,
+    pub light_rig: Option<XlsxLightRig>,
 }
 
-impl Scene3DType {
+impl XlsxScene3DType {
     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
         let mut scene3d = Self {
             backdrop: None,
@@ -54,13 +54,13 @@ impl Scene3DType {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"backdrop" => {
-                    scene3d.backdrop = Some(BackDrop::load(reader)?);
+                    scene3d.backdrop = Some(XlsxBackDrop::load(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"camera" => {
-                    scene3d.camera = Some(Camera::load(reader, e)?);
+                    scene3d.camera = Some(XlsxCamera::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"lightRig" => {
-                    scene3d.light_rig = Some(LightRig::load(reader, e)?);
+                    scene3d.light_rig = Some(XlsxLightRig::load(reader, e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"scene3d" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

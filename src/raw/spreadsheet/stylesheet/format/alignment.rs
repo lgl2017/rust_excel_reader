@@ -14,7 +14,7 @@ use crate::helper::{string_to_bool, string_to_int, string_to_unsignedint};
 /// </xf>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct Alignment {
+pub struct XlsxAlignment {
     // attributes
     /// Specifies the type of horizontal alignment in cells
     /// possible values: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.horizontalalignmentvalues?view=openxml-3.0.1
@@ -66,7 +66,7 @@ pub struct Alignment {
     pub wrap_text: Option<bool>,
 }
 
-impl Alignment {
+impl XlsxAlignment {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut alignment = Self {

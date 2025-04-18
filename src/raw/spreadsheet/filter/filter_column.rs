@@ -7,8 +7,9 @@ use crate::{
 };
 
 use super::{
-    color_filter::ColorFilter, custom_filter::CustomFilters, dynamic_filter::DynamicFilter,
-    filter_criteria::FilterCriteriaGroup, icon_filter::IconFilter, top_n_filter::TopNFilter,
+    color_filter::XlsxColorFilter, custom_filter::XlsxCustomFilters,
+    dynamic_filter::XlsxDynamicFilter, filter_criteria::XlsxFilterCriteriaGroup,
+    icon_filter::XlsxIconFilter, top_n_filter::XlsxTopNFilter,
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.filtercolumn?view=openxml-3.0.1
@@ -33,27 +34,27 @@ use super::{
 /// </filterColumn>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct FilterColumn {
+pub struct XlsxFilterColumn {
     // extLst (Future Feature Data Storage Area) Not supported
 
     // Child Elements
     /// colorFilter (Color Filter Criteria)
-    pub color_filter: Option<ColorFilter>,
+    pub color_filter: Option<XlsxColorFilter>,
 
     /// customFilters (Custom Filters)
-    pub custom_filters: Option<CustomFilters>,
+    pub custom_filters: Option<XlsxCustomFilters>,
 
     /// dynamicFilter (Dynamic Filter)
-    pub dynamic_filter: Option<DynamicFilter>,
+    pub dynamic_filter: Option<XlsxDynamicFilter>,
 
     /// filters (Filter Criteria)
-    pub grouped_filter: Option<FilterCriteriaGroup>,
+    pub grouped_filter: Option<XlsxFilterCriteriaGroup>,
 
     /// iconFilter (Icon Filter)
-    pub icon_filter: Option<IconFilter>,
+    pub icon_filter: Option<XlsxIconFilter>,
 
     /// top10 (Top 10)
-    pub top_n_filter: Option<TopNFilter>,
+    pub top_n_filter: Option<XlsxTopNFilter>,
 
     // Attributes
     /// colId (Filter Column Data)
@@ -72,7 +73,7 @@ pub struct FilterColumn {
     pub show_filter_button: Option<bool>,
 }
 
-impl FilterColumn {
+impl XlsxFilterColumn {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut filter_column = Self {
@@ -120,22 +121,22 @@ impl FilterColumn {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"colorFilter" => {
-                    filter_column.color_filter = Some(ColorFilter::load(e)?)
+                    filter_column.color_filter = Some(XlsxColorFilter::load(e)?)
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"customFilters" => {
-                    filter_column.custom_filters = Some(CustomFilters::load(reader, e)?)
+                    filter_column.custom_filters = Some(XlsxCustomFilters::load(reader, e)?)
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"dynamicFilter" => {
-                    filter_column.dynamic_filter = Some(DynamicFilter::load(e)?)
+                    filter_column.dynamic_filter = Some(XlsxDynamicFilter::load(e)?)
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"filters" => {
-                    filter_column.grouped_filter = Some(FilterCriteriaGroup::load(reader, e)?)
+                    filter_column.grouped_filter = Some(XlsxFilterCriteriaGroup::load(reader, e)?)
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"iconFilter" => {
-                    filter_column.icon_filter = Some(IconFilter::load(e)?)
+                    filter_column.icon_filter = Some(XlsxIconFilter::load(e)?)
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"top10" => {
-                    filter_column.top_n_filter = Some(TopNFilter::load(e)?)
+                    filter_column.top_n_filter = Some(XlsxTopNFilter::load(e)?)
                 }
 
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"filterColumn" => break,

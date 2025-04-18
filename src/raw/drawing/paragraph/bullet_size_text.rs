@@ -9,4 +9,4 @@
 /// </a:pPr>
 /// ```
 // tag: buSzTx
-pub type BulletSizeText = bool;
+pub type XlsxBulletSizeText = bool;

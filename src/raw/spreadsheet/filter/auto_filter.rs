@@ -1,13 +1,8 @@
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
-use crate::{
-    common_types::{Coordinate, Dimension},
-    excel::XmlReader,
-    helper::a1_dimension_to_row_col,
-};
-
-use super::{filter_column::FilterColumn, sort_state::SortState};
+use super::{filter_column::XlsxFilterColumn, sort_state::XlsxSortState};
+use crate::{common_types::Dimension, excel::XmlReader};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.autofilter?view=openxml-3.0.1
 ///
@@ -28,15 +23,15 @@ use super::{filter_column::FilterColumn, sort_state::SortState};
 ///
 /// autoFilter (AutoFilter Settings)
 #[derive(Debug, Clone, PartialEq)]
-pub struct AutoFilter {
+pub struct XlsxAutoFilter {
     // extLst (Future Feature Data Storage Area) not supported
 
     // Child Elements
     /// filterColumn (AutoFilter Column)
-    pub filter_colomn: Option<Vec<FilterColumn>>,
+    pub filter_colomn: Option<Vec<XlsxFilterColumn>>,
 
     /// sortState (Sort State)
-    pub sort_state: Option<SortState>,
+    pub sort_state: Option<XlsxSortState>,
 
     /// Attributes
     /// ref (Cell or Range Reference)
@@ -45,7 +40,7 @@ pub struct AutoFilter {
     pub r#ref: Option<Dimension>,
 }
 
-impl AutoFilter {
+impl XlsxAutoFilter {
     pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut filter = Self {
@@ -53,18 +48,14 @@ impl AutoFilter {
             sort_state: None,
             r#ref: None,
         };
-        let mut filter_columns: Vec<FilterColumn> = vec![];
+        let mut filter_columns: Vec<XlsxFilterColumn> = vec![];
 
         for a in attributes {
             match a {
                 Ok(a) => match a.key.local_name().as_ref() {
                     b"ref" => {
                         let value = a.value.as_ref();
-                        let dimension = a1_dimension_to_row_col(value)?;
-                        filter.r#ref = Some(Dimension {
-                            start: Coordinate::from_point(dimension.0),
-                            end: Coordinate::from_point(dimension.1),
-                        });
+                        filter.r#ref = Dimension::from_a1(value);
                         break;
                     }
                     _ => {}
@@ -85,10 +76,10 @@ impl AutoFilter {
                     let _ = reader.read_to_end_into(e.to_end().to_owned().name(), &mut Vec::new());
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"filterColumn" => {
-                    filter_columns.push(FilterColumn::load(reader, e)?);
+                    filter_columns.push(XlsxFilterColumn::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"sortState" => {
-                    filter.sort_state = Some(SortState::load(reader, e)?);
+                    filter.sort_state = Some(XlsxSortState::load(reader, e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"autoFilter" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file at `autoFilter`."),

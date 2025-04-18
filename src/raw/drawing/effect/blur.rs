@@ -4,10 +4,11 @@ use quick_xml::events::BytesStart;
 use crate::helper::{string_to_bool, string_to_int};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blur?view=openxml-3.0.1
+///
 /// a blur effect that is applied to the entire shape, including its fill.
 /// All color channels, including alpha, are affected.
 #[derive(Debug, Clone, PartialEq)]
-pub struct Blur {
+pub struct XlsxBlur {
     // attributes
     /// Specifies whether the bounds of the object should be grown as a result of the blurring.
     /// True indicates the bounds are grown while false indicates that they are not.
@@ -19,7 +20,7 @@ pub struct Blur {
     pub rad: Option<i64>,
 }
 
-impl Blur {
+impl XlsxBlur {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut blur = Self {

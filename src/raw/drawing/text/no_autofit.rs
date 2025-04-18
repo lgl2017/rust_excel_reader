@@ -9,4 +9,4 @@
 /// </a:bodyPr>
 /// ```
 // noAutofit (No AutoFit)	§21.1.2.1.2
-pub type NoAutoFit = bool;
+pub type XlsxNoAutoFit = bool;

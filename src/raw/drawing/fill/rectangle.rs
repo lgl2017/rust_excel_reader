@@ -1,10 +1,10 @@
-use crate::raw::drawing::shape::rectangle::Rectangle;
+use crate::raw::drawing::shape::rectangle::XlsxRectangle;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.tilerectangle?view=openxml-3.0.1
-pub type TileRectangle = Rectangle;
+pub type XlsxTileRectangle = XlsxRectangle;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.sourcerectangle?view=openxml-3.0.1
-pub type SourceRectangle = Rectangle;
+pub type XlsxSourceRectangle = XlsxRectangle;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.filltorectangle?view=openxml-3.0.1
 ///
@@ -12,7 +12,7 @@ pub type SourceRectangle = Rectangle;
 /// ```
 /// <a:fillToRect l="50000" t="-80000" r="50000" b="180000" />
 /// ```
-pub type FillToRectangle = Rectangle;
+pub type XlsxFillToRectangle = XlsxRectangle;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.fillrectangle?view=openxml-3.0.1
-pub type FillRectangle = Rectangle;
+pub type XlsxFillRectangle = XlsxRectangle;
