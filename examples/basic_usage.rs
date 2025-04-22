@@ -11,8 +11,7 @@ fn main() -> anyhow::Result<()> {
 
     // excel from a reader
     // let reader = BufReader::new(File::open(path)?);
-    // let mut archive = ZipArchive::new(reader)?;
-    // let mut excel = Excel::from_path(path)?;
+    // let mut excel: Excel<std::io::BufReader<std::fs::File>> = Excel::from_reader(reader)?;
 
     // excel directly from path
     let mut excel = Excel::from_path(path)?;
