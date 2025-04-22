@@ -3,6 +3,7 @@ use crate::excel::XmlReader;
 
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 ///  CustomColorList: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.customcolorlist?view=openxml-3.0.1
 ///
@@ -52,7 +53,7 @@ use quick_xml::events::{BytesStart, Event};
 pub type XlsxCustomColorList = Vec<XlsxCustomColor>;
 
 pub(crate) fn load_custom_color_list(
-    reader: &mut XmlReader,
+    reader: &mut XmlReader<impl Read>,
 ) -> anyhow::Result<XlsxCustomColorList> {
     let mut buf = Vec::new();
     let mut colors: Vec<XlsxCustomColor> = vec![];
@@ -87,7 +88,7 @@ pub struct XlsxCustomColor {
 }
 
 impl XlsxCustomColor {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
 
         let mut color = Self {

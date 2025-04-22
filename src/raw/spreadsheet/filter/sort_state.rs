@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -62,7 +63,7 @@ pub struct XlsxSortState {
 }
 
 impl XlsxSortState {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut sort_state = Self {
             sort_condition: None,

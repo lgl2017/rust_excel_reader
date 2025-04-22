@@ -1,5 +1,6 @@
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::{excel::XmlReader, helper::string_to_unsignedint};
 
@@ -24,7 +25,9 @@ use super::{
 /// tableColumns (Table Columns)
 pub type XlsxTableColumns = Vec<XlsxTableColumn>;
 
-pub(crate) fn load_table_columns(reader: &mut XmlReader) -> anyhow::Result<XlsxTableColumns> {
+pub(crate) fn load_table_columns(
+    reader: &mut XmlReader<impl Read>,
+) -> anyhow::Result<XlsxTableColumns> {
     let mut buf = Vec::new();
     let mut columns: XlsxTableColumns = vec![];
 
@@ -159,7 +162,7 @@ pub struct XlsxTableColumn {
 }
 
 impl XlsxTableColumn {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut column = Self {
             calculated_column_formula: None,

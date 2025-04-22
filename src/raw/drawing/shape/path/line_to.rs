@@ -1,5 +1,6 @@
 use super::path_point::XlsxPoint;
 use crate::excel::XmlReader;
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -21,7 +22,7 @@ pub struct XlsxLineTo {
 }
 
 impl XlsxLineTo {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut point: Option<XlsxPoint> = None;
 
         let mut buf = Vec::new();

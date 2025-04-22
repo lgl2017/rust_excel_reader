@@ -5,6 +5,8 @@ pub mod run_properties;
 pub mod text;
 
 use anyhow::bail;
+use std::io::Read;
+
 use phonetic_properties::XlsxPhoneticProperties;
 use phonetic_run::XlsxPhoneticRun;
 use quick_xml::events::Event;
@@ -65,7 +67,7 @@ pub struct XlsxStringItem {
 }
 
 impl XlsxStringItem {
-    pub(crate) fn load(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, tag: &[u8]) -> anyhow::Result<Self> {
         let mut item = Self {
             phonetic_properties: None,
             rich_text_run: None,

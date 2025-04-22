@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -43,7 +44,7 @@ pub struct XlsxCellValue {
 }
 
 impl XlsxCellValue {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let mut space: Option<String> = None;
 
         let attributes = e.attributes();

@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -128,15 +129,15 @@ pub struct XlsxEffectContainer {
 }
 
 impl XlsxEffectContainer {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         return XlsxEffectContainer::load_helper(reader, e, b"cont");
     }
 
-    pub(crate) fn load_effect_dag(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load_effect_dag(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         return XlsxEffectContainer::load_helper(reader, e, b"effectDag");
     }
 
-    fn load_helper(reader: &mut XmlReader, e: &BytesStart, tag: &[u8]) -> anyhow::Result<Self> {
+    fn load_helper(reader: &mut XmlReader<impl Read>, e: &BytesStart, tag: &[u8]) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut container = Self {
             alpha_bi_level: None,

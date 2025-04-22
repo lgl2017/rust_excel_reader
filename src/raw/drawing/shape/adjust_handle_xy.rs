@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -61,7 +62,7 @@ pub struct XlsxAdjustHandleXY {
 }
 
 impl XlsxAdjustHandleXY {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let mut polar = Self {
             position: None,
             horizontal_guide_ref: None,

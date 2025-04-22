@@ -1,5 +1,6 @@
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 use crate::{common_types::Text, excel::XmlReader};
 
@@ -14,7 +15,7 @@ use crate::{common_types::Text, excel::XmlReader};
 /// </si>
 /// ```
 // tag: t
-pub(crate) fn load_text(reader: &mut XmlReader) -> anyhow::Result<Text> {
+pub(crate) fn load_text(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Text> {
     let mut text = String::new();
     let mut buf: Vec<u8> = Vec::new();
     loop {

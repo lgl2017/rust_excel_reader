@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -64,7 +65,7 @@ pub struct XlsxGradientFill {
 }
 
 impl XlsxGradientFill {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut fill = Self {
             path: None,
@@ -124,7 +125,7 @@ impl XlsxGradientFill {
     }
 }
 
-pub(crate) fn load_gradient_stops(reader: &mut XmlReader) -> anyhow::Result<Vec<GradientStop>> {
+pub(crate) fn load_gradient_stops(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Vec<GradientStop>> {
     let mut gs_list: Vec<GradientStop> = vec![];
 
     let mut buf = Vec::new();
@@ -169,7 +170,7 @@ pub struct GradientStop {
 }
 
 impl GradientStop {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut stop = Self {
             color: None,
@@ -270,7 +271,7 @@ pub struct PathGradientfill {
 }
 
 impl PathGradientfill {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut fill = Self {
             fill_to_rect: None,

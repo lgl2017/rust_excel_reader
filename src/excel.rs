@@ -27,7 +27,7 @@ use crate::{
     },
 };
 
-pub(crate) type XmlReader<'a> = Reader<BufReader<ZipFile<'a>>>;
+pub(crate) type XmlReader<'a, R> = Reader<BufReader<ZipFile<'a, R>>>;
 
 /// A struct representing xml zipped excel file
 pub struct Excel<RS> {
@@ -372,7 +372,7 @@ impl<RS: Read + Seek> Excel<RS> {
 pub(crate) fn xml_reader<'a, RS: Read + Seek>(
     zip: &'a mut ZipArchive<RS>,
     path: &str,
-) -> Option<XmlReader<'a>> {
+) -> Option<XmlReader<'a, RS>> {
     let Some(path) = get_actual_path(zip, path) else {
         return None;
     };

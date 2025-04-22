@@ -1,4 +1,5 @@
 use crate::excel::XmlReader;
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -34,7 +35,7 @@ pub struct XlsxColorChange {
 }
 
 impl XlsxColorChange {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut change = Self {
             color_from: None,

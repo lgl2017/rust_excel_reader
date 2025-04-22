@@ -1,4 +1,5 @@
 use quick_xml::events::BytesStart;
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
@@ -26,7 +27,7 @@ pub struct XlsxSrgbColor {
 }
 
 impl XlsxSrgbColor {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let val = extract_val_attribute(e)?;
         let mut color = Self {
             val,

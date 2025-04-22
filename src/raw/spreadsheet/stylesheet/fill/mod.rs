@@ -2,6 +2,7 @@ use anyhow::bail;
 use gradient_fill::XlsxGradientFill;
 use pattern_fill::XlsxPatternFill;
 use quick_xml::events::Event;
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
@@ -22,7 +23,7 @@ pub mod pattern_fill;
 /// ```
 pub type XlsxFills = Vec<XlsxFill>;
 
-pub(crate) fn load_fills(reader: &mut XmlReader) -> anyhow::Result<XlsxFills> {
+pub(crate) fn load_fills(reader: &mut XmlReader<impl Read>) -> anyhow::Result<XlsxFills> {
     let mut buf = Vec::new();
     let mut fills: Vec<XlsxFill> = vec![];
 
@@ -59,7 +60,7 @@ pub enum XlsxFill {
 }
 
 impl XlsxFill {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Option<Self>> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Option<Self>> {
         let mut buf = Vec::new();
 
         loop {

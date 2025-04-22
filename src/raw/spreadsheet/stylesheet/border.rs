@@ -1,5 +1,6 @@
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::{excel::XmlReader, helper::string_to_bool};
 
@@ -8,7 +9,7 @@ use super::color::XlsxColor;
 pub type XlsxBorders = Vec<XlsxBorder>;
 
 /// Borders: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.borders?view=openxml-3.0.1
-pub(crate) fn load_borders(reader: &mut XmlReader) -> anyhow::Result<XlsxBorders> {
+pub(crate) fn load_borders(reader: &mut XmlReader<impl Read>) -> anyhow::Result<XlsxBorders> {
     let mut buf: Vec<u8> = Vec::new();
     let mut borders: Vec<XlsxBorder> = vec![];
 
@@ -94,7 +95,7 @@ pub struct XlsxBorder {
 }
 
 impl XlsxBorder {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut border = Self {
             diagonal_down: None,
@@ -215,7 +216,11 @@ pub struct XlsxBorderStyle {
 }
 
 impl XlsxBorderStyle {
-    pub fn load(reader: &mut XmlReader, e: &BytesStart, tag: &[u8]) -> anyhow::Result<Self> {
+    pub fn load(
+        reader: &mut XmlReader<impl Read>,
+        e: &BytesStart,
+        tag: &[u8],
+    ) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut border_style = Self {
             color: None,

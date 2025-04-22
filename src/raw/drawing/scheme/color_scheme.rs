@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -128,7 +129,7 @@ pub enum XlsxSchemeColorEnum {
 }
 
 impl XlsxSchemeColorEnum {
-    pub(crate) fn load(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Option<Self>> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, tag: &[u8]) -> anyhow::Result<Option<Self>> {
         let color_enum = XlsxColorEnum::load(reader, tag)?;
         if color_enum.is_none() {
             return Ok(None);
@@ -153,7 +154,7 @@ impl XlsxSchemeColorEnum {
 }
 
 impl XlsxColorScheme {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
 
         let mut color = Self {

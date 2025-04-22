@@ -1,5 +1,8 @@
 use crate::excel::XmlReader;
+
 use anyhow::bail;
+use std::io::Read;
+
 use arc_to::XlsxArcTo;
 use close_shape_path::XlsxCloseShapePath;
 use cubic_bezier_curve_to::XlsxCubicBezierCurveTo;
@@ -78,7 +81,7 @@ pub struct XlsxPath {
 }
 
 impl XlsxPath {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let mut path = Self {
             paths: Some(XlsxPathTypeEnum::load_list(reader, b"path")?),
             extrusion_allowed: Some(false),
@@ -124,7 +127,10 @@ pub enum XlsxPathTypeEnum {
 }
 
 impl XlsxPathTypeEnum {
-    pub(crate) fn load_list(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Vec<Self>> {
+    pub(crate) fn load_list(
+        reader: &mut XmlReader<impl Read>,
+        tag: &[u8],
+    ) -> anyhow::Result<Vec<Self>> {
         let mut paths: Vec<XlsxPathTypeEnum> = vec![];
         let mut buf = Vec::new();
 
@@ -146,7 +152,10 @@ impl XlsxPathTypeEnum {
         Ok(paths)
     }
 
-    fn load_helper(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Option<Self>> {
+    fn load_helper(
+        reader: &mut XmlReader<impl Read>,
+        e: &BytesStart,
+    ) -> anyhow::Result<Option<Self>> {
         match e.local_name().as_ref() {
             b"arcTo" => {
                 return Ok(Some(XlsxPathTypeEnum::Arc(XlsxArcTo::load(e)?)));

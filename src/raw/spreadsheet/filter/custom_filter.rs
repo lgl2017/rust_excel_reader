@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -27,7 +28,7 @@ pub struct XlsxCustomFilters {
 }
 
 impl XlsxCustomFilters {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let mut and: Option<bool> = None;
         let mut filters: Vec<XlsxCustomFilter> = vec![];
 

@@ -1,5 +1,6 @@
 use super::connection_site::XlsxConnectionSite;
 use crate::excel::XmlReader;
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -22,7 +23,8 @@ use quick_xml::events::Event;
 pub type XlsxConnectionSiteList = Vec<XlsxConnectionSite>;
 
 pub(crate) fn load_connection_site_list(
-    reader: &mut XmlReader,
+    reader:  &mut XmlReader<impl Read>,
+
 ) -> anyhow::Result<XlsxConnectionSiteList> {
     let mut buf = Vec::new();
     let mut sites: Vec<XlsxConnectionSite> = vec![];
@@ -51,7 +53,7 @@ pub(crate) fn load_connection_site_list(
 // }
 
 // impl ConnectionSiteList {
-//     pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+//     pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
 //         let mut buf = Vec::new();
 //         let mut sites: Vec<ConnectionSite> = vec![];
 

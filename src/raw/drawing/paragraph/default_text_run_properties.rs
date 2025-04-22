@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -106,7 +107,7 @@ pub struct XlsxDefaultTextRunProperties {
 }
 
 impl XlsxDefaultTextRunProperties {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
 
         let mut defaults = Self {

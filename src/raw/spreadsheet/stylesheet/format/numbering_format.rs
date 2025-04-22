@@ -1,5 +1,6 @@
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::{excel::XmlReader, helper::string_to_unsignedint};
 
@@ -14,7 +15,9 @@ use crate::{excel::XmlReader, helper::string_to_unsignedint};
 // tag: numFmts
 pub type XlsxNumberingFormats = Vec<XlsxNumberingFormat>;
 
-pub(crate) fn load_number_formats(reader: &mut XmlReader) -> anyhow::Result<XlsxNumberingFormats> {
+pub(crate) fn load_number_formats(
+    reader: &mut XmlReader<impl Read>,
+) -> anyhow::Result<XlsxNumberingFormats> {
     let mut buf: Vec<u8> = Vec::new();
     let mut formats: Vec<XlsxNumberingFormat> = vec![];
 

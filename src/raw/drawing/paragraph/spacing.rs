@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -15,7 +16,7 @@ pub enum XlsxSpacingEnum {
 }
 
 impl XlsxSpacingEnum {
-    pub(crate) fn load(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Option<Self>> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, tag: &[u8]) -> anyhow::Result<Option<Self>> {
         let mut buf = Vec::new();
 
         loop {

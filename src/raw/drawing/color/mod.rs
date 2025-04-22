@@ -1,5 +1,8 @@
 use crate::excel::XmlReader;
+
 use anyhow::bail;
+use std::io::Read;
+
 use hsl_color::XlsxHslColor;
 use preset_color::XlsxPresetColor;
 use quick_xml::events::{BytesStart, Event};
@@ -35,7 +38,10 @@ pub enum XlsxColorEnum {
 }
 
 impl XlsxColorEnum {
-    pub(crate) fn load(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Option<Self>> {
+    pub(crate) fn load(
+        reader: &mut XmlReader<impl Read>,
+        tag: &[u8],
+    ) -> anyhow::Result<Option<Self>> {
         let mut buf = Vec::new();
 
         loop {
@@ -55,7 +61,10 @@ impl XlsxColorEnum {
         Ok(None)
     }
 
-    pub(crate) fn load_list(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Vec<Self>> {
+    pub(crate) fn load_list(
+        reader: &mut XmlReader<impl Read>,
+        tag: &[u8],
+    ) -> anyhow::Result<Vec<Self>> {
         let mut colors: Vec<XlsxColorEnum> = vec![];
         let mut buf = Vec::new();
 
@@ -78,7 +87,10 @@ impl XlsxColorEnum {
         Ok(colors)
     }
 
-    fn load_helper(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Option<Self>> {
+    fn load_helper(
+        reader: &mut XmlReader<impl Read>,
+        e: &BytesStart,
+    ) -> anyhow::Result<Option<Self>> {
         match e.local_name().as_ref() {
             b"hslClr" => {
                 let hsl = XlsxHslColor::load(reader, e)?;

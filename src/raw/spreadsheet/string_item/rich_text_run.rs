@@ -1,5 +1,6 @@
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 use crate::{common_types::Text, excel::XmlReader};
 
@@ -46,7 +47,7 @@ pub struct XlsxRichTextRun {
 }
 
 impl XlsxRichTextRun {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut run = Self {
             run_properties: None,
             text: None,

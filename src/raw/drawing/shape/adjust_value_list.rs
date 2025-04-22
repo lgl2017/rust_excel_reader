@@ -1,5 +1,6 @@
 use super::shape_guide::XlsxShapeGuide;
 use crate::excel::XmlReader;
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -16,7 +17,8 @@ use quick_xml::events::Event;
 pub type XlsxAdjustValueList = Vec<XlsxShapeGuide>;
 
 pub(crate) fn load_adjust_value_list(
-    reader: &mut XmlReader,
+    reader:  &mut XmlReader<impl Read>,
+
 ) -> anyhow::Result<XlsxAdjustValueList> {
     let mut buf = Vec::new();
     let mut guides: Vec<XlsxShapeGuide> = vec![];

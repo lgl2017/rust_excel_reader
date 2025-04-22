@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -70,7 +71,7 @@ pub struct XlsxCustomGeometry {
 }
 
 impl XlsxCustomGeometry {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut geom = Self {
             adjust_handle_list: None,
             adjust_value_list: None,

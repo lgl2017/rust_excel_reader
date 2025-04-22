@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -129,7 +130,7 @@ pub struct XlsxCellFormula {
 }
 
 impl XlsxCellFormula {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let mut text = String::new();
         let mut buf: Vec<u8> = Vec::new();
         loop {

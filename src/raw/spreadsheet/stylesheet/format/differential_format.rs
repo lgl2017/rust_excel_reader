@@ -1,5 +1,6 @@
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 use crate::{
     excel::XmlReader,
@@ -16,7 +17,9 @@ use super::{
 // tag: dxfs
 pub type XlsxDifferentialFormats = Vec<XlsxDifferentialFormat>;
 
-pub(crate) fn load_dxfs(reader: &mut XmlReader) -> anyhow::Result<XlsxDifferentialFormats> {
+pub(crate) fn load_dxfs(
+    reader: &mut XmlReader<impl Read>,
+) -> anyhow::Result<XlsxDifferentialFormats> {
     let mut buf: Vec<u8> = Vec::new();
     let mut formats: Vec<XlsxDifferentialFormat> = vec![];
 
@@ -52,7 +55,7 @@ pub struct XlsxDifferentialFormat {
 }
 
 impl XlsxDifferentialFormat {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut format = Self {
             alignment: None,
             border: None,

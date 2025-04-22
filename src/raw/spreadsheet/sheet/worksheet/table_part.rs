@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -16,7 +17,7 @@ use crate::excel::XmlReader;
 /// ```
 pub type XlsxTableParts = Vec<XlsxTablePart>;
 
-pub(crate) fn load_table_parts(reader: &mut XmlReader) -> anyhow::Result<XlsxTableParts> {
+pub(crate) fn load_table_parts(reader: &mut XmlReader<impl Read>) -> anyhow::Result<XlsxTableParts> {
     let mut parts: XlsxTableParts = vec![];
 
     let mut buf = Vec::new();

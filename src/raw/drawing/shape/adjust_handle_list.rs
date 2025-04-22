@@ -1,5 +1,6 @@
 use super::{adjust_handle_polar::XlsxAdjustHandlePolar, adjust_handle_xy::XlsxAdjustHandleXY};
 use crate::excel::XmlReader;
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -28,7 +29,7 @@ pub struct XlsxAdjustHandleList {
 }
 
 impl XlsxAdjustHandleList {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut polars: Vec<XlsxAdjustHandlePolar> = vec![];
         let mut xys: Vec<XlsxAdjustHandleXY> = vec![];
 

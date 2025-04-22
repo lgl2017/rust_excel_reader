@@ -4,6 +4,7 @@ use super::{
     text_default::{load_text_default, XlsxTextDefault},
 };
 use crate::excel::XmlReader;
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -84,7 +85,7 @@ pub struct XlsxObjectDefaults {
 }
 
 impl XlsxObjectDefaults {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
 
         let mut defaults = Self {

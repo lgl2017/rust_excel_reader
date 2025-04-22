@@ -1,5 +1,6 @@
 use super::{backdrop::XlsxBackDrop, camera::XlsxCamera, light_rig::XlsxLightRig};
 use crate::excel::XmlReader;
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -37,7 +38,7 @@ pub struct XlsxScene3DType {
 }
 
 impl XlsxScene3DType {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut scene3d = Self {
             backdrop: None,
             camera: None,

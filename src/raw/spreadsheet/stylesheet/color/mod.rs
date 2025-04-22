@@ -1,7 +1,6 @@
-use std::usize;
-
 use anyhow::bail;
 use quick_xml::events::BytesStart;
+use std::usize;
 use stylesheet_colors::{get_default_indexed_color_mapping, XlsxStyleSheetColors};
 
 use crate::{

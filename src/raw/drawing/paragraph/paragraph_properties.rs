@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -38,7 +39,8 @@ use super::{
 pub type XlsxDefaultParagraphProperties = XlsxParagraphProperties;
 
 pub(crate) fn load_default_paragraph_properties(
-    reader: &mut XmlReader,
+    reader:  &mut XmlReader<impl Read>,
+
     e: &BytesStart,
 ) -> anyhow::Result<XlsxDefaultParagraphProperties> {
     return XlsxParagraphProperties::load(reader, e, b"defPPr");
@@ -58,7 +60,8 @@ pub(crate) fn load_default_paragraph_properties(
 pub type XlsxLevel1ParagraphProperties = XlsxParagraphProperties;
 
 pub(crate) fn load_level1_paragraph_properties(
-    reader: &mut XmlReader,
+    reader:  &mut XmlReader<impl Read>,
+
     e: &BytesStart,
 ) -> anyhow::Result<XlsxLevel1ParagraphProperties> {
     return XlsxParagraphProperties::load(reader, e, b"lvl1pPr");
@@ -78,7 +81,8 @@ pub(crate) fn load_level1_paragraph_properties(
 pub type XlsxLevel2ParagraphProperties = XlsxParagraphProperties;
 
 pub(crate) fn load_level2_paragraph_properties(
-    reader: &mut XmlReader,
+    reader:  &mut XmlReader<impl Read>,
+
     e: &BytesStart,
 ) -> anyhow::Result<XlsxLevel2ParagraphProperties> {
     return XlsxParagraphProperties::load(reader, e, b"lvl2pPr");
@@ -98,7 +102,8 @@ pub(crate) fn load_level2_paragraph_properties(
 pub type XlsxLevel3ParagraphProperties = XlsxParagraphProperties;
 
 pub(crate) fn load_level3_paragraph_properties(
-    reader: &mut XmlReader,
+    reader:  &mut XmlReader<impl Read>,
+
     e: &BytesStart,
 ) -> anyhow::Result<XlsxLevel3ParagraphProperties> {
     return XlsxParagraphProperties::load(reader, e, b"lvl3pPr");
@@ -118,7 +123,8 @@ pub(crate) fn load_level3_paragraph_properties(
 pub type XlsxLevel4ParagraphProperties = XlsxParagraphProperties;
 
 pub(crate) fn load_level4_paragraph_properties(
-    reader: &mut XmlReader,
+    reader:  &mut XmlReader<impl Read>,
+
     e: &BytesStart,
 ) -> anyhow::Result<XlsxLevel4ParagraphProperties> {
     return XlsxParagraphProperties::load(reader, e, b"lvl4pPr");
@@ -138,7 +144,8 @@ pub(crate) fn load_level4_paragraph_properties(
 pub type XlsxLevel5ParagraphProperties = XlsxParagraphProperties;
 
 pub(crate) fn load_level5_paragraph_properties(
-    reader: &mut XmlReader,
+    reader:  &mut XmlReader<impl Read>,
+
     e: &BytesStart,
 ) -> anyhow::Result<XlsxLevel5ParagraphProperties> {
     return XlsxParagraphProperties::load(reader, e, b"lvl5pPr");
@@ -158,7 +165,8 @@ pub(crate) fn load_level5_paragraph_properties(
 pub type XlsxLevel6ParagraphProperties = XlsxParagraphProperties;
 
 pub(crate) fn load_level6_paragraph_properties(
-    reader: &mut XmlReader,
+    reader:  &mut XmlReader<impl Read>,
+
     e: &BytesStart,
 ) -> anyhow::Result<XlsxLevel6ParagraphProperties> {
     return XlsxParagraphProperties::load(reader, e, b"lvl6pPr");
@@ -178,7 +186,8 @@ pub(crate) fn load_level6_paragraph_properties(
 pub type XlsxLevel7ParagraphProperties = XlsxParagraphProperties;
 
 pub(crate) fn load_level7_paragraph_properties(
-    reader: &mut XmlReader,
+    reader:  &mut XmlReader<impl Read>,
+
     e: &BytesStart,
 ) -> anyhow::Result<XlsxLevel7ParagraphProperties> {
     return XlsxParagraphProperties::load(reader, e, b"lvl7pPr");
@@ -198,7 +207,8 @@ pub(crate) fn load_level7_paragraph_properties(
 pub type XlsxLevel8ParagraphProperties = XlsxParagraphProperties;
 
 pub(crate) fn load_level8_paragraph_properties(
-    reader: &mut XmlReader,
+    reader:  &mut XmlReader<impl Read>,
+
     e: &BytesStart,
 ) -> anyhow::Result<XlsxLevel8ParagraphProperties> {
     return XlsxParagraphProperties::load(reader, e, b"lvl8pPr");
@@ -218,7 +228,8 @@ pub(crate) fn load_level8_paragraph_properties(
 pub type XlsxLevel9ParagraphProperties = XlsxParagraphProperties;
 
 pub(crate) fn load_level9_paragraph_properties(
-    reader: &mut XmlReader,
+    reader:  &mut XmlReader<impl Read>,
+
     e: &BytesStart,
 ) -> anyhow::Result<XlsxLevel9ParagraphProperties> {
     return XlsxParagraphProperties::load(reader, e, b"lvl9pPr");
@@ -282,7 +293,7 @@ pub struct XlsxParagraphProperties {
 }
 
 impl XlsxParagraphProperties {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart, tag: &[u8]) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart, tag: &[u8]) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
 
         let mut properties = Self {

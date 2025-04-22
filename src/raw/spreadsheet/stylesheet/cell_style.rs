@@ -1,5 +1,6 @@
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::{
     excel::XmlReader,
@@ -19,7 +20,9 @@ use crate::{
 /// ```
 pub type XlsxCellStyles = Vec<XlsxCellStyle>;
 
-pub(crate) fn load_cell_styles(reader: &mut XmlReader) -> anyhow::Result<XlsxCellStyles> {
+pub(crate) fn load_cell_styles(
+    reader: &mut XmlReader<impl Read>,
+) -> anyhow::Result<XlsxCellStyles> {
     let mut buf: Vec<u8> = Vec::new();
     let mut styles: Vec<XlsxCellStyle> = vec![];
 

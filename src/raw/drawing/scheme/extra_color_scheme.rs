@@ -1,5 +1,6 @@
 use crate::excel::XmlReader;
 use crate::raw::drawing::color::color_map::XlsxColorMap;
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -10,7 +11,8 @@ use super::color_scheme::XlsxColorScheme;
 pub type XlsxExtraColorSchemeList = Vec<XlsxExtraColorScheme>;
 
 pub(crate) fn load_extra_color_scheme_list(
-    reader: &mut XmlReader,
+    reader:  &mut XmlReader<impl Read>,
+
 ) -> anyhow::Result<Vec<XlsxExtraColorScheme>> {
     let mut buf = Vec::new();
     let mut schemes: Vec<XlsxExtraColorScheme> = vec![];
@@ -90,7 +92,7 @@ pub struct XlsxExtraColorScheme {
 }
 
 impl XlsxExtraColorScheme {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
         let mut scheme = Self {
             color_scheme: None,

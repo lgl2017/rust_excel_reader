@@ -1,5 +1,6 @@
 use super::shape_guide::XlsxShapeGuide;
 use crate::excel::XmlReader;
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -16,7 +17,7 @@ use quick_xml::events::Event;
 
 pub type XlsxShapeGuideList = Vec<XlsxShapeGuide>;
 
-pub(crate) fn load_shape_guide_list(reader: &mut XmlReader) -> anyhow::Result<XlsxShapeGuideList> {
+pub(crate) fn load_shape_guide_list(reader: &mut XmlReader<impl Read>) -> anyhow::Result<XlsxShapeGuideList> {
     let mut buf = Vec::new();
     let mut guides: Vec<XlsxShapeGuide> = vec![];
 

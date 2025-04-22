@@ -10,6 +10,7 @@ use crate::raw::drawing::paragraph::paragraph_properties::{
     XlsxLevel6ParagraphProperties, XlsxLevel7ParagraphProperties, XlsxLevel8ParagraphProperties,
     XlsxLevel9ParagraphProperties,
 };
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -64,7 +65,7 @@ pub struct XlsxTextListStyle {
 }
 
 impl XlsxTextListStyle {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
 
         let mut styles = Self {

@@ -1,5 +1,6 @@
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::{
     excel::XmlReader,
@@ -21,7 +22,9 @@ use crate::{
 /// definedNames (Defined Names)
 pub type XlsxDefinedNames = Vec<XlsxDefinedName>;
 
-pub(crate) fn load_defined_names(reader: &mut XmlReader) -> anyhow::Result<XlsxDefinedNames> {
+pub(crate) fn load_defined_names(
+    reader: &mut XmlReader<impl Read>,
+) -> anyhow::Result<XlsxDefinedNames> {
     let mut names: XlsxDefinedNames = vec![];
 
     let mut buf = Vec::new();
@@ -121,7 +124,7 @@ pub struct XlsxDefinedName {
 }
 
 impl XlsxDefinedName {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut defined_name = Self {
             value: None,

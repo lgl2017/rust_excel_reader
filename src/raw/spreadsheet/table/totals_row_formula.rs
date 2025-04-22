@@ -1,4 +1,5 @@
 use anyhow::bail;
+use std::io::Read;
 use quick_xml::events::{BytesStart, Event};
 
 use crate::{excel::XmlReader, helper::string_to_bool};
@@ -23,7 +24,7 @@ pub struct XlsxTotalsRowFormula {
 }
 
 impl XlsxTotalsRowFormula {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let mut text = String::new();
         let mut buf: Vec<u8> = Vec::new();
         loop {

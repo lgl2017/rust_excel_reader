@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -19,7 +20,7 @@ use crate::{
 /// ```
 pub type XlsxColumnInformations = Vec<XlsxColumnInformation>;
 
-pub(crate) fn load_column_infos(reader: &mut XmlReader) -> anyhow::Result<XlsxColumnInformations> {
+pub(crate) fn load_column_infos(reader: &mut XmlReader<impl Read>) -> anyhow::Result<XlsxColumnInformations> {
     let mut cols: XlsxColumnInformations = vec![];
 
     let mut buf = Vec::new();

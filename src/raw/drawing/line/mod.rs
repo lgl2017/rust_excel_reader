@@ -1,5 +1,8 @@
 use crate::excel::XmlReader;
+
 use anyhow::bail;
+use std::io::Read;
+
 use outline::XlsxOutline;
 use quick_xml::events::Event;
 
@@ -44,7 +47,9 @@ pub mod tail_end;
 /// ```
 pub type XlsxLineStyleList = Vec<XlsxOutline>;
 
-pub(crate) fn load_line_style_list(reader: &mut XmlReader) -> anyhow::Result<XlsxLineStyleList> {
+pub(crate) fn load_line_style_list(
+    reader: &mut XmlReader<impl Read>,
+) -> anyhow::Result<XlsxLineStyleList> {
     let mut outlines: Vec<XlsxOutline> = vec![];
 
     let mut buf = Vec::new();

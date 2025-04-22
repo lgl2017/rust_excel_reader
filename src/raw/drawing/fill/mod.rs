@@ -8,6 +8,7 @@ pub mod rectangle;
 pub mod solid_fill;
 
 use anyhow::bail;
+use std::io::Read;
 
 use crate::excel::XmlReader;
 use blip_fill::XlsxBlipFill;
@@ -37,7 +38,7 @@ use solid_fill::XlsxSolidFill;
 pub type XlsxBackgroundFillStyleList = Vec<XlsxFillStyleEnum>;
 
 pub(crate) fn load_bg_fill_style_lst(
-    reader: &mut XmlReader,
+    reader: &mut XmlReader<impl Read>,
 ) -> anyhow::Result<XlsxBackgroundFillStyleList> {
     return Ok(XlsxFillStyleEnum::load_list(reader, b"bgFillStyleLst")?);
 }
@@ -48,7 +49,9 @@ pub(crate) fn load_bg_fill_style_lst(
 // tag: fillStyleLst
 pub type XlsxFillStyleList = Vec<XlsxFillStyleEnum>;
 
-pub(crate) fn load_fill_style_lst(reader: &mut XmlReader) -> anyhow::Result<XlsxFillStyleList> {
+pub(crate) fn load_fill_style_lst(
+    reader: &mut XmlReader<impl Read>,
+) -> anyhow::Result<XlsxFillStyleList> {
     return Ok(XlsxFillStyleEnum::load_list(reader, b"fillStyleLst")?);
 }
 
@@ -74,7 +77,10 @@ pub enum XlsxFillStyleEnum {
 }
 
 impl XlsxFillStyleEnum {
-    pub(crate) fn load(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Option<Self>> {
+    pub(crate) fn load(
+        reader: &mut XmlReader<impl Read>,
+        tag: &[u8],
+    ) -> anyhow::Result<Option<Self>> {
         let mut buf = Vec::new();
 
         loop {
@@ -94,7 +100,10 @@ impl XlsxFillStyleEnum {
         Ok(None)
     }
 
-    pub(crate) fn load_list(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Vec<Self>> {
+    pub(crate) fn load_list(
+        reader: &mut XmlReader<impl Read>,
+        tag: &[u8],
+    ) -> anyhow::Result<Vec<Self>> {
         let mut fills: Vec<XlsxFillStyleEnum> = vec![];
         let mut buf = Vec::new();
 
@@ -116,7 +125,10 @@ impl XlsxFillStyleEnum {
         Ok(fills)
     }
 
-    fn load_helper(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Option<Self>> {
+    fn load_helper(
+        reader: &mut XmlReader<impl Read>,
+        e: &BytesStart,
+    ) -> anyhow::Result<Option<Self>> {
         match e.local_name().as_ref() {
             b"solidFill" => {
                 let Some(fill) = XlsxSolidFill::load(reader, b"solidFill")? else {

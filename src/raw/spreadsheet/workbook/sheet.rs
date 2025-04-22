@@ -1,5 +1,6 @@
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::{excel::XmlReader, helper::string_to_unsignedint};
 
@@ -19,7 +20,7 @@ use crate::{excel::XmlReader, helper::string_to_unsignedint};
 /// sheets (Sheets)
 pub type XlsxSheets = Vec<XlsxSheet>;
 
-pub(crate) fn load_sheets(reader: &mut XmlReader) -> anyhow::Result<XlsxSheets> {
+pub(crate) fn load_sheets(reader: &mut XmlReader<impl Read>) -> anyhow::Result<XlsxSheets> {
     let mut sheets: XlsxSheets = vec![];
 
     let mut buf = Vec::new();

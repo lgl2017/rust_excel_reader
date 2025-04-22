@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -18,7 +19,7 @@ pub struct XlsxCustomDash {
 }
 
 impl XlsxCustomDash {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
         let mut stops: Vec<XlsxDashStop> = vec![];
 

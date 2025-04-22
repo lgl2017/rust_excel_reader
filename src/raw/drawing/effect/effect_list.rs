@@ -4,6 +4,7 @@ use super::{
     soft_edge::XlsxSoftEdge,
 };
 use crate::excel::XmlReader;
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -38,7 +39,7 @@ pub struct XlsxEffectList {
 }
 
 impl XlsxEffectList {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut list = Self {
             blur: None,
             fill_overlay: None,

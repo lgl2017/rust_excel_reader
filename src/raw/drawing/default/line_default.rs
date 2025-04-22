@@ -1,4 +1,5 @@
 use crate::excel::XmlReader;
+use std::io::Read;
 
 use super::XlsxDefaultBase;
 
@@ -30,6 +31,8 @@ use super::XlsxDefaultBase;
 /// ```
 pub type XlsxLineDefault = XlsxDefaultBase;
 
-pub(crate) fn load_line_default(reader: &mut XmlReader) -> anyhow::Result<XlsxLineDefault> {
+pub(crate) fn load_line_default(
+    reader: &mut XmlReader<impl Read>,
+) -> anyhow::Result<XlsxLineDefault> {
     return XlsxDefaultBase::load(reader, b"lnDef");
 }

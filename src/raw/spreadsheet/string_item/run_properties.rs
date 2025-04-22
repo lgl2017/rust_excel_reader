@@ -1,5 +1,6 @@
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 use crate::{
     excel::XmlReader,
@@ -168,7 +169,7 @@ pub struct XlsxRunProperties {
 }
 
 impl XlsxRunProperties {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
 
         let mut properties = Self {

@@ -1,5 +1,6 @@
 use crate::excel::XmlReader;
 use crate::raw::drawing::image::blip::XlsxBlip;
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -22,7 +23,7 @@ pub struct XlsxPictureBullet {
 }
 
 impl XlsxPictureBullet {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut bullet = Self { blip: None };
 
         let mut buf = Vec::new();

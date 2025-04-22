@@ -1,5 +1,6 @@
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::{
     excel::XmlReader,
@@ -19,7 +20,7 @@ use crate::{
 pub type XlsxCustomWorkbookViews = Vec<XlsxCustomWorkbookView>;
 
 pub(crate) fn load_custom_bookviews(
-    reader: &mut XmlReader,
+    reader: &mut XmlReader<impl Read>,
 ) -> anyhow::Result<XlsxCustomWorkbookViews> {
     let mut views: XlsxCustomWorkbookViews = vec![];
 
@@ -226,7 +227,7 @@ pub struct XlsxCustomWorkbookView {
 }
 
 impl XlsxCustomWorkbookView {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut view = Self {
             minimized: Some(false),

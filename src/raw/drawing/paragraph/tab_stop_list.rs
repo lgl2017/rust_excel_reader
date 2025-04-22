@@ -1,5 +1,6 @@
 use super::tab_stop::XlsxTabStop;
 use crate::excel::XmlReader;
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -21,7 +22,7 @@ use quick_xml::events::Event;
 // tag: tabLst
 pub type XlsxTabStopList = Vec<XlsxTabStop>;
 
-pub(crate) fn load_tab_stop_list(reader: &mut XmlReader) -> anyhow::Result<XlsxTabStopList> {
+pub(crate) fn load_tab_stop_list(reader: &mut XmlReader<impl Read>) -> anyhow::Result<XlsxTabStopList> {
     let mut stops: Vec<XlsxTabStop> = vec![];
     let mut buf = Vec::new();
 

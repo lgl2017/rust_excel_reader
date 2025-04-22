@@ -1,5 +1,8 @@
 use crate::excel::XmlReader;
+
 use anyhow::bail;
+use std::io::Read;
+
 use complex_sript_font::XlsxComplexScriptFont;
 use east_asian_font::XlsxEastAsianFont;
 use latin_font::XlsxLatinFont;
@@ -84,15 +87,15 @@ pub struct XlsxFontBase {
 }
 
 impl XlsxFontBase {
-    pub(crate) fn load_major(reader: &mut XmlReader) -> anyhow::Result<XlsxMajorFont> {
+    pub(crate) fn load_major(reader: &mut XmlReader<impl Read>) -> anyhow::Result<XlsxMajorFont> {
         return Self::load_helper(reader, b"majorFont");
     }
 
-    pub(crate) fn load_minor(reader: &mut XmlReader) -> anyhow::Result<XlsxMajorFont> {
+    pub(crate) fn load_minor(reader: &mut XmlReader<impl Read>) -> anyhow::Result<XlsxMajorFont> {
         return Self::load_helper(reader, b"minorFont");
     }
 
-    fn load_helper(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Self> {
+    fn load_helper(reader: &mut XmlReader<impl Read>, tag: &[u8]) -> anyhow::Result<Self> {
         let mut font: Self = Self {
             cs: None,
             ea: None,

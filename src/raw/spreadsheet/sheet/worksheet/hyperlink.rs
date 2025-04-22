@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -5,7 +6,7 @@ use crate::{common_types::Coordinate, excel::XmlReader};
 
 pub type XlsxHyperlinks = Vec<XlsxHyperlink>;
 
-pub(crate) fn load_hyperlinks(reader: &mut XmlReader) -> anyhow::Result<XlsxHyperlinks> {
+pub(crate) fn load_hyperlinks(reader: &mut XmlReader<impl Read>) -> anyhow::Result<XlsxHyperlinks> {
     let mut hyperlinks: XlsxHyperlinks = vec![];
 
     let mut buf = Vec::new();

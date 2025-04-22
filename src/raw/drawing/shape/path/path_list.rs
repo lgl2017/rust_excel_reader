@@ -1,5 +1,6 @@
 use super::XlsxPath;
 use crate::excel::XmlReader;
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -26,7 +27,7 @@ use quick_xml::events::Event;
 /// ```
 pub type XlsxPathList = Vec<XlsxPath>;
 
-pub(crate) fn load_path_list(reader: &mut XmlReader) -> anyhow::Result<XlsxPathList> {
+pub(crate) fn load_path_list(reader: &mut XmlReader<impl Read>) -> anyhow::Result<XlsxPathList> {
     let mut buf = Vec::new();
     let mut paths: Vec<XlsxPath> = vec![];
 

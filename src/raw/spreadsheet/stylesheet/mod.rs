@@ -6,10 +6,9 @@ pub mod font;
 pub mod format;
 pub mod table_style;
 
-use std::io::{Read, Seek};
-
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::{Read, Seek};
 use zip::ZipArchive;
 
 use crate::excel::xml_reader;

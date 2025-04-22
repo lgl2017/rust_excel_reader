@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -49,7 +50,7 @@ pub struct XlsxFilterCriteriaGroup {
 }
 
 impl XlsxFilterCriteriaGroup {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let mut creteria = Self {
             date_group_item: None,
             value_filters: None,

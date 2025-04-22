@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -17,7 +18,7 @@ use crate::{common_types::Dimension, excel::XmlReader};
 /// ```
 pub type XlsxMergeCells = Vec<XlsxMergeCell>;
 
-pub(crate) fn load_merge_cells(reader: &mut XmlReader) -> anyhow::Result<XlsxMergeCells> {
+pub(crate) fn load_merge_cells(reader: &mut XmlReader<impl Read>) -> anyhow::Result<XlsxMergeCells> {
     let mut cells: XlsxMergeCells = vec![];
 
     let mut buf = Vec::new();

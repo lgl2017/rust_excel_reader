@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -31,7 +32,7 @@ pub struct XlsxPresetTextWarp {
 }
 
 impl XlsxPresetTextWarp {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
         let mut preset_text_warp = Self {
             adjust_value_list: None,

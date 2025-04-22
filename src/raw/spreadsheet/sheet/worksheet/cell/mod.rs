@@ -1,8 +1,10 @@
 use anyhow::bail;
+use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
+
 use cell_formula::XlsxCellFormula;
 use cell_value::XlsxCellValue;
 use inline_string::{load_inline_string, XlsxInlineString};
-use quick_xml::events::{BytesStart, Event};
 
 use crate::{
     common_types::Coordinate,
@@ -99,7 +101,7 @@ pub struct XlsxCell {
 }
 
 impl XlsxCell {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let mut cell = Self {
             formula: None,
             inline_string: None,

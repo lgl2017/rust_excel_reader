@@ -1,5 +1,6 @@
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 use crate::{common_types::HexColor, excel::XmlReader, helper::format_hex_string};
 
@@ -31,7 +32,7 @@ pub struct XlsxStyleSheetColors {
 }
 
 impl XlsxStyleSheetColors {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
         let mut colors = Self {
             indexed_colors: vec![],
@@ -79,7 +80,7 @@ impl XlsxStyleSheetColors {
     }
 }
 
-fn load_mru_colors(reader: &mut XmlReader) -> anyhow::Result<Vec<XlsxColor>> {
+fn load_mru_colors(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Vec<XlsxColor>> {
     let mut colors: Vec<XlsxColor> = vec![];
     let mut buf = Vec::new();
 
@@ -101,7 +102,7 @@ fn load_mru_colors(reader: &mut XmlReader) -> anyhow::Result<Vec<XlsxColor>> {
     return Ok(colors);
 }
 
-fn load_indexed_colors(reader: &mut XmlReader) -> anyhow::Result<Vec<XlsxRgbColor>> {
+fn load_indexed_colors(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Vec<XlsxRgbColor>> {
     let mut colors: Vec<XlsxRgbColor> = vec![];
     let mut buf = Vec::new();
 

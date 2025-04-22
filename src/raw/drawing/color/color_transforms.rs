@@ -6,6 +6,7 @@ use crate::helper::{
     grayscale, hsla_to_rgba, inverse, inverse_gamma_shift, percentage_int_to_float, rgba_to_hsla,
     string_to_bool, string_to_int,
 };
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -160,7 +161,7 @@ pub enum XlsxColorTransform {
 }
 
 impl XlsxColorTransform {
-    pub fn load_list(reader: &mut XmlReader, tag: &[u8]) -> anyhow::Result<Vec<Self>> {
+    pub fn load_list(reader: &mut XmlReader<impl Read>, tag: &[u8]) -> anyhow::Result<Vec<Self>> {
         let mut transforms: Vec<Self> = vec![];
 
         let mut buf = Vec::new();

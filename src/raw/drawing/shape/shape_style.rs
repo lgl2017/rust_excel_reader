@@ -3,6 +3,7 @@ use crate::raw::drawing::{
     effect::effect_reference::XlsxEffectReference, fill::fill_reference::XlsxFillReference,
     font::font_reference::XlsxFontReference, line::line_reference::XlsxLineReference,
 };
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -45,7 +46,7 @@ pub struct XlsxShapeStyle {
 }
 
 impl XlsxShapeStyle {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut buf = Vec::new();
 
         let mut shape_style = Self {

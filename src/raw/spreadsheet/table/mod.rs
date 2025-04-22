@@ -1,7 +1,6 @@
-use std::io::{Read, Seek};
-
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::{Read, Seek};
 use table_column::{load_table_columns, XlsxTableColumns};
 use table_style_info::XlsxTableStyleInfo;
 use zip::ZipArchive;

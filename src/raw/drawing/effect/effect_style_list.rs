@@ -1,5 +1,6 @@
 use super::effect_style::XlsxEffectStyle;
 use crate::excel::XmlReader;
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
 
@@ -38,7 +39,8 @@ use quick_xml::events::Event;
 pub type XlsxEffectStyleList = Vec<XlsxEffectStyle>;
 
 pub(crate) fn load_effect_style_list(
-    reader: &mut XmlReader,
+    reader:  &mut XmlReader<impl Read>,
+
 ) -> anyhow::Result<XlsxEffectStyleList> {
     let mut styles: Vec<XlsxEffectStyle> = vec![];
 

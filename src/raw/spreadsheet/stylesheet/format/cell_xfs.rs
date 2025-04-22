@@ -1,5 +1,6 @@
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
@@ -16,7 +17,7 @@ use super::cell_format::XlsxCellFormat;
 /// ```
 pub type XlsxCellFormats = Vec<XlsxCellFormat>;
 
-pub(crate) fn load_cell_xfs(reader: &mut XmlReader) -> anyhow::Result<XlsxCellFormats> {
+pub(crate) fn load_cell_xfs(reader: &mut XmlReader<impl Read>) -> anyhow::Result<XlsxCellFormats> {
     let mut buf: Vec<u8> = Vec::new();
     let mut formats: Vec<XlsxCellFormat> = vec![];
 

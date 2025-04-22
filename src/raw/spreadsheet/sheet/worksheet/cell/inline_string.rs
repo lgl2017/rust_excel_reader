@@ -1,4 +1,5 @@
 use crate::{excel::XmlReader, raw::spreadsheet::string_item::XlsxStringItem};
+use std::io::Read;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.inlinestring?view=openxml-3.0.1
 ///
@@ -14,6 +15,8 @@ use crate::{excel::XmlReader, raw::spreadsheet::string_item::XlsxStringItem};
 /// is (Rich Text Inline)
 pub type XlsxInlineString = XlsxStringItem;
 
-pub(crate) fn load_inline_string(reader: &mut XmlReader) -> anyhow::Result<XlsxInlineString> {
+pub(crate) fn load_inline_string(
+    reader: &mut XmlReader<impl Read>,
+) -> anyhow::Result<XlsxInlineString> {
     return XlsxStringItem::load(reader, b"is");
 }

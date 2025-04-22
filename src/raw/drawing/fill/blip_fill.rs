@@ -1,3 +1,4 @@
+use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
 
@@ -41,7 +42,7 @@ pub struct XlsxBlipFill {
 }
 
 impl XlsxBlipFill {
-    pub(crate) fn load(reader: &mut XmlReader, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut fill = Self {
             blip: None,
@@ -115,7 +116,7 @@ pub struct XlsxStretch {
 }
 
 impl XlsxStretch {
-    pub(crate) fn load(reader: &mut XmlReader) -> anyhow::Result<Self> {
+    pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
         let mut stretch = Self {
             fill_rectangle: None,
         };
