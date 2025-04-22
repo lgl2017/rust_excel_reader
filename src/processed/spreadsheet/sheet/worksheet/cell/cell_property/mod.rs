@@ -6,7 +6,7 @@ pub mod numbering_format;
 pub mod text_alignment;
 
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use border::Border;
 use fill::Fill;
@@ -37,7 +37,7 @@ static DEFAULT_HIDDEN: bool = false;
 static DEFAULT_SHOW_PHONETIC: bool = true;
 
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CellProperty {
     pub width: f64,
 
@@ -110,7 +110,7 @@ impl CellProperty {
         let fill = Self::get_fill(fill_id, stylesheet.clone(), color_scheme.clone());
         let font = Self::get_font(font_id, stylesheet.clone(), color_scheme.clone());
         let border = Self::get_border(border_id, stylesheet.clone(), color_scheme.clone());
-        let numbering_format = Self::get_numbering_format(numbering_format_id, stylesheet.clone());
+
         return Self {
             width,
             width_best_fit: Self::get_width_best_fit(col_info),
@@ -123,7 +123,7 @@ impl CellProperty {
             font,
             border,
             fill,
-            numbering_format,
+            numbering_format: NumberingFormat::from_id(numbering_format_id, stylesheet.clone()),
         };
     }
 
@@ -150,18 +150,6 @@ impl CellProperty {
         };
 
         return DEFAULT_DY_DESCENT;
-    }
-
-    fn get_numbering_format(
-        numbering_format: Option<u64>,
-        stylesheet: XlsxStyleSheet,
-    ) -> NumberingFormat {
-        if let Some(id) = numbering_format {
-            let raw = stylesheet.get_num_format(id);
-            return NumberingFormat::from_raw(raw);
-        }
-
-        return NumberingFormat::default();
     }
 
     fn get_font(

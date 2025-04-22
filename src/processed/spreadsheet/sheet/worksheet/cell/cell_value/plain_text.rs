@@ -1,5 +1,5 @@
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::common_types::Text;
 
@@ -20,7 +20,7 @@ use super::{phonetic_properties::PhoneticProperties, phonetic_run::PhoneticRun};
 /// </si>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct PlainText {
     pub phonetic_properties: Option<PhoneticProperties>,
     pub phonetic_runs: Option<Vec<PhoneticRun>>,

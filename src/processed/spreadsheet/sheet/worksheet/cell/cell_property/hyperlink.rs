@@ -2,7 +2,7 @@ use regex::Regex;
 use std::collections::BTreeMap;
 
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::{
     common_types::{Coordinate, Dimension},
@@ -12,8 +12,8 @@ use crate::{
 };
 
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(tag = "type"))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(tag = "type", content = "value"))]
 pub enum Hyperlink {
     Inernal(InternalHyperlink),
     External(ExternalHyperlink),
@@ -55,7 +55,7 @@ impl Hyperlink {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct InternalHyperlink {
     pub sheet_name: String,
     pub cell_range: Dimension,
@@ -130,8 +130,8 @@ impl InternalHyperlink {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(tag = "type"))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(tag = "type", content = "value"))]
 pub enum ExternalHyperlink {
     Url(String),
     Email(EmailHyperlink),
@@ -182,7 +182,7 @@ impl ExternalHyperlink {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct EmailHyperlink {
     mail_to: String,
     subject: String,

@@ -1,5 +1,5 @@
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::{
     common_types::HexColor,
@@ -38,7 +38,7 @@ static DEFAULT_FONT_SIZE: f64 = 11.0;
 /// </fonts>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Font {
     /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.bold?view=openxml-3.0.1
     pub bold: bool,
@@ -180,7 +180,7 @@ impl Font {
 /// * 4: Script
 /// * 5: Decorative
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum FontFamilyValue {
     NotApplicable,
     Roman,
@@ -215,7 +215,7 @@ impl FontFamilyValue {
 /// * Single
 /// * SingleAccounting
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum UnderlineValue {
     Double,
     DoubleAccounting,
@@ -244,7 +244,7 @@ impl UnderlineValue {
 /// * Minor
 /// * None
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum FontSchemeValue {
     Major,
     Minor,
@@ -269,7 +269,7 @@ impl FontSchemeValue {
 /// * Subscript,
 /// * Superscript
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum VerticalAlignmentRunValue {
     Baseline,
     Subscript,

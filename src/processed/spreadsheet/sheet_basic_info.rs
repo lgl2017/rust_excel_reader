@@ -1,7 +1,7 @@
 use anyhow::bail;
 
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::{
     packaging::relationship::{zip_path_for_id, XlsxRelationships},
@@ -9,7 +9,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct SheetBasicInfo {
     /// id (Relationship Id)
     pub r_id: String,
@@ -69,7 +69,7 @@ impl SheetBasicInfo {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum SheetType {
     /// WorkSheet
     WorkSheet,
@@ -81,7 +81,7 @@ pub enum SheetType {
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.sheetstatevalues?view=openxml-3.0.1
 #[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum SheetVisibleState {
     /// Visible
     Visible,

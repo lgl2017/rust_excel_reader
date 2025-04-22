@@ -1,5 +1,5 @@
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use super::{phonetic_properties::PhoneticProperties, phonetic_run::PhoneticRun};
 use crate::{
@@ -28,7 +28,7 @@ use crate::{
 ///     </r>
 /// </si>
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct RichText {
     pub phonetic_properties: Option<PhoneticProperties>,
     pub phonetic_runs: Option<Vec<PhoneticRun>>,
@@ -36,7 +36,7 @@ pub struct RichText {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct RichTextRun {
     pub font: Font,
     pub text: Text,

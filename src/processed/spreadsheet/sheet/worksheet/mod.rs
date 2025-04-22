@@ -6,7 +6,7 @@ use anyhow::bail;
 use std::{collections::BTreeMap, u64};
 
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use calculation_reference::CalculationReferenceMode;
 use cell::{
@@ -40,7 +40,7 @@ use crate::{
 };
 
 #[derive(Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Worksheet {
     pub name: String,
     pub sheet_id: u64,
@@ -160,7 +160,6 @@ impl Worksheet {
         let num_format_id = self.get_id(cell.clone(), row.clone(), col.clone(), &|x| {
             self.get_number_format_id_helper(x)
         });
-
         let fill_id = self.get_id(cell.clone(), row.clone(), col.clone(), &|x| {
             self.get_fill_id_helper(x)
         });

@@ -1,10 +1,10 @@
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::raw::spreadsheet::table::table_style_info::XlsxTableStyleInfo;
 
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct TableStyle {
     /// A string representing the name of the table style to use with this table.
     ///

@@ -1,5 +1,5 @@
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::raw::spreadsheet::stylesheet::format::alignment::XlsxAlignment;
 
@@ -7,7 +7,7 @@ use crate::raw::spreadsheet::stylesheet::format::alignment::XlsxAlignment;
 ///
 /// Formatting information pertaining to text alignment in cells.
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct TextAlignment {
     /// Specifies the type of horizontal alignment in cells.
     pub horizontal_alignment: HorizontalAlignementValue,
@@ -98,7 +98,7 @@ impl TextAlignment {
 // * Left
 // * Right
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum HorizontalAlignementValue {
     Center,
     CenterContinuous,
@@ -135,7 +135,7 @@ impl HorizontalAlignementValue {
 /// * Justify
 /// * Top
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum VerticalAlignementValue {
     Bottom,
     Center,
@@ -161,7 +161,7 @@ impl VerticalAlignementValue {
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.alignment?view=openxml-3.0.1
 ///
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum ReadingOrderValue {
     ContextDependent,
     LeftToRight,

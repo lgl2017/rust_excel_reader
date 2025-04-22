@@ -1,12 +1,12 @@
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.referencemodevalues?view=openxml-3.0.1
 ///
 /// * A1
 /// * R1C1
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum CalculationReferenceMode {
     A1,
     R1C1,

@@ -1,5 +1,5 @@
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::{
     common_types::HexColor,
@@ -20,8 +20,8 @@ static DEFAULT_BACKGROUN_COLOR: &str = "ffffffff";
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.fill?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(tag = "type"))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(tag = "type", content = "value"))]
 pub enum Fill {
     PatternFill(PatternFill),
     GradientFill(GradientFill),
@@ -70,7 +70,7 @@ impl Fill {
 ///// </fill>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct PatternFill {
     /// Specifies the fill pattern type (including solid and none).
     /// Default is none, when missing
@@ -133,7 +133,7 @@ impl PatternFill {
 /// * None
 /// * Solid
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum PatternFillTypeValue {
     DarkDown,
     DarkGray,
@@ -210,7 +210,7 @@ impl PatternFillTypeValue {
 /// </fill>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct GradientFill {
     /// Specifies the position of the bottom edge of the inner rectangle
     /// For bottom, 0 means the bottom edge of the inner rectangle is on the top edge of the cell, and 1 means it is on the bottom edge of the cell. (applies to From Corner and From Center gradients).
@@ -282,7 +282,7 @@ impl GradientFill {
 /// * Linear
 /// * Path
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum GradientFillTypeValue {
     Linear,
     Path,
@@ -301,7 +301,7 @@ impl GradientFillTypeValue {
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.gradientstop?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct GradientStop {
     /// Position information for this gradient stop
     ///
