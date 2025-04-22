@@ -1,3 +1,6 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::raw::spreadsheet::stylesheet::format::numbering_format::{
     get_builtin_format_code, XlsxNumberingFormat,
 };
@@ -7,6 +10,7 @@ static DEFAULT_FORMAT_ID: u64 = 0;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.numberingformat?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct NumberingFormat {
     pub format_code: Option<String>,
     pub format_id: u64,

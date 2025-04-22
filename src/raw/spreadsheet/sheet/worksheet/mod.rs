@@ -68,7 +68,7 @@ use crate::{
 /// </worksheet>
 /// ```
 /// worksheet (Worksheet)
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct XlsxWorksheet {
     // extLst (Future Feature Data Storage Area) Not supported
 

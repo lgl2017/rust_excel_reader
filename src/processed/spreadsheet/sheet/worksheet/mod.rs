@@ -3,13 +3,17 @@ pub mod cell;
 pub mod table;
 
 use anyhow::bail;
+use std::{collections::BTreeMap, u64};
+
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use calculation_reference::CalculationReferenceMode;
 use cell::{
     cell_property::{hyperlink::Hyperlink, CellProperty},
     cell_value::CellValueType,
     Cell,
 };
-use std::{collections::BTreeMap, u64};
 use table::Table;
 
 use crate::{
@@ -36,6 +40,7 @@ use crate::{
 };
 
 #[derive(Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Worksheet {
     pub name: String,
     pub sheet_id: u64,
@@ -55,14 +60,25 @@ pub struct Worksheet {
     pub is_1904: bool,
 
     /// Calculation Reference Mode
-    pub calculation_reference_mode: Option<CalculationReferenceMode>,
+    pub calculation_reference_mode: CalculationReferenceMode,
 
     // private
+    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
     raw_sheet: Box<XlsxWorksheet>,
+
+    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
     shared_string_items: Box<Vec<XlsxSharedStringItem>>,
+
+    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
     stylesheet: Box<XlsxStyleSheet>,
+
+    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
     color_scheme: Box<Option<XlsxColorScheme>>,
+
+    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
     external_hyperlinks: Box<BTreeMap<String, String>>,
+
+    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
     defined_names: Box<XlsxDefinedNames>,
 }
 
@@ -99,7 +115,8 @@ impl Worksheet {
             merged_cells: worksheet.merge_cells.clone().unwrap_or(vec![]),
             tables,
             is_1904,
-            calculation_reference_mode,
+            calculation_reference_mode: calculation_reference_mode
+                .unwrap_or(CalculationReferenceMode::default()),
             raw_sheet: Box::new(worksheet),
             shared_string_items: Box::new(shared_string_items),
             stylesheet: Box::new(stylesheet),

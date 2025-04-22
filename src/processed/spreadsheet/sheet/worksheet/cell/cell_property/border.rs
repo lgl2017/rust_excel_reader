@@ -1,3 +1,6 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::{
     common_types::HexColor,
     raw::{
@@ -39,6 +42,7 @@ static DEFAULT_BORDER_COLOR: &str = "000000ff";
 /// </borders>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Border {
     pub left: BorderStyle,
 
@@ -124,6 +128,7 @@ impl Border {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BorderStyle {
     /// The line style for this border
     pub style: BorderStyleValue,
@@ -179,6 +184,7 @@ impl BorderStyle {
 /// * Thick
 /// * Thin
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum BorderStyleValue {
     DashDot,
     DashDotDot,

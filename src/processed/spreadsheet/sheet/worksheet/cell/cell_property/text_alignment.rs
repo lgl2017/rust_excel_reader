@@ -1,12 +1,16 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::raw::spreadsheet::stylesheet::format::alignment::XlsxAlignment;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.alignment?view=openxml-3.0.1
 ///
 /// Formatting information pertaining to text alignment in cells.
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TextAlignment {
     /// Specifies the type of horizontal alignment in cells.
-    pub horizontal: HorizontalAlignementValue,
+    pub horizontal_alignment: HorizontalAlignementValue,
 
     /// Indicates the number of spaces (of the normal style font) of indentation for text in a cell.
     ///
@@ -54,7 +58,7 @@ pub struct TextAlignment {
 impl TextAlignment {
     pub(crate) fn default() -> Self {
         return Self {
-            horizontal: HorizontalAlignementValue::General,
+            horizontal_alignment: HorizontalAlignementValue::General,
             indent: 0,
             justify_last_line: false,
             reading_order: ReadingOrderValue::LeftToRight,
@@ -70,7 +74,7 @@ impl TextAlignment {
             return Self::default();
         };
         return Self {
-            horizontal: HorizontalAlignementValue::from_string(alignment.horizontal),
+            horizontal_alignment: HorizontalAlignementValue::from_string(alignment.horizontal),
             indent: alignment.indent.unwrap_or(0),
             justify_last_line: alignment.justify_last_line.unwrap_or(false),
             reading_order: ReadingOrderValue::from_index(alignment.reading_order),
@@ -94,6 +98,7 @@ impl TextAlignment {
 // * Left
 // * Right
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum HorizontalAlignementValue {
     Center,
     CenterContinuous,
@@ -130,6 +135,7 @@ impl HorizontalAlignementValue {
 /// * Justify
 /// * Top
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum VerticalAlignementValue {
     Bottom,
     Center,
@@ -155,6 +161,7 @@ impl VerticalAlignementValue {
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.alignment?view=openxml-3.0.1
 ///
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum ReadingOrderValue {
     ContextDependent,
     LeftToRight,

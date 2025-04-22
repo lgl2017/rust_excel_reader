@@ -1,3 +1,6 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::{
     processed::spreadsheet::sheet::worksheet::cell::cell_property::font::Font,
     raw::{
@@ -33,6 +36,7 @@ use crate::{
 /// The phonetic text character, "カ" is displayed over the "課" character and the phonetic text "ケ" is displayed above the "毛" character, using the font record in the style sheet at index 1.
 // tag: phoneticPr
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PhoneticProperties {
     // Attributes
     /// Specifies how the text for the phonetic run is aligned across the top of the cells, with respect to the main text in the body of the cell.
@@ -75,6 +79,7 @@ impl PhoneticProperties {
 /// * Hiragana
 /// * noConversion
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PhoneticTypeValue {
     HalfWidthKatakana,
     FullWidthKatakana,
@@ -104,6 +109,7 @@ impl PhoneticTypeValue {
 /// * Left
 /// * NoControl
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PhoneticAlignmentValue {
     Center,
     Distributed,

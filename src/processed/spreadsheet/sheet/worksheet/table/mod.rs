@@ -1,10 +1,13 @@
-use table_style::TableStyle;
-
-use crate::{common_types::Dimension, raw::spreadsheet::table::XlsxTable};
-
 pub mod table_style;
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
+use crate::{common_types::Dimension, raw::spreadsheet::table::XlsxTable};
+use table_style::TableStyle;
+
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Table {
     /// name of the table.
     ///

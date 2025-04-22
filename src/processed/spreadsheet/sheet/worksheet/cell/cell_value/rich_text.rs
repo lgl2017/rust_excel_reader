@@ -1,3 +1,6 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use super::{phonetic_properties::PhoneticProperties, phonetic_run::PhoneticRun};
 use crate::{
     common_types::Text, processed::spreadsheet::sheet::worksheet::cell::cell_property::font::Font,
@@ -25,6 +28,7 @@ use crate::{
 ///     </r>
 /// </si>
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RichText {
     pub phonetic_properties: Option<PhoneticProperties>,
     pub phonetic_runs: Option<Vec<PhoneticRun>>,
@@ -32,6 +36,7 @@ pub struct RichText {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RichTextRun {
     pub font: Font,
     pub text: Text,

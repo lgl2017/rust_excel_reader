@@ -12,7 +12,7 @@ Excel Reader is a pure Rust library to read and parse xlsx files.
 You can use this library to get
 - An overview of Sheets in the workbook
 - Detail information on worksheets including dimension, merged cells, tables, and some other properties
-- Cell values, formatting, and styles including hyperlink, border, fill, font, alignment and etc.
+- Cell values, formatting, and styles including hyperlink, border, fill, font, alignment and etc
 
 
 If the processed information above does not meet your needs, you can also get the raw version (parsed xml in Rust structures) directly for the following elements.
@@ -36,6 +36,12 @@ cargo add excel_reader
 Or add the following line to `Cargo.toml`:
 ```
 excel_reader = "0.1.4"
+```
+
+## Features
+Serialization and Deserialization on processed structs can be enabled by adding the `serde` feature.
+```
+excel_reader = { version = "0.1.9", features = ["serde"] }
 ```
 
 

@@ -32,7 +32,7 @@ use table_style::XlsxTableStyles;
 /// Root element of the StylesSheet part
 ///
 /// tag: styleSheet
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct XlsxStyleSheet {
     // extLst (Future Feature Data Storage Area): Not supported
 

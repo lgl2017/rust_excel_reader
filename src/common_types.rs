@@ -7,6 +7,9 @@ use crate::helper::r1c1_address_to_row_col;
 use crate::helper::r1c1_dimension_to_row_col;
 use crate::helper::string_to_int;
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 /// Hex representation of RGBA (alpha last)
 ///
 /// ex: #88f94eff
@@ -58,6 +61,7 @@ impl XlsxAdjustAngle {
 }
 
 /// row, col: 1 based index
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Default, PartialEq, Eq, Hash, Ord, PartialOrd, Copy, Clone)]
 pub struct Coordinate {
     pub row: u64,
@@ -90,6 +94,7 @@ impl Coordinate {
     }
 }
 
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Default, PartialEq, Eq, Hash, Ord, PartialOrd, Copy, Clone)]
 pub struct Dimension {
     pub start: Coordinate,

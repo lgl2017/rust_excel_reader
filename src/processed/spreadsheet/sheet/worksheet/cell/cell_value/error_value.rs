@@ -2,10 +2,14 @@ use std::fmt;
 
 use anyhow::bail;
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 /// https://msdn.microsoft.com/en-us/library/office/ff839168.aspx
 ///
 /// Errors that can appear as a value in a worksheet cell
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum CellErrorType {
     /// Division by 0 error
     Div0,

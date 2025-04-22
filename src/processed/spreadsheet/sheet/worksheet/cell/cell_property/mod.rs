@@ -5,6 +5,9 @@ pub mod hyperlink;
 pub mod numbering_format;
 pub mod text_alignment;
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use border::Border;
 use fill::Fill;
 use font::Font;
@@ -34,6 +37,7 @@ static DEFAULT_HIDDEN: bool = false;
 static DEFAULT_SHOW_PHONETIC: bool = true;
 
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct CellProperty {
     pub width: f64,
 

@@ -1,3 +1,6 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::{common_types::Text, raw::spreadsheet::string_item::phonetic_run::XlsxPhoneticRun};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.phoneticrun?view=openxml-3.0.1
@@ -22,6 +25,7 @@ use crate::{common_types::Text, raw::spreadsheet::string_item::phonetic_run::Xls
 /// It also displays some phonetic text across the top of the cell.
 /// The phonetic text character, "カ" is displayed over the "課" character and the phonetic text "ケ" is displayed above the "毛" character, using the font record in the style sheet at index 1.
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PhoneticRun {
     pub text: Text,
 
