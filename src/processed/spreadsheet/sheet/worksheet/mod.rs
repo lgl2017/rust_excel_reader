@@ -3,7 +3,11 @@ pub mod cell;
 pub mod table;
 
 use anyhow::bail;
-use std::{collections::BTreeMap, u64};
+use std::{
+    cmp::{max, min},
+    collections::BTreeMap,
+    u64,
+};
 
 #[cfg(feature = "serde")]
 use serde::Serialize;
@@ -231,11 +235,12 @@ impl Worksheet {
     }
 
     fn get_dimension(worksheet: XlsxWorksheet) -> Option<Dimension> {
-        if let Some(d) = worksheet.dimension {
-            return Some(d);
-        }
+        // if let Some(d) = worksheet.dimension {
+        //     return Some(d);
+        // }
+        let worksheet_dimension = worksheet.dimension;
         let Some(data) = worksheet.sheet_data else {
-            return None;
+            return worksheet_dimension;
         };
 
         let rows = data.rows.unwrap_or(vec![]);
@@ -270,18 +275,32 @@ impl Worksheet {
                 last_col = l
             }
         }
+
         if first_col > last_col {
-            return None;
+            return worksheet_dimension;
         }
+
+        let Some(worksheet_dimension) = worksheet_dimension else {
+            return Some(Dimension {
+                start: Coordinate {
+                    row: first_row,
+                    col: first_col,
+                },
+                end: Coordinate {
+                    row: last_row,
+                    col: last_col,
+                },
+            });
+        };
 
         return Some(Dimension {
             start: Coordinate {
-                row: first_row,
-                col: first_col,
+                row: min(first_row, worksheet_dimension.start.row),
+                col: min(first_col, worksheet_dimension.start.col),
             },
             end: Coordinate {
-                row: last_row,
-                col: last_col,
+                row: max(last_row, worksheet_dimension.end.row),
+                col: max(last_col, worksheet_dimension.end.col),
             },
         });
     }
