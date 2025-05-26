@@ -558,7 +558,7 @@ impl XlsxColorTransform {
                 }
             }
             XlsxColorTransform::Tint(tint) => {
-                match apply_tint(rgba, st_percentage_to_float(*tint)) {
+                match apply_tint(rgba, 1.0 - st_percentage_to_float(*tint)) {
                     Ok(new) => return new,
                     Err(_) => return rgba,
                 }
