@@ -54,7 +54,7 @@ pub struct BlipFill {
     ///
     /// Specifies the DPI (dots per inch) used to calculate the size of the blip.
     /// If not present or zero, the DPI in the blip is used.
-    pub dpi: Option<u64>,
+    pub dpi: u64,
 
     /// rotWithShape (Rotate With Shape)
     ///
@@ -84,7 +84,7 @@ impl BlipFill {
             blip,
             source_rect: FillRectangle::from_raw(raw.clone().source_rect),
             fill_type: BlipFillType::from_raw(raw.clone()),
-            dpi: raw.clone().dpi,
+            dpi: raw.clone().dpi.unwrap_or(0),
             rotate_with_shape: raw.clone().rot_with_shape.unwrap_or(false),
         });
     }
