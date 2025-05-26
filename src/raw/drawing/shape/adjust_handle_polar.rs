@@ -1,10 +1,10 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
-use crate::common_types::{XlsxAdjustAngle, XlsxAdjustCoordinate};
+use crate::raw::drawing::st_types::{STAdjustAngle, STAdjustCoordinate};
 
 use super::position::XlsxPosition;
 
@@ -40,25 +40,25 @@ pub struct XlsxAdjustHandlePolar {
     /// If this attribute is omitted, then it is assumed that this adjust handle cannot move angularly.
     /// That is the maxAng and minAng are equal.
     // maxAng (Maximum Angle Adjustment)
-    pub max_angle_adjustment: Option<XlsxAdjustAngle>,
+    pub max_angle_adjustment: Option<STAdjustAngle>,
 
     /// Specifies the maximum radial position that is allowed for this adjustment handle.
     /// If this attribute is omitted, then it is assumed that this adjust handle cannot move radially.
     /// That is the maxR and minR are equal.
     // maxR (Maximum Radial Adjustment)
-    pub max_radial_adjustment: Option<XlsxAdjustCoordinate>,
+    pub max_radial_adjustment: Option<STAdjustCoordinate>,
 
     /// Specifies the minimum angle position that is allowed for this adjustment handle.
     /// If this attribute is omitted, then it is assumed that this adjust handle cannot move angularly.
     /// That is the maxAng and minAng are equal.
     // minAng (Minimum Angle Adjustment)
-    pub min_angle_adjustment: Option<XlsxAdjustAngle>,
+    pub min_angle_adjustment: Option<STAdjustAngle>,
 
     /// Specifies the minimum radial position that is allowed for this adjustment handle.
     /// If this attribute is omitted, then it is assumed that this adjust handle cannot move radially.
     /// That is the maxR and minR are equal.
     // minR (Minimum Radial Adjustment)
-    pub min_radial_adjustment: Option<XlsxAdjustCoordinate>,
+    pub min_radial_adjustment: Option<STAdjustCoordinate>,
 }
 
 impl XlsxAdjustHandlePolar {
@@ -84,19 +84,19 @@ impl XlsxAdjustHandlePolar {
                         b"gdRefR" => polar.radial_guid_ref = Some(string_value),
                         b"maxAng" => {
                             polar.max_angle_adjustment =
-                                Some(XlsxAdjustAngle::from_string(&string_value))
+                                Some(STAdjustAngle::from_string(&string_value))
                         }
                         b"maxR" => {
                             polar.max_radial_adjustment =
-                                Some(XlsxAdjustCoordinate::from_string(&string_value))
+                                Some(STAdjustCoordinate::from_string(&string_value))
                         }
                         b"minAng" => {
                             polar.min_angle_adjustment =
-                                Some(XlsxAdjustAngle::from_string(&string_value))
+                                Some(STAdjustAngle::from_string(&string_value))
                         }
                         b"minR" => {
                             polar.min_radial_adjustment =
-                                Some(XlsxAdjustCoordinate::from_string(&string_value))
+                                Some(STAdjustCoordinate::from_string(&string_value))
                         }
                         _ => {}
                     }

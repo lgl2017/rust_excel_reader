@@ -1,6 +1,6 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::BytesStart;
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
@@ -11,11 +11,12 @@ use super::color_transforms::{apply_color_transformations, XlsxColorTransform};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.systemcolor?view=openxml-3.0.1
 ///
-/// Example: The following represent the same color
+/// Example:
 /// ```
 /// <a:sysClr val="window" lastClr="FFFFFF" />
 /// ```
-// tag: sysClr
+///
+/// tag: sysClr
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxSystemColor {
     // attributes:
@@ -66,10 +67,9 @@ impl XlsxSystemColor {
 
 impl XlsxSystemColor {
     pub(crate) fn to_hex(&self) -> Option<HexColor> {
-        if self.last_clr.is_none() {
+        let Some(hex) = self.last_clr.clone() else {
             return None;
-        }
-        let hex = self.last_clr.clone().unwrap();
+        };
         let Ok(mut rgba) = hex_to_rgba(&hex, Some(false)) else {
             return None;
         };

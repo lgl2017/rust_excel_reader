@@ -1,12 +1,16 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
 use crate::helper::string_to_int;
+use crate::raw::drawing::st_types::STCoordinate;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.backdrop?view=openxml-3.0.1
+///
+/// This element defines a plane in which effects, such as glow and shadow, are applied in relation to the shape they are being applied to.
+/// The points and vectors contained within the backdrop define a plane in 3D space.
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxBackDrop {
     // extLst Not supported
@@ -14,10 +18,12 @@ pub struct XlsxBackDrop {
     // Child Elements
     // anchor
     pub anchor: Option<XlsxAnchor>,
+
     // norm
-    norm: Option<XlsxNormalVector>,
+    pub norm: Option<XlsxNormalVector>,
+
     // up
-    up: Option<XlsxUpVector>,
+    pub up: Option<XlsxUpVector>,
 }
 
 impl XlsxBackDrop {
@@ -72,13 +78,13 @@ pub type XlsxUpVector = XlsxVector;
 pub struct XlsxVector {
     // attributes
     /// Distance along X-axis in 3D
-    dx: Option<i64>,
+    pub dx: Option<STCoordinate>,
 
     /// Distance along y-axis in 3D
-    dy: Option<i64>,
+    pub dy: Option<STCoordinate>,
 
     /// Distance along z-axis in 3D
-    dz: Option<i64>,
+    pub dz: Option<STCoordinate>,
 }
 
 impl XlsxVector {
@@ -121,13 +127,13 @@ impl XlsxVector {
 pub struct XlsxAnchor {
     // Attributes	Description
     // x (X-Coordinate in 3D)	X-Coordinate in 3D space.
-    pub x: Option<i64>,
+    pub x: Option<STCoordinate>,
 
     // y (Y-Coordinate in 3D)	Y-Coordinate in 3D space.
-    pub y: Option<i64>,
+    pub y: Option<STCoordinate>,
 
     // z (Z-Coordinate in 3D)	Z-Coordinate in 3D space.
-    pub z: Option<i64>,
+    pub z: Option<STCoordinate>,
 }
 
 impl XlsxAnchor {

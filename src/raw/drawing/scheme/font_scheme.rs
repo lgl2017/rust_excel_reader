@@ -1,10 +1,10 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
-use crate::raw::drawing::font::{XlsxMajorFont, XlsxMinorFont};
+use crate::raw::drawing::text::font::{XlsxMajorFont, XlsxMinorFont};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.fontscheme?view=openxml-3.0.1
 /// This element defines the font scheme within the theme.

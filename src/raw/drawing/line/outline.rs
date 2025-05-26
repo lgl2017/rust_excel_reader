@@ -1,11 +1,13 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
+use crate::helper::string_to_unsignedint;
+use crate::raw::drawing::st_types::STPositiveCoordinate;
 use crate::{
-    helper::{extract_val_attribute, string_to_int},
+    helper::extract_val_attribute,
     raw::drawing::fill::{
         gradient_fill::XlsxGradientFill, no_fill::XlsxNoFill, pattern_fill::XlsxPatternFill,
         solid_fill::XlsxSolidFill,
@@ -18,6 +20,9 @@ use super::{
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.outline?view=openxml-3.0.1
+///
+/// This element specifies an outline style that can be applied to a number of different objects such as shapes and text.
+/// The line allows for the specifying of many different types of outlines including even line dashes and bevels.
 ///
 /// Example:
 /// ```
@@ -96,7 +101,7 @@ pub struct XlsxOutline {
     /// Specifies the width to be used for the underline stroke.
     /// If this attribute is omitted, then a value of 0 is assumed.
     // w (Line Width)
-    pub w: Option<i64>,
+    pub w: Option<STPositiveCoordinate>,
 }
 
 impl XlsxOutline {
@@ -117,9 +122,9 @@ impl XlsxOutline {
             tail_end: None,
             // attributes
             alignment: None,
-            cap: Some("square".to_owned()),
-            compound: Some("sng".to_owned()),
-            w: Some(0),
+            cap: None,
+            compound: None,
+            w: None,
         };
 
         let attributes = e.attributes();
@@ -138,7 +143,7 @@ impl XlsxOutline {
                             scheme.compound = Some(string_value);
                         }
                         b"w" => {
-                            scheme.w = string_to_int(&string_value);
+                            scheme.w = string_to_unsignedint(&string_value);
                         }
                         _ => {}
                     }

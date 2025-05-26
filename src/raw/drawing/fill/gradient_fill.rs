@@ -1,15 +1,14 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
-use crate::{
-    helper::{string_to_bool, string_to_int},
-    raw::drawing::color::XlsxColorEnum,
-};
+use crate::helper::string_to_unsignedint;
+use crate::raw::drawing::st_types::{STPositiveAngle, STPositivePercentage};
+use crate::{helper::string_to_bool, raw::drawing::color::XlsxColorEnum};
 
-use super::rectangle::{XlsxFillToRectangle, XlsxTileRectangle};
+use super::fill_rectangle::{XlsxFillToRectangle, XlsxTileRectangle};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.gradientfill?view=openxml-3.0.1
 ///
@@ -40,14 +39,14 @@ pub struct XlsxGradientFill {
     // Child Elements
     /// The list of gradient stops that specifies the gradient colors and their relative positions in the color band.
     // tag: gsLst
-    pub gs_lst: Option<Vec<GradientStop>>,
+    pub gs_lst: Option<Vec<XlsxGradientStop>>,
 
     /// specifies a linear gradient
-    pub lin: Option<LinearGradientFill>,
+    pub lin: Option<XlsxLinearGradientFill>,
 
     /// defines that a gradient fill follows a path
     // tag: path
-    pub path: Option<PathGradientfill>,
+    pub path: Option<XlsxPathGradientFill>,
 
     /// This element specifies a rectangular region of the shape to which the gradient is applied.
     // tag: tileRect
@@ -106,10 +105,10 @@ impl XlsxGradientFill {
                     fill.gs_lst = Some(load_gradient_stops(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"lin" => {
-                    fill.lin = Some(LinearGradientFill::load(e)?);
+                    fill.lin = Some(XlsxLinearGradientFill::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"path" => {
-                    fill.path = Some(PathGradientfill::load(reader, e)?);
+                    fill.path = Some(XlsxPathGradientFill::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"tileRect" => {
                     fill.tile_rect = Some(XlsxTileRectangle::load(e)?);
@@ -125,8 +124,10 @@ impl XlsxGradientFill {
     }
 }
 
-pub(crate) fn load_gradient_stops(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Vec<GradientStop>> {
-    let mut gs_list: Vec<GradientStop> = vec![];
+pub(crate) fn load_gradient_stops(
+    reader: &mut XmlReader<impl Read>,
+) -> anyhow::Result<Vec<XlsxGradientStop>> {
+    let mut gs_list: Vec<XlsxGradientStop> = vec![];
 
     let mut buf = Vec::new();
 
@@ -135,7 +136,7 @@ pub(crate) fn load_gradient_stops(reader: &mut XmlReader<impl Read>) -> anyhow::
 
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"gs" => {
-                let gs = GradientStop::load(reader, e)?;
+                let gs = XlsxGradientStop::load(reader, e)?;
                 gs_list.push(gs);
             }
 
@@ -148,7 +149,7 @@ pub(crate) fn load_gradient_stops(reader: &mut XmlReader<impl Read>) -> anyhow::
     Ok(gs_list)
 }
 
-/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.gradientfill?view=openxml-3.0.1
+/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.gradientstop?view=openxml-3.0.1
 ///
 /// Example:
 /// ```
@@ -161,15 +162,17 @@ pub(crate) fn load_gradient_stops(reader: &mut XmlReader<impl Read>) -> anyhow::
 /// </a:gs>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct GradientStop {
+pub struct XlsxGradientStop {
     // children
     pub color: Option<XlsxColorEnum>,
 
     // attribute
-    pub pos: Option<i64>,
+    /// Specifies where this gradient stop should appear in the color band.
+    /// This position is specified in the range [0%, 100%], which corresponds to the beginning and the end of the color band respectively.
+    pub pos: Option<STPositivePercentage>,
 }
 
-impl GradientStop {
+impl XlsxGradientStop {
     pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut stop = Self {
@@ -183,7 +186,7 @@ impl GradientStop {
                     let string_value = String::from_utf8(a.value.to_vec())?;
                     match a.key.local_name().as_ref() {
                         b"pos" => {
-                            stop.pos = string_to_int(&string_value);
+                            stop.pos = string_to_unsignedint(&string_value);
                             break;
                         }
                         _ => {}
@@ -208,16 +211,16 @@ impl GradientStop {
 /// <a:lin ang="5400000" scaled="0" />
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct LinearGradientFill {
+pub struct XlsxLinearGradientFill {
     // attributes
     /// Specifies the direction of color change for the gradient.
-    pub ang: Option<i64>,
+    pub ang: Option<STPositiveAngle>,
 
     /// Whether the gradient angle scales with the fill region.
     pub scaled: Option<bool>,
 }
 
-impl LinearGradientFill {
+impl XlsxLinearGradientFill {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut fill = Self {
@@ -231,7 +234,7 @@ impl LinearGradientFill {
                     let string_value = String::from_utf8(a.value.to_vec())?;
                     match a.key.local_name().as_ref() {
                         b"ang" => {
-                            fill.ang = string_to_int(&string_value);
+                            fill.ang = string_to_unsignedint(&string_value);
                         }
                         b"scaled" => {
                             fill.scaled = string_to_bool(&string_value);
@@ -249,7 +252,7 @@ impl LinearGradientFill {
     }
 }
 
-/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.pathgradientfill?view=openxml-3.0.1#[derive(Debug, Clone, PartialEq)]
+/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.pathgradientfill?view=openxml-3.0.1
 ///
 /// Example:
 /// ```
@@ -258,7 +261,7 @@ impl LinearGradientFill {
 /// </a:path>
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct PathGradientfill {
+pub struct XlsxPathGradientFill {
     // children
     /// defines the "focus" rectangle for the center shade, specified relative to the fill tile rectangle
     // tag: fillToRect
@@ -270,7 +273,7 @@ pub struct PathGradientfill {
     pub path: Option<String>,
 }
 
-impl PathGradientfill {
+impl XlsxPathGradientFill {
     pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut fill = Self {

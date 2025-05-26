@@ -1,8 +1,8 @@
 use super::effect_container::XlsxEffectContainer;
 use crate::excel::XmlReader;
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 /// Alpha Modulate Effect: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alphamodulationeffect?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]

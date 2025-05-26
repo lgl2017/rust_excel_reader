@@ -1,10 +1,10 @@
 pub mod blip_fill;
+pub mod fill_rectangle;
 pub mod fill_reference;
 pub mod gradient_fill;
 pub mod group_fill;
 pub mod no_fill;
 pub mod pattern_fill;
-pub mod rectangle;
 pub mod solid_fill;
 
 use anyhow::bail;
@@ -19,11 +19,14 @@ use pattern_fill::XlsxPatternFill;
 use quick_xml::events::{BytesStart, Event};
 use solid_fill::XlsxSolidFill;
 
-/// BackgroundFillStyleList: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.backgroundfillstylelist?view=openxml-3.0.1
-/// defines a set of three background fill styles that are used within a theme, arranged in order from subtle to moderate to intense
+/// BackgroundFillStyleList:
+///
+/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.backgroundfillstylelist?view=openxml-3.0.1
+///
+/// Defines a set of three background fill styles that are used within a theme, arranged in order from subtle to moderate to intense
 ///
 /// Example
-/// ````
+/// ```
 /// <a:bgFillStyleLst>
 ///     <a:solidFill>
 ///         <a:schemeClr val="phClr" />
@@ -33,8 +36,9 @@ use solid_fill::XlsxSolidFill;
 ///     <blipFill>
 ///     …  </blipFill>
 /// </a:bgFillStyleLst>
-/// ``
-// tag: bgFillStyleLst
+/// ```
+///
+/// tag: bgFillStyleLst
 pub type XlsxBackgroundFillStyleList = Vec<XlsxFillStyleEnum>;
 
 pub(crate) fn load_bg_fill_style_lst(

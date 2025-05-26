@@ -1,14 +1,16 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
-use super::rectangle::{XlsxFillRectangle, XlsxSourceRectangle};
+use super::fill_rectangle::{XlsxFillRectangle, XlsxSourceRectangle};
 use crate::excel::XmlReader;
-use crate::helper::{string_to_bool, string_to_int};
+use crate::helper::{string_to_bool, string_to_int, string_to_unsignedint};
 use crate::raw::drawing::image::blip::XlsxBlip;
 
 /// XlsxBlipFill (Picture Fill): https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blipfill?view=openxml-3.0.1
 ///
+/// This element specifies the type of picture fill that the picture object has.
+/// Because a picture has a picture fill already by default, it is possible to have two fills specified for a picture object.
 /// Example:
 /// ```
 /// <p:blipFill>
@@ -20,13 +22,16 @@ use crate::raw::drawing::image::blip::XlsxBlip;
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxBlipFill {
-    //     Child Elements	Subclause
+    // Child Elements
     // blip (Blip)	§20.1.8.13
     pub blip: Option<XlsxBlip>,
-    // srcRect (Source Rectangle)	§20.1.8.55
+
+    // srcRect (Source Rectangle)
     pub source_rect: Option<XlsxSourceRectangle>,
-    // stretch (Stretch)	§20.1.8.56
+
+    // stretch (Stretch)
     pub stretch: Option<XlsxStretch>,
+
     // tile (Tile)
     pub tile: Option<XlsxTile>,
 
@@ -34,7 +39,7 @@ pub struct XlsxBlipFill {
     /// Specifies the DPI (dots per inch) used to calculate the size of the blip.
     /// If not present or zero, the DPI in the blip is used.
     // dpi (DPI Setting)
-    pub dpi: Option<i64>,
+    pub dpi: Option<u64>,
 
     /// Specifies that the fill should rotate with the shape.
     // rotWithShape (Rotate With Shape)
@@ -60,7 +65,7 @@ impl XlsxBlipFill {
                     let string_value = String::from_utf8(a.value.to_vec())?;
                     match a.key.local_name().as_ref() {
                         b"dpi" => {
-                            fill.dpi = string_to_int(&string_value);
+                            fill.dpi = string_to_unsignedint(&string_value);
                         }
                         b"rotWithShape" => {
                             fill.rot_with_shape = string_to_bool(&string_value);
@@ -110,7 +115,7 @@ impl XlsxBlipFill {
 // tag: stretch
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxStretch {
-    // Child Elements	Subclause
+    // Child Elements
     // fillRect (Fill Rectangle)
     pub fill_rectangle: Option<XlsxFillRectangle>,
 }
@@ -141,7 +146,13 @@ impl XlsxStretch {
     }
 }
 
-// tag: tile
+/// tile (Tile)
+///
+/// This element specifies that a BLIP should be tiled to fill the available space.
+/// This element defines a "tile" rectangle within the bounding box.
+/// The image is encompassed within the tile rectangle, and the tile rectangle is tiled across the bounding box to fill the entire area.
+///
+/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.tile?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxTile {
     // Attributes	Description

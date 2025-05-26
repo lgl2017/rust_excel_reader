@@ -1,7 +1,6 @@
 pub mod border;
 pub mod fill;
 pub mod font;
-pub mod hyperlink;
 pub mod numbering_format;
 pub mod text_alignment;
 
@@ -11,25 +10,30 @@ use serde::Serialize;
 use border::Border;
 use fill::Fill;
 use font::Font;
-use hyperlink::Hyperlink;
 use numbering_format::NumberingFormat;
 use text_alignment::TextAlignment;
 
-use crate::raw::{
-    drawing::scheme::color_scheme::XlsxColorScheme,
-    spreadsheet::{
-        sheet::{
-            sheet_format_properties::XlsxSheetFormatProperties,
-            worksheet::{cell::XlsxCell, column_information::XlsxColumnInformation, row::XlsxRow},
-        },
-        stylesheet::{
-            format::{alignment::XlsxAlignment, protection::XlsxCellProtection},
-            XlsxStyleSheet,
+use crate::{
+    processed::shared::hyperlink::Hyperlink,
+    raw::{
+        drawing::scheme::color_scheme::XlsxColorScheme,
+        spreadsheet::{
+            ct_types::{base_column_width_to_pt, column_width_to_pt},
+            sheet::{
+                sheet_format_properties::XlsxSheetFormatProperties,
+                worksheet::{
+                    cell::XlsxCell, column_information::XlsxColumnInformation, row::XlsxRow,
+                },
+            },
+            stylesheet::{
+                format::{alignment::XlsxAlignment, protection::XlsxCellProtection},
+                XlsxStyleSheet,
+            },
         },
     },
 };
 
-static DEFAULT_CELL_WIDTH: f64 = 8.43;
+static DEFAULT_CELL_WIDTH: f64 = 48.75; // 65 px or a baseColumnWidth of 10
 static DEFAULT_BEST_FIT: bool = false;
 static DEFAULT_CELL_HEIGHT: f64 = 15.0;
 static DEFAULT_DY_DESCENT: f64 = 0.2;
@@ -39,11 +43,15 @@ static DEFAULT_SHOW_PHONETIC: bool = true;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CellProperty {
+    /// cell width in points
+    ///
+    /// Approximate with [MAX_DIGIT_WIDTH] using Aptos of font size 12 pt
     pub width: f64,
 
     /// Flag indicating if the column width should automatically resize
     pub width_best_fit: bool,
 
+    /// cell height in points
     pub height: f64,
 
     /// vertical distance in pixels from the bottom of a cell in a row to the typographical baseline of its content
@@ -53,6 +61,7 @@ pub struct CellProperty {
 
     pub show_phonetic: bool,
 
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub hyperlink: Option<Hyperlink>,
 
     // styles
@@ -223,16 +232,16 @@ impl CellProperty {
     ) -> f64 {
         if let Some(col_info) = col_info {
             if let Some(f) = col_info.width {
-                return f;
+                return column_width_to_pt(f);
             }
         }
 
         if let Some(sheet_format_properties) = sheet_format_properties {
             return if let Some(f) = sheet_format_properties.default_col_width {
-                f
+                column_width_to_pt(f)
             } else if let Some(f) = sheet_format_properties.base_col_width {
                 // defaultColWidth = baseColumnWidth + {margin padding (2 pixels on each side, totalling 4 pixels)} + {gridline (1pixel)}
-                (f + 4 + 1) as f64
+                base_column_width_to_pt(f)
             } else {
                 DEFAULT_CELL_WIDTH
             };

@@ -2,28 +2,36 @@ pub mod calculation_reference;
 pub mod cell;
 pub mod table;
 
-use anyhow::bail;
-use std::{
-    cmp::{max, min},
-    collections::BTreeMap,
-    u64,
-};
-
 #[cfg(feature = "serde")]
 use serde::Serialize;
 
-use calculation_reference::CalculationReferenceMode;
-use cell::{
-    cell_property::{hyperlink::Hyperlink, CellProperty},
-    cell_value::CellValueType,
-    Cell,
+#[cfg(feature = "drawing")]
+use std::collections::BTreeMap;
+
+use anyhow::bail;
+use std::{
+    cmp::{max, min},
+    u64,
 };
+
+#[cfg(feature = "drawing")]
+use crate::processed::drawing::worksheet_drawing::{
+    anchor_type::DrawingAnchorType, content_type::DrawingContentType, WorksheetDrawing,
+};
+
+#[cfg(feature = "drawing")]
+use crate::raw::drawing::worksheet_drawing::{XlsxWorksheetDrawing, XlsxWorksheetDrawingType};
+
+use calculation_reference::CalculationReferenceMode;
+use cell::{cell_property::CellProperty, cell_value::CellValueType, Cell};
 use table::Table;
 
 use crate::{
     common_types::{Coordinate, Dimension},
+    packaging::relationship::XlsxRelationships,
+    processed::shared::hyperlink::Hyperlink,
     raw::{
-        drawing::scheme::color_scheme::XlsxColorScheme,
+        drawing::{scheme::color_scheme::XlsxColorScheme, theme::XlsxTheme},
         spreadsheet::{
             shared_string::shared_string_item::XlsxSharedStringItem,
             sheet::worksheet::{
@@ -67,71 +75,63 @@ pub struct Worksheet {
     pub calculation_reference_mode: CalculationReferenceMode,
 
     // private
-    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
     raw_sheet: Box<XlsxWorksheet>,
 
-    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
+    worksheet_rels: Box<XlsxRelationships>,
+
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
     shared_string_items: Box<Vec<XlsxSharedStringItem>>,
 
-    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
     stylesheet: Box<XlsxStyleSheet>,
 
-    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
-    color_scheme: Box<Option<XlsxColorScheme>>,
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
+    theme: Option<Box<XlsxTheme>>,
 
-    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
-    external_hyperlinks: Box<BTreeMap<String, String>>,
-
-    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
     defined_names: Box<XlsxDefinedNames>,
+
+    #[cfg(feature = "drawing")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
+    drawing_rels: Box<XlsxRelationships>,
+
+    #[cfg(feature = "drawing")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
+    raw_drawing: Option<Box<XlsxWorksheetDrawing>>,
+
+    // (r_id, bytes)
+    #[cfg(feature = "drawing")]
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
+    image_bytes: Box<BTreeMap<String, Vec<u8>>>,
 }
 
 impl Worksheet {
-    pub(crate) fn from_raw(
-        name: String,
-        sheet_id: u64,
-        worksheet: XlsxWorksheet,
-        tables: Vec<XlsxTable>,
-        defined_names: XlsxDefinedNames,
-        // (r_id, target)
-        external_hyperlinks: BTreeMap<String, String>,
-        is_1904: bool,
-        calculation_reference_mode: Option<CalculationReferenceMode>,
-        shared_string_items: Vec<XlsxSharedStringItem>,
-        stylesheet: XlsxStyleSheet,
-        color_scheme: Option<XlsxColorScheme>,
-    ) -> Self {
-        let default_table_style_name = if let Some(style) = stylesheet.clone().table_styles {
-            style.default_table_style
-        } else {
-            None
+    /// get all cells within a worksheet.
+    pub fn get_cells(&self) -> anyhow::Result<Vec<Cell>> {
+        let mut cells: Vec<Cell> = vec![];
+
+        let Some(dimension) = self.dimension else {
+            return Ok(cells);
         };
 
-        let tables: Vec<Table> = tables
-            .into_iter()
-            .map(|t| Table::from_raw(t, default_table_style_name.clone()))
-            .collect();
+        let (start, end) = (dimension.start, dimension.end);
+        let mut row_index = start.row;
 
-        return Self {
-            name,
-            sheet_id,
-            dimension: Self::get_dimension(worksheet.clone()),
-            merged_cells: worksheet.merge_cells.clone().unwrap_or(vec![]),
-            tables,
-            is_1904,
-            calculation_reference_mode: calculation_reference_mode
-                .unwrap_or(CalculationReferenceMode::default()),
-            raw_sheet: Box::new(worksheet),
-            shared_string_items: Box::new(shared_string_items),
-            stylesheet: Box::new(stylesheet),
-            color_scheme: Box::new(color_scheme),
-            external_hyperlinks: Box::new(external_hyperlinks),
-            defined_names: Box::new(defined_names),
-        };
+        while row_index <= end.row {
+            let mut col_index = start.col;
+            while col_index <= end.col {
+                let cell = self.get_cell(Coordinate::from_point((row_index, col_index)))?;
+                cells.push(cell);
+                col_index += 1;
+            }
+            row_index += 1;
+        }
+
+        Ok(cells)
     }
-}
 
-impl Worksheet {
     /// get cell value and styles for a specific coordinate.
     ///
     /// The style here ignoring table settings.
@@ -152,13 +152,15 @@ impl Worksheet {
             return Ok(Cell::default(coordinate));
         };
 
+        let color_scheme = self.get_color_scheme();
+
         let col = self.get_raw_col_info(coordinate);
 
         let cell_value = CellValueType::from_raw(
             cell.clone(),
             *self.shared_string_items.clone(),
             *self.stylesheet.clone(),
-            *self.color_scheme.clone(),
+            color_scheme.clone(),
         )?;
 
         let num_format_id = self.get_id(cell.clone(), row.clone(), col.clone(), &|x| {
@@ -189,7 +191,7 @@ impl Worksheet {
             self.get_hyperlink(coordinate),
             (*self.raw_sheet).sheet_format_properties.clone(),
             *self.stylesheet.clone(),
-            *self.color_scheme.clone(),
+            color_scheme.clone(),
         );
 
         Ok(Cell {
@@ -197,6 +199,136 @@ impl Worksheet {
             value: cell_value,
             property: cell_property,
         })
+    }
+
+    /// get all drawings within a worksheet.
+    #[cfg(feature = "drawing")]
+    pub fn get_drawings(&self) -> Vec<WorksheetDrawing> {
+        let mut drawings: Vec<WorksheetDrawing> = vec![];
+        let Some(raw_drawings) = self.raw_drawing.clone() else {
+            return drawings;
+        };
+        for raw in raw_drawings.drawings.unwrap_or(vec![]).into_iter() {
+            match raw {
+                XlsxWorksheetDrawingType::AbsoluteAnchor(absolute_anchor) => {
+                    let Some(content) = DrawingContentType::from_raw(
+                        absolute_anchor.clone().drawing_content,
+                        absolute_anchor.clone().extent,
+                        absolute_anchor.clone().position,
+                        absolute_anchor.clone().client_data,
+                        None,
+                        *self.drawing_rels.clone(),
+                        *self.image_bytes.clone(),
+                        *self.defined_names.clone(),
+                        self.get_color_scheme(),
+                        self.theme.clone(),
+                    ) else {
+                        continue;
+                    };
+
+                    let anchor = DrawingAnchorType::AbsoluteAnchor;
+
+                    drawings.push(WorksheetDrawing { anchor, content });
+                }
+                XlsxWorksheetDrawingType::OneCellAnchor(one_cell_anchor_drawing) => {
+                    let Some(content) = DrawingContentType::from_raw(
+                        one_cell_anchor_drawing.clone().drawing_content,
+                        one_cell_anchor_drawing.clone().extent,
+                        None,
+                        one_cell_anchor_drawing.clone().client_data,
+                        None,
+                        *self.drawing_rels.clone(),
+                        *self.image_bytes.clone(),
+                        *self.defined_names.clone(),
+                        self.get_color_scheme(),
+                        self.theme.clone(),
+                    ) else {
+                        continue;
+                    };
+
+                    let anchor =
+                        DrawingAnchorType::from_one_cell_anchor(one_cell_anchor_drawing.clone());
+
+                    drawings.push(WorksheetDrawing { anchor, content });
+                }
+                XlsxWorksheetDrawingType::TwoCellAnchor(two_cell_anchor_drawing) => {
+                    let Some(content) = DrawingContentType::from_raw(
+                        two_cell_anchor_drawing.clone().drawing_content,
+                        None,
+                        None,
+                        two_cell_anchor_drawing.clone().client_data,
+                        None,
+                        *self.drawing_rels.clone(),
+                        *self.image_bytes.clone(),
+                        *self.defined_names.clone(),
+                        self.get_color_scheme(),
+                        self.theme.clone(),
+                    ) else {
+                        continue;
+                    };
+
+                    let anchor =
+                        DrawingAnchorType::from_two_cell_anchor(two_cell_anchor_drawing.clone());
+
+                    drawings.push(WorksheetDrawing { anchor, content });
+                }
+            }
+        }
+
+        return drawings;
+    }
+}
+
+impl Worksheet {
+    pub(crate) fn from_raw(
+        name: String,
+        sheet_id: u64,
+        worksheet: Box<XlsxWorksheet>,
+        worksheet_rels: Box<XlsxRelationships>,
+        tables: Box<Vec<XlsxTable>>,
+        defined_names: Box<XlsxDefinedNames>,
+        is_1904: bool,
+        calculation_reference_mode: Option<CalculationReferenceMode>,
+        shared_string_items: Box<Vec<XlsxSharedStringItem>>,
+        stylesheet: Box<XlsxStyleSheet>,
+        theme: Option<Box<XlsxTheme>>,
+        #[cfg(feature = "drawing")] drawing_rels: Box<XlsxRelationships>,
+        #[cfg(feature = "drawing")] raw_drawing: Option<Box<XlsxWorksheetDrawing>>,
+        #[cfg(feature = "drawing")] image_bytes: Box<BTreeMap<String, Vec<u8>>>,
+    ) -> Self {
+        let default_table_style_name = if let Some(style) = stylesheet.clone().table_styles {
+            style.default_table_style
+        } else {
+            None
+        };
+
+        let tables: Vec<Table> = tables
+            .into_iter()
+            .map(|t| Table::from_raw(t, default_table_style_name.clone()))
+            .collect();
+
+        return Self {
+            name,
+            sheet_id,
+            dimension: Self::get_dimension(*worksheet.clone()),
+            merged_cells: worksheet.merge_cells.clone().unwrap_or(vec![]),
+            tables,
+            is_1904,
+            calculation_reference_mode: calculation_reference_mode
+                .unwrap_or(CalculationReferenceMode::default()),
+            raw_sheet: worksheet,
+            worksheet_rels,
+            shared_string_items,
+            stylesheet,
+            theme,
+            defined_names,
+            #[cfg(feature = "drawing")]
+            raw_drawing,
+            #[cfg(feature = "drawing")]
+            drawing_rels,
+            #[cfg(feature = "drawing")]
+            image_bytes,
+        };
     }
 }
 
@@ -215,7 +347,7 @@ impl Worksheet {
         };
         return Hyperlink::from_raw(
             target_link.clone(),
-            *self.external_hyperlinks.clone(),
+            *self.worksheet_rels.clone(),
             *self.defined_names.clone(),
         );
     }
@@ -235,9 +367,6 @@ impl Worksheet {
     }
 
     fn get_dimension(worksheet: XlsxWorksheet) -> Option<Dimension> {
-        // if let Some(d) = worksheet.dimension {
-        //     return Some(d);
-        // }
         let worksheet_dimension = worksheet.dimension;
         let Some(data) = worksheet.sheet_data else {
             return worksheet_dimension;
@@ -304,6 +433,7 @@ impl Worksheet {
             },
         });
     }
+
     /// get cell alignment information
     fn get_protection(
         &self,
@@ -654,5 +784,16 @@ impl Worksheet {
         };
 
         return self.stylesheet.get_cell_style_format(cell_style_format_id);
+    }
+
+    fn get_color_scheme(&self) -> Option<XlsxColorScheme> {
+        let mut color_scheme: Option<XlsxColorScheme> = None;
+
+        if let Some(theme) = self.theme.clone() {
+            if let Some(theme_elements) = theme.theme_elements {
+                color_scheme = theme_elements.color_scheme
+            }
+        };
+        return color_scheme;
     }
 }

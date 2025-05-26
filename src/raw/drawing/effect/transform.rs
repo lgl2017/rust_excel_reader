@@ -1,28 +1,35 @@
 use anyhow::bail;
 use quick_xml::events::BytesStart;
 
-use crate::helper::string_to_int;
+use crate::{
+    helper::string_to_int,
+    raw::drawing::st_types::{STAngle, STCoordinate, STPercentage},
+};
 
+/// xfrm (Transform Effect)
+///
+/// This element specifies a transform effect. The transform is applied to each point in the shape's geometry using the following matrix:
+///
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.transformeffect?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxTransformEffect {
     /// Specifies the horizontal skew angle
-    pub kx: Option<i64>,
+    pub kx: Option<STAngle>,
 
     /// Specifies the vertical skew angle
-    pub ky: Option<i64>,
+    pub ky: Option<STAngle>,
 
     /// Specifies the horizontal scaling factor; negative scaling causes a flip.
-    pub sx: Option<i64>,
+    pub sx: Option<STPercentage>,
 
     /// Specifies the vertical scaling factor; negative scaling causes a flip.
-    pub sy: Option<i64>,
+    pub sy: Option<STPercentage>,
 
     /// Specifies an amount by which to shift the object along the x-axis
-    pub tx: Option<i64>,
+    pub tx: Option<STCoordinate>,
 
     /// Specifies an amount by which to shift the object along the y-axis
-    pub ty: Option<i64>,
+    pub ty: Option<STCoordinate>,
 }
 
 impl XlsxTransformEffect {

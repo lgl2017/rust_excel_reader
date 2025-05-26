@@ -27,7 +27,7 @@ pub struct SheetBasicInfo {
     pub r#type: SheetType,
 
     /// xml path
-    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
     pub(crate) path: String,
 }
 
@@ -70,6 +70,7 @@ impl SheetBasicInfo {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum SheetType {
     /// WorkSheet
     WorkSheet,
@@ -82,6 +83,7 @@ pub enum SheetType {
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.sheetstatevalues?view=openxml-3.0.1
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum SheetVisibleState {
     /// Visible
     Visible,

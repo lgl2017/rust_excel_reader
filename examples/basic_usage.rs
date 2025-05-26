@@ -1,6 +1,5 @@
 use excel_reader::{
-    common_types::Coordinate, excel::Excel,
-    processed::spreadsheet::sheet::worksheet::cell::cell_value::CellValueType,
+    excel::Excel, processed::spreadsheet::sheet::worksheet::cell::cell_value::CellValueType,
 };
 
 /// Demo for basic usages
@@ -64,42 +63,27 @@ fn main() -> anyhow::Result<()> {
     }
 
     // get cells (value and style) in a worksheet
-    let Some(dimension) = worksheet.dimension else {
-        println!("No cells available in worksheet");
-        return Ok(());
-    };
-
-    let (start, end) = (dimension.start, dimension.end);
-    let mut row_index = start.row;
-
-    println!("Cells: ");
-
-    while row_index <= end.row {
-        let mut col_index = start.col;
-        while col_index <= end.col {
-            let cell = worksheet.get_cell(Coordinate::from_point((row_index, col_index)))?;
-            println!("--------");
-            println!("coordinate: {:?}", cell.coordinate);
-            println!("value {:?}.", cell.value);
-            if let CellValueType::Numeric(_) = cell.value {
-                println!(
-                    "Numeric format: {:?}",
-                    cell.property.numbering_format.format_code
-                )
-            }
-            let properties = cell.property;
-
-            println!("size: {} * {}", properties.width, properties.height);
-            println!("hidden : {:?}", properties.hidden);
-            println!("show_phonetic : {:?}", properties.show_phonetic);
-            println!("hyperlink : {:?}", properties.hyperlink);
-            println!("font : {:?}", properties.font);
-            println!("border : {:?}", properties.border);
-            println!("fill : {:?}", properties.fill);
-            println!("alignment : {:?}", properties.alignment);
-            col_index += 1;
+    let cells = worksheet.get_cells()?;
+    for cell in cells {
+        println!("--------");
+        println!("coordinate: {:?}", cell.coordinate);
+        println!("value {:?}.", cell.value);
+        if let CellValueType::Numeric(_) = cell.value {
+            println!(
+                "Numeric format: {:?}",
+                cell.property.numbering_format.format_code
+            )
         }
-        row_index += 1;
+        let properties = cell.property;
+
+        println!("size: {} * {}", properties.width, properties.height);
+        println!("hidden : {:?}", properties.hidden);
+        println!("show_phonetic : {:?}", properties.show_phonetic);
+        println!("hyperlink : {:?}", properties.hyperlink);
+        println!("font : {:?}", properties.font);
+        println!("border : {:?}", properties.border);
+        println!("fill : {:?}", properties.fill);
+        println!("alignment : {:?}", properties.alignment);
     }
 
     Ok(())

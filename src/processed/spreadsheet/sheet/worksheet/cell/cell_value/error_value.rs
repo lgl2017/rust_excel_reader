@@ -10,6 +10,7 @@ use serde::Serialize;
 /// Errors that can appear as a value in a worksheet cell
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum CellErrorType {
     /// Division by 0 error
     Div0,

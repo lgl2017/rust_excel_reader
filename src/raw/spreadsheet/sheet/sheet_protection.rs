@@ -6,7 +6,6 @@
 /// ```
 /// <sheetProtection sheet="1" objects="1" scenarios="1" formatCells="0"  selectLockedCells="1"/>
 /// ```
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxSheetProtection {
     //     AlgorithmName

@@ -2,7 +2,6 @@ pub mod phonetic_properties;
 pub mod phonetic_run;
 pub mod rich_text_run;
 pub mod run_properties;
-pub mod text;
 
 use anyhow::bail;
 use std::io::Read;
@@ -11,9 +10,8 @@ use phonetic_properties::XlsxPhoneticProperties;
 use phonetic_run::XlsxPhoneticRun;
 use quick_xml::events::Event;
 use rich_text_run::XlsxRichTextRun;
-use text::load_text;
 
-use crate::{common_types::Text, excel::XmlReader};
+use crate::{common_types::Text, excel::XmlReader, helper::extract_text_contents};
 
 /// Example:
 /// ```
@@ -92,7 +90,7 @@ impl XlsxStringItem {
                     phonetic_runs.push(XlsxPhoneticRun::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"t" => {
-                    item.text = Some(load_text(reader)?);
+                    item.text = Some(extract_text_contents(reader, b"t")?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == tag => break,
                 Ok(Event::Eof) => bail!(

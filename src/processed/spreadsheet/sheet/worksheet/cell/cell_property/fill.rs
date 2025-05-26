@@ -21,7 +21,7 @@ static DEFAULT_BACKGROUN_COLOR: &str = "ffffffff";
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.fill?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-#[cfg_attr(feature = "serde", serde(tag = "type", content = "value"))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum Fill {
     PatternFill(PatternFill),
     GradientFill(GradientFill),
@@ -134,6 +134,7 @@ impl PatternFill {
 /// * Solid
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum PatternFillTypeValue {
     DarkDown,
     DarkGray,
@@ -283,6 +284,7 @@ impl GradientFill {
 /// * Path
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum GradientFillTypeValue {
     Linear,
     Path,

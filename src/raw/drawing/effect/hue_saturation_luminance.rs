@@ -3,8 +3,12 @@ use quick_xml::events::BytesStart;
 
 use crate::helper::string_to_int;
 
+/// hsl (Hue Saturation Luminance Effect)
+///
+/// This element specifies a hue/saturation/luminance effect.
+/// The hue, saturation, and luminance can each be adjusted relative to its current value.
+///
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.hsl?view=openxml-3.0.1
-// tag: hsl
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxHsl {
     // attributes:

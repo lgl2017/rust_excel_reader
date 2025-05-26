@@ -6,7 +6,6 @@ pub mod alpha_modulation;
 pub mod alpha_modulation_fixed;
 pub mod alpha_outset;
 pub mod alpha_replace;
-pub mod bevel;
 pub mod bi_level;
 pub mod blend;
 pub mod blur;

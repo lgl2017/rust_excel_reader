@@ -1,7 +1,7 @@
 use anyhow::bail;
 use quick_xml::events::BytesStart;
 
-use crate::{common_types::XlsxDatetime, helper::string_to_datetime};
+use crate::common_types::XlsxDatetime;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.dynamicfilter?view=openxml-3.0.1
 ///
@@ -65,12 +65,14 @@ impl XlsxDynamicFilter {
                 Ok(a) => {
                     let string_value = String::from_utf8(a.value.to_vec())?;
                     match a.key.local_name().as_ref() {
-                        b"maxValIso" => filter.max_val_iso = string_to_datetime(&string_value),
+                        b"maxValIso" => {
+                            filter.max_val_iso = XlsxDatetime::from_string(&string_value)
+                        }
                         b"type" => {
                             filter.filter_type = Some(string_value);
                         }
                         b"valIso" => {
-                            filter.min_val_iso = string_to_datetime(&string_value);
+                            filter.min_val_iso = XlsxDatetime::from_string(&string_value);
                         }
                         _ => {}
                     }

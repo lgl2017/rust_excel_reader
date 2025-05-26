@@ -89,7 +89,7 @@ impl XlsxSheet {
             id: None,
             name: None,
             sheet_id: None,
-            visible_state: Some("visible".to_owned()),
+            visible_state: None,
         };
 
         for a in attributes {

@@ -1,13 +1,14 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::{
     excel::XmlReader,
-    helper::{string_to_bool, string_to_int},
+    helper::{string_to_bool, string_to_int, string_to_unsignedint},
     raw::drawing::{
         scene::scene_3d_type::XlsxScene3DType,
         shape::{shape_3d_type::XlsxShape3DType, shape_autofit::XlsxShapeAutofit},
+        st_types::{STAngle, STCoordinate, STPositiveCoordinate},
     },
 };
 
@@ -127,7 +128,7 @@ pub struct XlsxBodyProperties {
     /// ```
     ///
     // tag: bIns
-    pub bottom_inset: Option<i64>,
+    pub bottom_inset: Option<STCoordinate>,
 
     /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.bodyproperties.compatiblelinespacing?view=openxml-3.0.1#documentformat-openxml-drawing-bodyproperties-compatiblelinespacing
     ///
@@ -165,28 +166,28 @@ pub struct XlsxBodyProperties {
     /// Specifies the left inset of the bounding rectangle.
     /// If this attribute is omitted, then a value of 91440, meaning 0.1 inches, is implied.
     // tag: lIns
-    pub left_inset: Option<i64>,
+    pub left_inset: Option<STCoordinate>,
 
     /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.bodyproperties.columncount?view=openxml-3.0.1#documentformat-openxml-drawing-bodyproperties-columncount
     ///
     /// Specifies the number of columns of text in the bounding rectangle.
     /// If this attribute is omitted, then a value of 1 is implied.
     // tag: numCol
-    pub column_count: Option<i64>,
+    pub column_count: Option<u64>,
 
     /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.bodyproperties.rightinset?view=openxml-3.0.1#documentformat-openxml-drawing-bodyproperties-rightinset
     ///
     /// Specifies the right inset of the bounding rectangle.
     /// If this attribute is omitted, then a value of 91440, meaning 0.1 inches, is implied.
     // tag: rIns
-    pub right_inset: Option<i64>,
+    pub right_inset: Option<STCoordinate>,
 
     /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.bodyproperties.rotation?view=openxml-3.0.1#documentformat-openxml-drawing-bodyproperties-rotation
     ///
     /// Specifies the rotation that is being applied to the text within the bounding box.
     /// if this attribute is omitted, then a value of 0 is implied.
     // tag: rot
-    pub rotation: Option<i64>,
+    pub rotation: Option<STAngle>,
 
     /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.bodyproperties.righttoleftcolumns?view=openxml-3.0.1#documentformat-openxml-drawing-bodyproperties-righttoleftcolumns
     ///
@@ -200,7 +201,7 @@ pub struct XlsxBodyProperties {
     /// Specifies the space between text columns in the text area.
     ///  If this attribute is omitted, then a value of 0 is implied.
     // tag: spcCol
-    pub column_spacing: Option<i64>,
+    pub column_spacing: Option<STPositiveCoordinate>,
 
     /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.bodyproperties.useparagraphspacing?view=openxml-3.0.1#documentformat-openxml-drawing-bodyproperties-useparagraphspacing
     ///
@@ -214,7 +215,7 @@ pub struct XlsxBodyProperties {
     /// Specifies the top inset of the bounding rectangle.
     /// If this attribute is omitted, then a value of 45720, meaning 0.05 inches, is implied.
     // tag: tIns
-    pub top_inset: Option<i64>,
+    pub top_inset: Option<STCoordinate>,
 
     /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.bodyproperties.upright?view=openxml-3.0.1#documentformat-openxml-drawing-bodyproperties-upright
     ///
@@ -263,25 +264,25 @@ impl XlsxBodyProperties {
             scene3d: None,
             shape3d: None,
             shape_autofit: None,
-            anchor: Some("t".to_owned()),
-            anchor_center: Some(false),
-            bottom_inset: Some(45720),
-            compatible_line_spacing: Some(false),
-            force_anti_alias: Some(false),
-            from_word_art: Some(false),
-            horizontal_overflow: Some("overflow".to_owned()),
-            left_inset: Some(91440),
-            column_count: Some(1),
-            right_inset: Some(91440),
-            rotation: Some(0),
-            right_to_left_columns: Some(false),
-            column_spacing: Some(0),
-            use_paragraph_spacing: Some(false),
-            top_inset: Some(45720),
-            upright: Some(false),
-            vertical: Some("horz".to_owned()),
-            vertical_overflow: Some("overflow".to_owned()),
-            wrap: Some("square".to_owned()),
+            anchor: None,
+            anchor_center: None,
+            bottom_inset: None,
+            compatible_line_spacing: None,
+            force_anti_alias: None,
+            from_word_art: None,
+            horizontal_overflow: None,
+            left_inset: None,
+            column_count: None,
+            right_inset: None,
+            rotation: None,
+            right_to_left_columns: None,
+            column_spacing: None,
+            use_paragraph_spacing: None,
+            top_inset: None,
+            upright: None,
+            vertical: None,
+            vertical_overflow: None,
+            wrap: None,
         };
 
         let attributes = e.attributes();
@@ -301,13 +302,15 @@ impl XlsxBodyProperties {
                         b"fromWordArt" => properties.from_word_art = string_to_bool(&string_value),
                         b"horzOverflow" => properties.horizontal_overflow = Some(string_value),
                         b"lIns" => properties.left_inset = string_to_int(&string_value),
-                        b"numCol" => properties.column_count = string_to_int(&string_value),
+                        b"numCol" => properties.column_count = string_to_unsignedint(&string_value),
                         b"rIns" => properties.right_inset = string_to_int(&string_value),
                         b"rot" => properties.rotation = string_to_int(&string_value),
                         b"rtlCol" => {
                             properties.right_to_left_columns = string_to_bool(&string_value)
                         }
-                        b"spcCol" => properties.column_spacing = string_to_int(&string_value),
+                        b"spcCol" => {
+                            properties.column_spacing = string_to_unsignedint(&string_value)
+                        }
                         b"spcFirstLastPara" => {
                             properties.use_paragraph_spacing = string_to_bool(&string_value)
                         }

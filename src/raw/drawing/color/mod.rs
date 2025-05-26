@@ -1,16 +1,3 @@
-use crate::excel::XmlReader;
-
-use anyhow::bail;
-use std::io::Read;
-
-use hsl_color::XlsxHslColor;
-use preset_color::XlsxPresetColor;
-use quick_xml::events::{BytesStart, Event};
-use scheme_color::XlsxSchemeColor;
-use scrgb_color::XlsxScrgbColor;
-use srgb_color::XlsxSrgbColor;
-use system_color::XlsxSystemColor;
-
 pub mod color_map;
 pub mod color_transforms;
 pub mod custom_color;
@@ -20,6 +7,20 @@ pub mod scheme_color;
 pub mod scrgb_color;
 pub mod srgb_color;
 pub mod system_color;
+
+use anyhow::bail;
+use std::io::Read;
+
+use super::scheme::color_scheme::XlsxColorScheme;
+use crate::{common_types::HexColor, excel::XmlReader};
+
+use hsl_color::XlsxHslColor;
+use preset_color::XlsxPresetColor;
+use quick_xml::events::{BytesStart, Event};
+use scheme_color::XlsxSchemeColor;
+use scrgb_color::XlsxScrgbColor;
+use srgb_color::XlsxSrgbColor;
+use system_color::XlsxSystemColor;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum XlsxColorEnum {
@@ -61,6 +62,7 @@ impl XlsxColorEnum {
         Ok(None)
     }
 
+    #[allow(dead_code)]
     pub(crate) fn load_list(
         reader: &mut XmlReader<impl Read>,
         tag: &[u8],
@@ -117,6 +119,24 @@ impl XlsxColorEnum {
                 return Ok(Some(XlsxColorEnum::SystemColor(system)));
             }
             _ => return Ok(None),
+        }
+    }
+}
+
+impl XlsxColorEnum {
+    #[allow(dead_code)]
+    pub(crate) fn to_hex(
+        &self,
+        color_scheme: Option<XlsxColorScheme>,
+        ref_color: Option<HexColor>,
+    ) -> Option<HexColor> {
+        match self {
+            XlsxColorEnum::HslColor(c) => c.to_hex(),
+            XlsxColorEnum::PresetColor(c) => c.to_hex(),
+            XlsxColorEnum::SchemeColor(c) => c.to_hex(color_scheme.clone(), ref_color),
+            XlsxColorEnum::ScrgbColor(c) => c.to_hex(),
+            XlsxColorEnum::SrgbColor(c) => c.to_hex(),
+            XlsxColorEnum::SystemColor(c) => c.to_hex(),
         }
     }
 }

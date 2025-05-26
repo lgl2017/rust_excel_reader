@@ -1,12 +1,14 @@
 use anyhow::bail;
 use quick_xml::events::BytesStart;
 
-use crate::helper::{string_to_bool, string_to_int};
+use crate::helper::{string_to_bool, string_to_unsignedint};
 
-/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blur?view=openxml-3.0.1
+/// blur (Blur Effect)
 ///
 /// a blur effect that is applied to the entire shape, including its fill.
 /// All color channels, including alpha, are affected.
+///
+/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blur?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxBlur {
     // attributes
@@ -15,9 +17,9 @@ pub struct XlsxBlur {
     // tag: grow (Grow Bounds)
     pub grow: Option<bool>,
 
-    /// Specifies the radius of blur.
+    /// Specifies the radius of blur: positive interger in EMUs
     // tag: rad (Radius)
-    pub rad: Option<i64>,
+    pub rad: Option<u64>,
 }
 
 impl XlsxBlur {
@@ -37,7 +39,7 @@ impl XlsxBlur {
                             blur.grow = string_to_bool(&string_value);
                         }
                         b"rad" => {
-                            blur.rad = string_to_int(&string_value);
+                            blur.rad = string_to_unsignedint(&string_value);
                         }
                         _ => {}
                     }

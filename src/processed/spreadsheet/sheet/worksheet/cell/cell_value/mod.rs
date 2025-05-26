@@ -36,7 +36,7 @@ pub mod rich_text;
 /// Different data types that can appear as a value in a worksheet cell
 #[derive(Debug, Clone, PartialEq, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-#[cfg_attr(feature = "serde", serde(tag = "type", content = "value"))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum CellValueType {
     Numeric(f64),
     /// Rich inline String or shared string

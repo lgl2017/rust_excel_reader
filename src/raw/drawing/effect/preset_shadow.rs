@@ -1,13 +1,15 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::BytesStart;
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
 use crate::{helper::string_to_int, raw::drawing::color::XlsxColorEnum};
 
-/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.presetshadow?view=openxml-3.0.1
+/// prstShdw (Preset Shadow)
+///
 /// specifies that a preset shadow is to be used.
+///
 /// Each preset shadow is equivalent to a specific outer shadow effect.
 /// For each preset shadow, the color element, direction attribute, and distance attribute represent the color, direction, and distance parameters of the corresponding outer shadow.
 /// Additionally, the rotateWithShape attribute of corresponding outer shadow is always false. Other non-default parameters of the outer shadow are dependent on the prst attribute
@@ -22,7 +24,8 @@ use crate::{helper::string_to_int, raw::drawing::color::XlsxColorEnum};
 ///     </a:schemeClr>
 /// </a:prstShdw>
 /// ```
-
+///
+/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.presetshadow?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxPresetShadow {
     // children

@@ -181,6 +181,7 @@ impl Font {
 /// * 5: Decorative
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum FontFamilyValue {
     NotApplicable,
     Roman,
@@ -216,6 +217,7 @@ impl FontFamilyValue {
 /// * SingleAccounting
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum UnderlineValue {
     Double,
     DoubleAccounting,
@@ -245,6 +247,7 @@ impl UnderlineValue {
 /// * None
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum FontSchemeValue {
     Major,
     Minor,
@@ -270,6 +273,7 @@ impl FontSchemeValue {
 /// * Superscript
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum VerticalAlignmentRunValue {
     Baseline,
     Subscript,

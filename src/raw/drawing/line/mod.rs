@@ -1,10 +1,9 @@
 use crate::excel::XmlReader;
 
 use anyhow::bail;
-use std::io::Read;
-
 use outline::XlsxOutline;
 use quick_xml::events::Event;
+use std::io::Read;
 
 pub mod custom_dash;
 pub mod head_end;
@@ -16,6 +15,7 @@ pub mod round_line_join;
 pub mod tail_end;
 
 /// XlsxLineStyleList: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.linestylelist?view=openxml-3.0.1
+///
 /// defines a list of three line styles for use within a theme.
 /// The three line styles are arranged in order from subtle to moderate to intense versions of lines.
 ///

@@ -1,12 +1,12 @@
 use super::{
-    paragraph::text_list_style::XlsxTextListStyle,
     shape::{shape_properties::XlsxShapeProperties, shape_style::XlsxShapeStyle},
     text::body_properties::XlsxBodyProperties,
+    text::paragraph::text_list_style::XlsxTextListStyle,
 };
 use crate::excel::XmlReader;
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 pub mod line_default;
 pub mod object_defaults;
@@ -27,7 +27,7 @@ pub struct XlsxDefaultBase {
     pub shape_properties: Option<XlsxShapeProperties>,
 
     // style (Shape Style)
-    pub style: Option<XlsxShapeStyle>,
+    pub shape_style: Option<XlsxShapeStyle>,
 }
 
 impl XlsxDefaultBase {
@@ -38,7 +38,7 @@ impl XlsxDefaultBase {
             body_properties: None,
             text_list_style: None,
             shape_properties: None,
-            style: None,
+            shape_style: None,
         };
 
         loop {
@@ -58,7 +58,7 @@ impl XlsxDefaultBase {
                     defaults.shape_properties = Some(XlsxShapeProperties::load(reader, e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"style" => {
-                    defaults.style = Some(XlsxShapeStyle::load(reader)?);
+                    defaults.shape_style = Some(XlsxShapeStyle::load(reader)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == tag => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

@@ -2,9 +2,9 @@ use anyhow::bail;
 use quick_xml::events::Event;
 use std::io::Read;
 
-use crate::{common_types::Text, excel::XmlReader};
+use crate::{common_types::Text, excel::XmlReader, helper::extract_text_contents};
 
-use super::{run_properties::XlsxRunProperties, text::load_text};
+use super::run_properties::XlsxRunProperties;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.run?view=openxml-3.0.1
 ///
@@ -61,7 +61,7 @@ impl XlsxRichTextRun {
                     run.run_properties = Some(XlsxRunProperties::load(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"t" => {
-                    run.text = Some(load_text(reader)?);
+                    run.text = Some(extract_text_contents(reader, b"t")?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"r" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file at `r`."),

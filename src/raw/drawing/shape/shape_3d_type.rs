@@ -1,9 +1,11 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
+use crate::helper::string_to_unsignedint;
+use crate::raw::drawing::st_types::{STCoordinate, STPositiveCoordinate};
 use crate::{helper::string_to_int, raw::drawing::color::XlsxColorEnum};
 
 use super::bevel::{XlsxBevelBottom, XlsxBevelTop};
@@ -43,11 +45,11 @@ pub struct XlsxShape3DType {
     // attributes
     /// Extrusion Height
     // tag: extrusionH
-    pub extrusion_h: Option<i64>,
+    pub extrusion_h: Option<STPositiveCoordinate>,
 
     /// contour width
     // tag: contourW
-    pub contour_w: Option<i64>,
+    pub contour_w: Option<STPositiveCoordinate>,
 
     /// Preset Material Type
     /// possible values: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.presetmaterialtypevalues?view=openxml-3.0.1
@@ -55,7 +57,7 @@ pub struct XlsxShape3DType {
     pub prst_material: Option<String>,
 
     /// Shape Depth
-    pub z: Option<i64>,
+    pub z: Option<STCoordinate>,
 }
 
 impl XlsxShape3DType {
@@ -78,8 +80,8 @@ impl XlsxShape3DType {
                 Ok(a) => {
                     let string_value = String::from_utf8(a.value.to_vec())?;
                     match a.key.local_name().as_ref() {
-                        b"extrusionH" => shape3d.extrusion_h = string_to_int(&string_value),
-                        b"contourW" => shape3d.contour_w = string_to_int(&string_value),
+                        b"extrusionH" => shape3d.extrusion_h = string_to_unsignedint(&string_value),
+                        b"contourW" => shape3d.contour_w = string_to_unsignedint(&string_value),
                         b"prstMaterial" => shape3d.prst_material = Some(string_value),
                         b"z" => shape3d.z = string_to_int(&string_value),
                         _ => {}

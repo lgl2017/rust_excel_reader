@@ -1,14 +1,16 @@
 use crate::excel::XmlReader;
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use super::effect_container::XlsxEffectContainer;
 
-/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blend?view=openxml-3.0.1
+/// blend (Blend Effect)
 ///
 /// Specifies a blend of several effects.
 /// The container specifies the raw effects to blend while the blend mode specifies how the effects are to be blended.
+///
+/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blend?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxBlend {
     // children

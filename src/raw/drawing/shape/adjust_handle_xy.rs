@@ -1,12 +1,10 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
-
-use crate::excel::XmlReader;
-
-use crate::common_types::XlsxAdjustCoordinate;
+use std::io::Read;
 
 use super::position::XlsxPosition;
+use crate::excel::XmlReader;
+use crate::raw::drawing::st_types::STAdjustCoordinate;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.adjusthandlexy?view=openxml-3.0.1
 ///
@@ -40,25 +38,25 @@ pub struct XlsxAdjustHandleXY {
     /// If this attribute is omitted, then it is assumed that this adjust handle cannot move in the x direction.
     /// That is the maxX and minX are equal.
     // maxX (Maximum Horizontal Adjustment)
-    pub max_horizaontal_adjustment: Option<XlsxAdjustCoordinate>,
+    pub max_horizaontal_adjustment: Option<STAdjustCoordinate>,
 
     /// Specifies the maximum vertical position that is allowed for this adjustment handle.
     /// If this attribute is omitted, then it is assumed that this adjust handle cannot move in the y direction.
     /// That is the maxY and minY are equal.
     // maxY (Maximum Vertical Adjustment)
-    pub max_vertical_adjustment: Option<XlsxAdjustCoordinate>,
+    pub max_vertical_adjustment: Option<STAdjustCoordinate>,
 
     /// Specifies the minimum horizontal position that is allowed for this adjustment handle.
     /// If this attribute is omitted, then it is assumed that this adjust handle cannot move in the x direction.
     /// That is the maxX and minX are equal.
     // minX (Minimum Horizontal Adjustment)
-    pub min_horizaontal_adjustment: Option<XlsxAdjustCoordinate>,
+    pub min_horizaontal_adjustment: Option<STAdjustCoordinate>,
 
     /// Specifies the minimum vertical position that is allowed for this adjustment handle.
     /// If this attribute is omitted, then it is assumed that this adjust handle cannot move in the y direction.
     /// That is the maxY and minY are equal.
     // minY (Minimum Vertical Adjustment)
-    pub min_vertical_adjustment: Option<XlsxAdjustCoordinate>,
+    pub min_vertical_adjustment: Option<STAdjustCoordinate>,
 }
 
 impl XlsxAdjustHandleXY {
@@ -84,19 +82,19 @@ impl XlsxAdjustHandleXY {
                         b"gdRefY" => polar.vertical_guide_ref = Some(string_value),
                         b"maxX" => {
                             polar.max_horizaontal_adjustment =
-                                Some(XlsxAdjustCoordinate::from_string(&string_value))
+                                Some(STAdjustCoordinate::from_string(&string_value))
                         }
                         b"maxY" => {
                             polar.max_vertical_adjustment =
-                                Some(XlsxAdjustCoordinate::from_string(&string_value))
+                                Some(STAdjustCoordinate::from_string(&string_value))
                         }
                         b"minX" => {
                             polar.min_horizaontal_adjustment =
-                                Some(XlsxAdjustCoordinate::from_string(&string_value))
+                                Some(STAdjustCoordinate::from_string(&string_value))
                         }
                         b"minY" => {
                             polar.min_vertical_adjustment =
-                                Some(XlsxAdjustCoordinate::from_string(&string_value))
+                                Some(STAdjustCoordinate::from_string(&string_value))
                         }
                         _ => {}
                     }

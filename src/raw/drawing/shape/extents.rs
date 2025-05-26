@@ -1,7 +1,17 @@
 use anyhow::bail;
 use quick_xml::events::BytesStart;
 
-use crate::helper::string_to_int;
+use crate::{helper::string_to_int, raw::drawing::st_types::STCoordinate};
+
+/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.childextents?view=openxml-3.0.1
+///
+/// This element specifies the size dimensions of the child extents rectangle and is used for calculations of grouping, scaling, and rotation behavior of shapes placed within a group.
+///
+/// Example:
+/// ```
+/// <a:chExt cx="2426208" cy="978408"/>
+/// ```
+pub type XlsxChildExtent = XlsxExtents;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.extents?view=openxml-3.0.1
 ///
@@ -20,28 +30,25 @@ pub struct XlsxExtents {
     // attributes
     /// Extent Length
     // tag: cx
-    pub length: Option<i64>,
+    pub cx: Option<STCoordinate>,
 
     /// Extent Width
     // tag: cy
-    pub width: Option<i64>,
+    pub cy: Option<STCoordinate>,
 }
 
 impl XlsxExtents {
     pub(crate) fn load(e: &BytesStart) -> anyhow::Result<Self> {
         let attributes = e.attributes();
-        let mut position = Self {
-            length: None,
-            width: None,
-        };
+        let mut position = Self { cx: None, cy: None };
 
         for a in attributes {
             match a {
                 Ok(a) => {
                     let string_value = String::from_utf8(a.value.to_vec())?;
                     match a.key.local_name().as_ref() {
-                        b"cx" => position.length = string_to_int(&string_value),
-                        b"cy" => position.width = string_to_int(&string_value),
+                        b"cx" => position.cx = string_to_int(&string_value),
+                        b"cy" => position.cy = string_to_int(&string_value),
                         _ => {}
                     }
                 }

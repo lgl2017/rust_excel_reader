@@ -1,12 +1,14 @@
 use super::shape_guide::XlsxShapeGuide;
 use crate::excel::XmlReader;
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.adjustvaluelist?view=openxml-3.0.1
+///
 /// This element specifies the adjust values that are applied to the specified shape.
 /// An adjust value is simply a guide that has a value based formula specified.
+///
 /// Example:
 /// ```
 /// <a:avLst>
@@ -17,8 +19,7 @@ use quick_xml::events::Event;
 pub type XlsxAdjustValueList = Vec<XlsxShapeGuide>;
 
 pub(crate) fn load_adjust_value_list(
-    reader:  &mut XmlReader<impl Read>,
-
+    reader: &mut XmlReader<impl Read>,
 ) -> anyhow::Result<XlsxAdjustValueList> {
     let mut buf = Vec::new();
     let mut guides: Vec<XlsxShapeGuide> = vec![];

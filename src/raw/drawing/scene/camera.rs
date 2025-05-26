@@ -1,10 +1,11 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
 use crate::helper::string_to_int;
+use crate::raw::drawing::st_types::STAngle;
 
 use super::rotation::XlsxRotation;
 
@@ -26,7 +27,7 @@ pub struct XlsxCamera {
     pub prst: Option<String>,
 
     /// Field of view
-    pub fov: Option<i64>,
+    pub fov: Option<STAngle>,
 
     /// Zoom
     pub zoom: Option<i64>,

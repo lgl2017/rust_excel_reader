@@ -4,9 +4,9 @@ use super::{
     soft_edge::XlsxSoftEdge,
 };
 use crate::excel::XmlReader;
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.effectlist?view=openxml-3.0.1
 /// tag: effectLst
@@ -19,6 +19,7 @@ pub struct XlsxEffectList {
 
     /// fillOverlay (Fill Overlay Effect)	§20.1.8.29
     pub fill_overlay: Option<Box<XlsxFillOverlay>>,
+
     /// glow (Glow Effect)	§20.1.8.32
     pub glow: Option<XlsxGlow>,
 

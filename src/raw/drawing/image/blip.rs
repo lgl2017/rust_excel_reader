@@ -1,9 +1,10 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
+use crate::raw::drawing::effect::tint::XlsxTint;
 use crate::raw::drawing::effect::{
     alpha_bi_level::XlsxAlphaBiLevel, alpha_ceiling::XlsxAlphaCeiling, alpha_floor::XlsxAlphaFloor,
     alpha_inverse::XlsxAlphaInverse, alpha_modulation::XlsxAlphaModulation,
@@ -11,13 +12,25 @@ use crate::raw::drawing::effect::{
     bi_level::XlsxBiLevel, blur::XlsxBlur, color_change::XlsxColorChange,
     color_replacement::XlsxColorReplacement, duotone::XlsxDuotone, fill_overlay::XlsxFillOverlay,
     gray_scale::XlsxGrayScale, hue_saturation_luminance::XlsxHsl, luminance::XlsxLuminance,
-    tint::XlsxTint,
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blip?view=openxml-3.0.1
+///
+/// This element specifies the existence of an image (binary large image or picture) and contains a reference to the image data.
+///
+/// Example
+/// ```
+/// <a:blip
+/// xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+/// r:embed="rId1" />
+/// ```
+///
+/// blip (Blip)
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxBlip {
-    //     Child Elements	Subclause
+    // Child Elements
+    // extLst (Extension List)	§20.1.2.2.15 Not Supported
+
     // alphaBiLevel (Alpha Bi-Level Effect)	§20.1.8.1
     pub alpha_bi_level: Option<XlsxAlphaBiLevel>,
 
@@ -52,23 +65,27 @@ pub struct XlsxBlip {
 
     // duotone (Duotone Effect)	§20.1.8.23
     pub duotone: Option<XlsxDuotone>,
+
     // fillOverlay (Fill Overlay Effect)	§20.1.8.29
     pub fill_overlay: Option<Box<XlsxFillOverlay>>,
+
     // grayscl (Gray Scale Effect)	§20.1.8.34
     pub grayscl: Option<XlsxGrayScale>,
 
     // hsl (Hue Saturation Luminance Effect)	§20.1.8.39
     pub hsl: Option<XlsxHsl>,
+
     // lum (Luminance Effect)	§20.1.8.42
     pub lum: Option<XlsxLuminance>,
+
     // tint (Tint Effect)
     pub tint: Option<XlsxTint>,
-    // extLst (Extension List)	§20.1.2.2.15 Not Supported
 
     // Attributes
     /// Specifies the compression state with which the picture is stored. This allows the application to specify the amount of compression that has been applied to a picture.
-    /// possible values: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blip?view=openxml-3.0.1
-    // cstate (Compression State)
+    /// possible values: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blipcompressionvalues?view=openxml-3.0.1
+    ///
+    /// cstate (Compression State)
     pub cstate: Option<String>,
 
     /// Specifies the identification information for an embedded picture.
@@ -78,12 +95,14 @@ pub struct XlsxBlip {
     /// ```
     /// <a:blip r:embed="rId2"/>
     /// ```
-    // embed (Embedded Picture Reference)
+    ///
+    /// embed (Embedded Picture Reference)
     pub embed: Option<String>,
 
     /// Specifies the identification information for a linked picture.
     /// This attribute is used to specify an image that does not reside within this file.
-    // link (Linked Picture Reference)
+    ///
+    /// link (Linked Picture Reference)
     pub link: Option<String>,
 }
 
@@ -180,9 +199,8 @@ impl XlsxBlip {
                     blip.clr_repl = XlsxColorReplacement::load(reader, b"clrRepl")?;
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"duotone" => {
-                    blip.duotone = Some(XlsxDuotone::load(reader)?);
+                    blip.duotone = XlsxDuotone::load(reader, b"duotone")?;
                 }
-
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"fillOverlay" => {
                     if let Some(fill_overlay) = XlsxFillOverlay::load(reader, b"fillOverlay")? {
                         blip.fill_overlay = Some(Box::new(fill_overlay));

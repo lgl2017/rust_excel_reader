@@ -3,13 +3,16 @@ use quick_xml::events::BytesStart;
 
 use crate::helper::string_to_int;
 
-/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alphaoutset?view=openxml-3.0.1
+// alphaOutset (Alpha Inset/Outset Effect)
+///
 /// This is equivalent to an alpha ceiling, followed by alpha blur, followed by either an alpha ceiling (positive radius) or alpha floor (negative radius).
+///
+/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alphaoutset?view=openxml-3.0.1
 // tag: alphaOutset
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxAlphaOutset {
     // attributes
-    /// Specifies the radius of blur.
+    /// Specifies the radius of blur as ST_Coordinate(emu).
     // tag: rad (Radius)
     pub rad: Option<i64>,
 }

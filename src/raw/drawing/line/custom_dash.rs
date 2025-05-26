@@ -1,16 +1,16 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
-use crate::helper::string_to_int;
+use crate::helper::string_to_unsignedint;
+use crate::raw::drawing::st_types::STPositivePercentage;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.customdash?view=openxml-3.0.1
 ///
 /// This element specifies a custom dashing scheme.
 /// It is a list of dash stop elements which represent building block atoms upon which the custom dashing scheme is built.
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxCustomDash {
     // children
@@ -47,11 +47,11 @@ pub struct XlsxDashStop {
     // Attributes
     /// Specifies the length of the dash relative to the line width.
     // d (Dash Length)
-    pub d: Option<i64>,
+    pub d: Option<STPositivePercentage>,
 
     /// Specifies the length of the space relative to the line width.
     // sp (Space Length)
-    pub sp: Option<i64>,
+    pub sp: Option<STPositivePercentage>,
 }
 
 impl XlsxDashStop {
@@ -65,8 +65,8 @@ impl XlsxDashStop {
                 Ok(a) => {
                     let string_value = String::from_utf8(a.value.to_vec())?;
                     match a.key.local_name().as_ref() {
-                        b"d" => dash_stop.d = string_to_int(&string_value),
-                        b"sp" => dash_stop.sp = string_to_int(&string_value),
+                        b"d" => dash_stop.d = string_to_unsignedint(&string_value),
+                        b"sp" => dash_stop.sp = string_to_unsignedint(&string_value),
                         _ => {}
                     }
                 }

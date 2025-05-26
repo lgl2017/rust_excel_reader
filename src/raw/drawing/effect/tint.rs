@@ -3,8 +3,12 @@ use quick_xml::events::BytesStart;
 
 use crate::helper::string_to_int;
 
+/// tint (Tint Effect)
+///
+/// This element specifies a tint effect.
+/// Shifts effect color values towards/away from hue by the specified amount.
+///
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.tinteffect?view=openxml-3.0.1
-// tag: tint
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxTint {
     // attributes:

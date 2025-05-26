@@ -9,10 +9,32 @@ use quick_xml::events::BytesStart;
 ///
 /// Example:
 /// ```
-/// <a:gdLst>
+/// <a:custGeom>
+///   <a:avLst/>
+///   <a:gdLst>
 ///     <a:gd name="myGuide" fmla="*/ h 2 3"/>
-/// </a:gdLst>
+///   </a:gdLst>
+///   <a:ahLst/>
+///   <a:cxnLst/>
+///   <a:rect l="0" t="0" r="0" b="0"/>
+///   <a:pathLst>
+///     <a:path w="1705233" h="679622">
+///       <a:moveTo>
+///         <a:pt x="0" y="myGuide"/>
+///       </a:moveTo>
+///       <a:lnTo>
+///         <a:pt x="1705233" y="myGuide"/>
+///       </a:lnTo>
+///       <a:lnTo>
+///         <a:pt x="852616" y="0"/>
+///       </a:lnTo>
+///       <a:close/>
+///     </a:path>
+///   </a:pathLst>
+/// </a:custGeom>
 /// ```
+///
+/// gd (Shpae guide)
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxShapeGuide {
     // Attributes

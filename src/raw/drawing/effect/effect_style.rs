@@ -2,13 +2,15 @@ use crate::excel::XmlReader;
 use crate::raw::drawing::{
     scene::scene_3d_type::XlsxScene3DType, shape::shape_3d_type::XlsxShape3DType,
 };
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 use super::{effect_container::XlsxEffectDag, effect_list::XlsxEffectList};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.effectstyle?view=openxml-3.0.1
+///
+/// This element defines a set of effects and 3D properties that can be applied to an object.
 ///
 /// Example:
 /// ```

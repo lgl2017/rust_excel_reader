@@ -1,6 +1,6 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
@@ -19,7 +19,8 @@ use super::{
     shape_3d_type::XlsxShape3DType, transform_2d::XlsxTransform2D,
 };
 
-/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.shapeproperties?view=openxml-3.0.1
+/// - https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.shapeproperties?view=openxml-3.0.1
+/// - https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.spreadsheet.shapeproperties?view=openxml-3.0.1
 ///
 /// This element specifies the visual shape properties that can be applied to a shape.
 ///

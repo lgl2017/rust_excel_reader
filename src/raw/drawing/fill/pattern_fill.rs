@@ -1,6 +1,6 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
@@ -34,12 +34,10 @@ pub type XlsxForegroundColor = XlsxColorEnum;
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxPatternFill {
     // Child Elements
-    /// [BackgroundColor]
-    // bgClr (Background color)	§20.1.8.10
+    /// bgClr (Background color)
     pub bg_clr: Option<XlsxBackgroundColor>,
 
-    /// [ForegroundColor]
-    // fgClr (Foreground color)
+    /// fgClr (Foreground color)
     pub fg_clr: Option<XlsxForegroundColor>,
 
     // Attributes

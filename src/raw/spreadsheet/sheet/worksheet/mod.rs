@@ -19,7 +19,7 @@ use std::io::{Read, Seek};
 use table_part::{load_table_parts, XlsxTableParts};
 use zip::ZipArchive;
 
-use super::sheet_format_properties::XlsxSheetFormatProperties;
+use super::{drawing::XlsxDrawing, sheet_format_properties::XlsxSheetFormatProperties};
 use crate::{
     excel::xml_reader,
     raw::spreadsheet::{
@@ -87,9 +87,12 @@ pub struct XlsxWorksheet {
     // dataConsolidate (Data Consolidate)	§18.3.1.29
     // dataValidations (Data Validations)	§18.3.1.33
 
-    // dimension (Worksheet Dimensions)	§18.3.1.35
+    // dimension (Worksheet Dimensions)
     pub dimension: Option<XlsxSheetDimension>,
-    // drawing (Drawing)	§18.3.1.36
+
+    // drawing (Drawing)
+    pub drawing: Option<XlsxDrawing>,
+
     // drawingHF (Drawing Reference in Header Footer)	§18.3.1.37
     // headerFooter (Header Footer Settings)	§18.3.1.46
 
@@ -135,6 +138,7 @@ impl XlsxWorksheet {
             auto_filter: None,
             column_infos: None,
             dimension: None,
+            drawing: None,
             hyperlinks: None,
             merge_cells: None,
             phonetic_properties: None,
@@ -164,6 +168,9 @@ impl XlsxWorksheet {
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"dimension" => {
                     worksheet.dimension = load_sheet_dimension(e)?;
+                }
+                Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"drawing" => {
+                    worksheet.drawing = Some(XlsxDrawing::load(e)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"hyperlinks" => {
                     worksheet.hyperlinks = Some(load_hyperlinks(&mut reader)?);

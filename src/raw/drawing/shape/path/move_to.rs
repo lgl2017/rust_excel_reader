@@ -1,8 +1,8 @@
 use super::path_point::XlsxPoint;
 use crate::excel::XmlReader;
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.moveto?view=openxml-3.0.1
 ///
@@ -18,7 +18,7 @@ use quick_xml::events::Event;
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxMoveTo {
     // Child
-    point: Option<XlsxPoint>,
+    pub point: Option<XlsxPoint>,
 }
 
 impl XlsxMoveTo {

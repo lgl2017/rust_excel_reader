@@ -1,17 +1,12 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::excel::XmlReader;
 use crate::raw::drawing::color::srgb_color::XlsxSrgbColor;
 use crate::raw::drawing::color::system_color::XlsxSystemColor;
 use crate::raw::drawing::color::XlsxColorEnum;
 
-// use crate::raw::drawing::color::{
-//     Accent1Color, Accent2Color, Accent3Color, Accent4Color, Accent5Color, Accent6Color, ColorEnum,
-//     Dark1Color, Dark2Color, FollowedHyperlinkColor, HyperlinkColor, Light1Color, Light2Color,
-//     SchemeColorEnum,
-// };
 use crate::common_types::HexColor;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.colorscheme?view=openxml-3.0.1
@@ -129,7 +124,10 @@ pub enum XlsxSchemeColorEnum {
 }
 
 impl XlsxSchemeColorEnum {
-    pub(crate) fn load(reader: &mut XmlReader<impl Read>, tag: &[u8]) -> anyhow::Result<Option<Self>> {
+    pub(crate) fn load(
+        reader: &mut XmlReader<impl Read>,
+        tag: &[u8],
+    ) -> anyhow::Result<Option<Self>> {
         let color_enum = XlsxColorEnum::load(reader, tag)?;
         if color_enum.is_none() {
             return Ok(None);
@@ -269,7 +267,7 @@ impl XlsxColorScheme {
 }
 
 impl XlsxColorScheme {
-    pub(crate) fn get_color(&self, index: u64) -> Option<HexColor> {
+    pub(crate) fn get_color_by_index(&self, index: u64) -> Option<HexColor> {
         return match index {
             0 => self.lt1.clone(),
             1 => self.dk1.clone(),

@@ -1,9 +1,10 @@
 use anyhow::bail;
 use quick_xml::events::BytesStart;
 
-use crate::helper::string_to_int;
+use crate::{helper::string_to_int, raw::drawing::st_types::STCoordinate};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.flattext?view=openxml-3.0.1
+///
 /// Keep text out of 3D scene entirely
 // tag: flatTx
 #[derive(Debug, Clone, PartialEq)]
@@ -12,7 +13,7 @@ pub struct XlsxFlatText {
     /// z (Z Coordinate)
     ///
     /// Specifies the Z coordinate to be used in positioning the flat text within the 3D scene.
-    pub z: Option<i64>,
+    pub z: Option<STCoordinate>,
 }
 
 impl XlsxFlatText {

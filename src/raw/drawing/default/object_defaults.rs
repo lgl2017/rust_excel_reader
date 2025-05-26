@@ -4,9 +4,9 @@ use super::{
     text_default::{load_text_default, XlsxTextDefault},
 };
 use crate::excel::XmlReader;
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.objectdefaults?view=openxml-3.0.1
 /// This element allows for the definition of default shape, line, and textbox formatting properties.

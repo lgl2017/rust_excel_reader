@@ -15,7 +15,8 @@ use super::color_transforms::{apply_color_transformations, XlsxColorTransform};
 /// <a:scrgbClr r="50000" g="50000" b="50000"/>
 /// <a:srgbClr val="BCBCBC"/> // hex digits RRGGBB.
 /// ```
-// tag: srgbClr
+///
+/// tag: srgbClr
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxSrgbColor {
     // attributes
@@ -41,14 +42,15 @@ impl XlsxSrgbColor {
 
 impl XlsxSrgbColor {
     pub(crate) fn to_hex(&self) -> Option<HexColor> {
-        if self.val.is_none() {
+        let Some(hex) = self.val.clone() else {
             return None;
-        }
-        let hex = self.val.clone().unwrap();
+        };
         let Ok(mut rgba) = hex_to_rgba(&hex, Some(false)) else {
             return None;
         };
+
         rgba = apply_color_transformations(rgba, self.color_transforms.clone().unwrap_or(vec![]));
+
         match rgba_to_hex(rgba, Some(false)) {
             Ok(hex) => return Some(hex),
             Err(_) => return None,

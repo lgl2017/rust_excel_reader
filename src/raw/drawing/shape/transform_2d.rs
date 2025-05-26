@@ -1,10 +1,11 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::{
     excel::XmlReader,
     helper::{string_to_bool, string_to_int},
+    raw::drawing::st_types::STAngle,
 };
 
 use super::{extents::XlsxExtents, offset::XlsxOffset};
@@ -20,7 +21,8 @@ use super::{extents::XlsxExtents, offset::XlsxOffset};
 ///   <a:ext cx="1705233" cy="679622"/>
 /// </a:xfrm>
 /// ```
-// tag: xfrm
+///
+/// xfrm
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxTransform2D {
     // Child Elements
@@ -31,19 +33,22 @@ pub struct XlsxTransform2D {
     pub offset: Option<XlsxOffset>,
 
     // Attributes
-    ///Specifies a horizontal flip.
+    /// Specifies a horizontal flip.
     /// When true, this attribute defines that the shape is flipped horizontally about the center of its bounding box.
-    // flipH (Horizontal Flip)
+    ///
+    /// flipH (Horizontal Flip)
     pub horizontal_flip: Option<bool>,
 
     /// Specifies a vertical flip.
     /// When true, this attribute defines that the group is flipped vertically about the center of its bounding box.
-    // flipV (Vertical Flip)
+    ///
+    /// flipV (Vertical Flip)
     pub vertical_flip: Option<bool>,
 
     /// Specifies the rotation angle of the Graphic Frame.
-    // rot (Rotation)
-    pub rotation: Option<i64>,
+    ///
+    /// rot (Rotation)
+    pub rotation: Option<STAngle>,
 }
 
 impl XlsxTransform2D {

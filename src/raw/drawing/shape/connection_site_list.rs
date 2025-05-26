@@ -1,8 +1,8 @@
 use super::connection_site::XlsxConnectionSite;
 use crate::excel::XmlReader;
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.connectionsitelist?view=openxml-3.0.1
 ///
@@ -23,8 +23,7 @@ use quick_xml::events::Event;
 pub type XlsxConnectionSiteList = Vec<XlsxConnectionSite>;
 
 pub(crate) fn load_connection_site_list(
-    reader:  &mut XmlReader<impl Read>,
-
+    reader: &mut XmlReader<impl Read>,
 ) -> anyhow::Result<XlsxConnectionSiteList> {
     let mut buf = Vec::new();
     let mut sites: Vec<XlsxConnectionSite> = vec![];
@@ -44,34 +43,3 @@ pub(crate) fn load_connection_site_list(
     }
     Ok(sites)
 }
-
-// #[derive(Debug, Clone, PartialEq)]
-// pub struct ConnectionSiteList {
-//     // children
-//     // cxn (Shape Connection Site)
-//     pub connection_site: Option<Vec<ConnectionSite>>,
-// }
-
-// impl ConnectionSiteList {
-//     pub(crate) fn load(reader: &mut XmlReader<impl Read>) -> anyhow::Result<Self> {
-//         let mut buf = Vec::new();
-//         let mut sites: Vec<ConnectionSite> = vec![];
-
-//         loop {
-//             buf.clear();
-
-//             match reader.read_event_into(&mut buf) {
-//                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"cxn" => {
-//                     sites.push(ConnectionSite::load(reader, e)?);
-//                 }
-//                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"cxnLst" => break,
-//                 Ok(Event::Eof) => bail!("unexpected end of file."),
-//                 Err(e) => bail!(e.to_string()),
-//                 _ => (),
-//             }
-//         }
-//         Ok(Self {
-//             connection_site: Some(sites),
-//         })
-//     }
-// }

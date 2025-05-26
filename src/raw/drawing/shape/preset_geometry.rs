@@ -1,6 +1,6 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
@@ -13,6 +13,7 @@ use super::adjust_value_list::{load_adjust_value_list, XlsxAdjustValueList};
 /// Example
 /// ```
 /// <a:prstGeom prst="heart">
+///     <a:avLst />
 /// </a:prstGeom>
 /// ```
 #[derive(Debug, Clone, PartialEq)]

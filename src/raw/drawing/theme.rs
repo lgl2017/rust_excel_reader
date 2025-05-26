@@ -12,6 +12,15 @@ use super::{
     theme_elements::XlsxThemeElements,
 };
 
+#[cfg(feature = "drawing")]
+use super::{
+    effect::{effect_reference::XlsxEffectReference, effect_style::XlsxEffectStyle},
+    fill::{fill_reference::XlsxFillReference, XlsxFillStyleEnum},
+    line::{line_reference::XlsxLineReference, outline::XlsxOutline},
+    scheme::format_scheme::XlsxFormatScheme,
+    text::font::{font_reference::XlsxFontReference, XlsxFontBase},
+};
+
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.theme?view=openxml-3.0.1
 ///
 /// Root element of DrawingML Theme part
@@ -112,5 +121,213 @@ impl XlsxTheme {
         }
 
         return Ok(theme);
+    }
+}
+
+#[cfg(feature = "drawing")]
+impl XlsxTheme {
+    fn get_format_scheme(&self) -> Option<XlsxFormatScheme> {
+        let Some(theme_elements) = self.theme_elements.clone() else {
+            return None;
+        };
+        return theme_elements.format_scheme.clone();
+    }
+
+    fn u64_to_usize(u64: u64) -> anyhow::Result<usize> {
+        return Ok(TryInto::<usize>::try_into(u64)?);
+    }
+
+    /// Get outline reference by a `lnRef`
+    ///
+    /// Example:
+    /// ```
+    /// <lnRef idx="1">
+    ///     <schemeClr val="accent2"/>
+    /// </lnRef>
+    /// ```
+    pub(crate) fn get_line_from_ref(
+        &self,
+        reference: Option<XlsxLineReference>,
+    ) -> Option<XlsxOutline> {
+        let Some(reference) = reference else {
+            return None;
+        };
+        let Some(index) = reference.index else {
+            return None;
+        };
+
+        let Some(format_scheme) = self.get_format_scheme() else {
+            return None;
+        };
+
+        let Some(line_style_list) = format_scheme.line_style_lst else {
+            return None;
+        };
+
+        let Ok(index) = Self::u64_to_usize(index) else {
+            return None;
+        };
+
+        // let Some(index) = index.checked_sub(1) else {
+        //     return None;
+        // };
+
+        if index > line_style_list.len() - 1 {
+            return None;
+        };
+
+        return Some(line_style_list[index].clone());
+    }
+
+    /// Get outline reference by a `fillRef`
+    ///
+    /// idx:
+    /// - value of 0 or 1000 indicates no background,
+    /// - values 1-999 refer to the index of a fill style within the fillStyleLst element,
+    /// - values 1001 and above refer to the index of a background fill style within the bgFillStyleLst element.
+    ///     For example: The value 1001 corresponds to the first background fill style, 1002 to the second background fill style, and so on.
+    ///
+    /// Example:
+    /// ```
+    /// <fillRef idx="0">
+    ///     <schemeClr val="accent2"/>
+    /// </fillRef>
+    /// ```
+    pub(crate) fn get_fill_from_ref(
+        &self,
+        reference: Option<XlsxFillReference>,
+    ) -> Option<XlsxFillStyleEnum> {
+        let Some(reference) = reference else {
+            return None;
+        };
+        let Some(index) = reference.index else {
+            return None;
+        };
+
+        let Some(format_scheme) = self.get_format_scheme() else {
+            return None;
+        };
+
+        let Ok(index) = Self::u64_to_usize(index) else {
+            return None;
+        };
+
+        // value of 0 or 1000 indicates no background,
+        if index == 0 || index == 1000 {
+            return Some(XlsxFillStyleEnum::NoFill(true));
+        }
+
+        // values 1-999 refer to the index of a fill style within the fillStyleLst element
+        if (1..=999).contains(&index) {
+            let Some(style_list) = format_scheme.fill_style_lst else {
+                return None;
+            };
+
+            let Some(index) = index.checked_sub(1) else {
+                return None;
+            };
+
+            if index > style_list.len() - 1 {
+                return None;
+            };
+
+            return Some(style_list[index].clone());
+        }
+
+        // values 1001 and above refer to the index of a background fill style within the bgFillStyleLst element.
+        // For example: The value 1001 corresponds to the first background fill style, 1002 to the second background fill style, and so on.
+        let Some(index) = index.checked_sub(1001) else {
+            return None;
+        };
+
+        let Some(style_list) = format_scheme.bg_fill_style_lst else {
+            return None;
+        };
+
+        if index > style_list.len() - 1 {
+            return None;
+        };
+
+        return Some(style_list[index].clone());
+    }
+
+    /// Get effect style reference by a `effectRef`
+    ///
+    /// Example:
+    /// ```
+    /// <effectRef idx="0">
+    ///     <schemeClr val="accent2"/>
+    /// </effectRef>
+    /// ```
+    pub(crate) fn get_effect_from_ref(
+        &self,
+        reference: Option<XlsxEffectReference>,
+    ) -> Option<XlsxEffectStyle> {
+        let Some(reference) = reference else {
+            return None;
+        };
+        let Some(index) = reference.index else {
+            return None;
+        };
+
+        let Some(format_scheme) = self.get_format_scheme() else {
+            return None;
+        };
+
+        let Some(style_list) = format_scheme.effect_style_lst else {
+            return None;
+        };
+
+        let Ok(index) = Self::u64_to_usize(index) else {
+            return None;
+        };
+
+        if index > style_list.len() - 1 {
+            return None;
+        };
+
+        return Some(style_list[index].clone());
+    }
+
+    /// Get font reference by a `fontRef`
+    ///
+    /// idx:
+    /// - `major`
+    /// - `minor`
+    /// - `none`
+    ///
+    /// Example:
+    /// ```
+    /// <fontRef idx="minor">
+    ///     <schemeClr val="tx1"/>
+    /// </fontRef>
+    /// ```
+    pub(crate) fn get_font_from_ref(
+        &self,
+        reference: Option<XlsxFontReference>,
+    ) -> Option<XlsxFontBase> {
+        let Some(reference) = reference else {
+            return None;
+        };
+        let Some(index) = reference.index else {
+            return None;
+        };
+
+        let Some(theme_elements) = self.theme_elements.clone() else {
+            return None;
+        };
+        let Some(font_scheme) = theme_elements.font_scheme.clone() else {
+            return None;
+        };
+
+        if index == "major" {
+            return font_scheme.major_font;
+        }
+
+        if index == "minor" {
+            return font_scheme.minor_font;
+        };
+
+        return None;
     }
 }

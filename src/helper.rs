@@ -1,30 +1,10 @@
+use std::io::Read;
+
 use anyhow::bail;
-use chrono::{DateTime, NaiveDateTime};
-use quick_xml::events::BytesStart;
+use quick_xml::events::{BytesStart, Event};
 use regex::Regex;
 
-use crate::common_types::XlsxDatetime;
-
-/// Converting Attributes string to datetime
-pub(crate) fn string_to_datetime(str: &str) -> Option<XlsxDatetime> {
-    // with time zone: YYYY-MM-DDThh:mm:ssZ
-    if let Ok(date_time) = DateTime::parse_from_rfc3339(str) {
-        return Some(XlsxDatetime {
-            datetime: date_time.naive_utc(),
-            offset: Some(date_time.offset().to_owned()),
-        });
-    }
-
-    // without time zone: YYYY-MM-DDThh:mm:ss
-    if let Ok(naive_date_time) = NaiveDateTime::parse_from_str(&str, "%Y-%m-%dT%H:%M:%S") {
-        return Some(XlsxDatetime {
-            datetime: naive_date_time,
-            offset: None,
-        });
-    };
-
-    return None;
-}
+use crate::{excel::XmlReader, raw::drawing::st_types::st_percentage_to_float};
 
 /// Converting Attributes string to boolean
 pub(crate) fn string_to_bool(str: &str) -> Option<bool> {
@@ -52,13 +32,6 @@ pub(crate) fn string_to_int(str: &str) -> Option<i64> {
         Ok(int) => Some(int),
         Err(_) => None,
     };
-}
-
-/// Converting percentage Integer to float.
-///
-/// Ex: 56,000 => 0.56
-pub(crate) fn percentage_int_to_float(int: i64) -> f64 {
-    return (int as f64) / 1000.0 / 100.0;
 }
 
 /// Converting Attributes percentage to integar.
@@ -102,6 +75,29 @@ pub(crate) fn extract_val_attribute(e: &BytesStart) -> anyhow::Result<Option<Str
     }
 
     return Ok(None);
+}
+
+pub(crate) fn extract_text_contents(
+    reader: &mut XmlReader<impl Read>,
+    tag: &[u8],
+) -> anyhow::Result<String> {
+    let mut text = String::new();
+    let mut buf: Vec<u8> = Vec::new();
+    loop {
+        buf.clear();
+
+        match reader.read_event_into(&mut buf) {
+            Ok(Event::Text(t)) => text.push_str(&t.unescape()?),
+            Ok(Event::End(ref e)) if e.local_name().as_ref() == tag => break,
+            Ok(Event::Eof) => bail!(
+                "unexpected end of file at `{}`.",
+                String::from_utf8(tag.to_vec())?
+            ),
+            Err(e) => bail!(e.to_string()),
+            _ => (),
+        }
+    }
+    return Ok(text);
 }
 
 /// Convert A1 reference dimension to (row, col) (1 based index).
@@ -463,7 +459,7 @@ pub(crate) fn rgba_to_hsla(rgba: (u32, u32, u32, f64)) -> anyhow::Result<(f64, f
 /// * B: 0 - 255
 ///
 /// * A: 0.0 - 1.0
-pub fn hsva_to_rgba(hsva: (f64, f64, f64, f64)) -> anyhow::Result<(u32, u32, u32, f64)> {
+pub(crate) fn hsva_to_rgba(hsva: (f64, f64, f64, f64)) -> anyhow::Result<(u32, u32, u32, f64)> {
     if !check_hue(&hsva.0) || !check_percentage(&hsva.1) || !check_percentage(&hsva.2) {
         bail!("invalid hsv value.")
     }
@@ -541,7 +537,7 @@ pub fn hsva_to_rgba(hsva: (f64, f64, f64, f64)) -> anyhow::Result<(u32, u32, u32
 /// * B: 0 - 255
 ///
 /// * A: 0.0 - 1.0
-pub fn rgba_to_hsva(rgba: (u32, u32, u32, f64)) -> anyhow::Result<(f64, f64, f64, f64)> {
+pub(crate) fn rgba_to_hsva(rgba: (u32, u32, u32, f64)) -> anyhow::Result<(f64, f64, f64, f64)> {
     if !check_rgb(&rgba.0) || !check_rgb(&rgba.1) || !check_rgb(&rgba.2) {
         bail!("invalid rgb value.")
     }
@@ -595,7 +591,7 @@ pub fn rgba_to_hsva(rgba: (u32, u32, u32, f64)) -> anyhow::Result<(f64, f64, f64
 /// * G: 0 - 255
 /// * B: 0 - 255
 /// * A: 0.0 - 1.0
-pub fn complementary(rgba: (u32, u32, u32, f64)) -> anyhow::Result<(u32, u32, u32, f64)> {
+pub(crate) fn complementary(rgba: (u32, u32, u32, f64)) -> anyhow::Result<(u32, u32, u32, f64)> {
     let (mut h, s, v, a) = rgba_to_hsva(rgba)?;
     fn shift_hue(h: f64, s: f64) -> f64 {
         let mut h = h + s;
@@ -620,7 +616,7 @@ pub fn complementary(rgba: (u32, u32, u32, f64)) -> anyhow::Result<(u32, u32, u3
 /// * G: 0 - 255
 /// * B: 0 - 255
 /// * A: 0.0 - 1.0
-pub fn inverse(rgba: (u32, u32, u32, f64)) -> anyhow::Result<(u32, u32, u32, f64)> {
+pub(crate) fn inverse(rgba: (u32, u32, u32, f64)) -> anyhow::Result<(u32, u32, u32, f64)> {
     if !check_rgb(&rgba.0) || !check_rgb(&rgba.1) || !check_rgb(&rgba.2) {
         bail!("invalid rgb value.")
     }
@@ -643,7 +639,8 @@ pub fn inverse(rgba: (u32, u32, u32, f64)) -> anyhow::Result<(u32, u32, u32, f64
 /// * A: 0.0 - 1.0
 pub(crate) fn gamma_shift(rgba: (u32, u32, u32, f64)) -> anyhow::Result<(u32, u32, u32, f64)> {
     let (h, s, mut v, a) = rgba_to_hsva(rgba)?;
-    v = v.powf(2.2);
+    // * normalize v to between [0, 1] beforea pply shift
+    v = (v / 100.0).powf(2.2) * 100.0;
     return hsva_to_rgba((h, s, v, a));
 }
 
@@ -660,7 +657,8 @@ pub(crate) fn inverse_gamma_shift(
     rgba: (u32, u32, u32, f64),
 ) -> anyhow::Result<(u32, u32, u32, f64)> {
     let (h, s, mut v, a) = rgba_to_hsva(rgba)?;
-    v = v.powf(1.0 / 2.2);
+    // * normalize v to between [0, 1] beforea pply shift
+    v = (v / 100.0).powf(1.0 / 2.2) * 100.0;
     return hsva_to_rgba((h, s, v, a));
 }
 
@@ -714,6 +712,7 @@ pub(crate) fn apply_tint(
     if tint == 0.0 {
         return Ok((rgba.0, rgba.1, rgba.2, rgba.3));
     }
+
     let (h, s, mut l, a) = rgba_to_hsla(rgba)?;
     l = l / 100.0;
 
@@ -730,6 +729,8 @@ pub(crate) fn apply_tint(
         l = 1.0
     }
 
+    l = l * 100.0;
+
     return hsla_to_rgba((h, s, l, a));
 }
 
@@ -742,7 +743,7 @@ pub(crate) fn apply_tint(
 /// original/returned: color component ranging from 0.0 to 1.0
 /// modulation: percentage in int. Ex: 50% -> 50,000
 pub(crate) fn apply_modulation(original: f64, modulation: i64) -> f64 {
-    let modulation = percentage_int_to_float(modulation);
+    let modulation = st_percentage_to_float(modulation);
     let mut new = original * modulation;
     if new < 0.0 {
         new = 0.0
@@ -762,7 +763,7 @@ pub(crate) fn apply_modulation(original: f64, modulation: i64) -> f64 {
 /// original/returned: color component ranging from 0.0 to 1.0
 /// offset: percentage in int. Ex: 50% -> 50,000
 pub(crate) fn apply_offset(original: f64, offset: i64) -> f64 {
-    let mut new = original + percentage_int_to_float(offset);
+    let mut new = original + st_percentage_to_float(offset);
     if new < 0.0 {
         new = 0.0
     }

@@ -1,6 +1,6 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::BytesStart;
+use std::io::Read;
 
 use crate::excel::XmlReader;
 use crate::helper::string_to_unsignedint;
@@ -21,7 +21,7 @@ use crate::raw::drawing::color::XlsxColorEnum;
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxLineReference {
     // Child Elements
-    color: Option<XlsxColorEnum>,
+    pub color: Option<XlsxColorEnum>,
 
     // Attributes	Description
     /// Specifies the style matrix index of the style referred to

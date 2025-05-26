@@ -80,6 +80,7 @@ impl PhoneticProperties {
 /// * noConversion
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum PhoneticTypeValue {
     HalfWidthKatakana,
     FullWidthKatakana,
@@ -110,6 +111,7 @@ impl PhoneticTypeValue {
 /// * NoControl
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum PhoneticAlignmentValue {
     Center,
     Distributed,

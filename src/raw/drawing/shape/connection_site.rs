@@ -1,10 +1,8 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
-use crate::excel::XmlReader;
-
-use crate::common_types::XlsxAdjustAngle;
+use crate::{excel::XmlReader, raw::drawing::st_types::STAdjustAngle};
 
 use super::position::XlsxPosition;
 
@@ -35,7 +33,7 @@ pub struct XlsxConnectionSite {
     ///  This angle is the angle around the connection site that an incoming connector tries to be routed to.
     ///  This allows connectors to know where the shape is in relation to the connection site and route connectors so as to avoid any overlap with the shape.
     // ang (Connection Site Angle)
-    pub angle: Option<XlsxAdjustAngle>,
+    pub angle: Option<STAdjustAngle>,
 }
 
 impl XlsxConnectionSite {
@@ -53,7 +51,7 @@ impl XlsxConnectionSite {
                     let string_value = String::from_utf8(a.value.to_vec())?;
                     match a.key.local_name().as_ref() {
                         b"ang" => {
-                            site.angle = Some(XlsxAdjustAngle::from_string(&string_value));
+                            site.angle = Some(STAdjustAngle::from_string(&string_value));
                             break;
                         }
                         _ => {}

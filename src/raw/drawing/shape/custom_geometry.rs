@@ -1,16 +1,15 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 use super::{
-    adjust_handle_list::XlsxAdjustHandleList,
+    adjust_handle_list::{load_adjust_handle_list, XlsxAdjustHandleList},
     adjust_value_list::{load_adjust_value_list, XlsxAdjustValueList},
     connection_site_list::{load_connection_site_list, XlsxConnectionSiteList},
     path::path_list::{load_path_list, XlsxPathList},
-    rectangle::XlsxRectangle,
     shape_guide_list::{load_shape_guide_list, XlsxShapeGuideList},
 };
-use crate::excel::XmlReader;
+use crate::{excel::XmlReader, raw::drawing::text::shape_text_rectangle::XlsxShapeTextRectangle};
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.customgeometry?view=openxml-3.0.1
 ///
@@ -47,7 +46,7 @@ use crate::excel::XmlReader;
 ///   </a:pathLst>
 /// </a:custGeom>
 /// ```
-// tag: custGeom
+/// tag: custGeom
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxCustomGeometry {
     // Child Elements
@@ -67,7 +66,7 @@ pub struct XlsxCustomGeometry {
     pub path_list: Option<XlsxPathList>,
 
     // rect (Shape Text Rectangle)
-    pub text_rectangle: Option<XlsxRectangle>,
+    pub text_rectangle: Option<XlsxShapeTextRectangle>,
 }
 
 impl XlsxCustomGeometry {
@@ -88,7 +87,7 @@ impl XlsxCustomGeometry {
 
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"ahLst" => {
-                    geom.adjust_handle_list = Some(XlsxAdjustHandleList::load(reader)?);
+                    geom.adjust_handle_list = Some(load_adjust_handle_list(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"avLst" => {
                     geom.adjust_value_list = Some(load_adjust_value_list(reader)?);
@@ -103,7 +102,7 @@ impl XlsxCustomGeometry {
                     geom.path_list = Some(load_path_list(reader)?);
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"rect" => {
-                    geom.text_rectangle = Some(XlsxRectangle::load(e)?);
+                    geom.text_rectangle = Some(XlsxShapeTextRectangle::load(e)?);
                 }
                 Ok(Event::End(ref e)) if e.local_name().as_ref() == b"custGeom" => break,
                 Ok(Event::Eof) => bail!("unexpected end of file."),

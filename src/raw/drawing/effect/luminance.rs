@@ -3,8 +3,13 @@ use quick_xml::events::BytesStart;
 
 use crate::helper::string_to_int;
 
+/// lum (Luminance Effect)
+///
+/// This element specifies a luminance effect.
+/// Brightness linearly shifts all colors closer to white or black.
+/// Contrast scales all colors to be either closer or further apart.
+///
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.luminanceeffect?view=openxml-3.0.1
-// tag: lum
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxLuminance {
     // attributes:

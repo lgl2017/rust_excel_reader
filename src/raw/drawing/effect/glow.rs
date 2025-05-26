@@ -1,12 +1,14 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::BytesStart;
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
-use crate::{helper::string_to_int, raw::drawing::color::XlsxColorEnum};
+use crate::helper::string_to_unsignedint;
+use crate::raw::drawing::color::XlsxColorEnum;
 
-/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.glow?view=openxml-3.0.1
+/// glow (Glow Effect)
+///
 /// specifies a glow effect, in which a color blurred outline is added outside the edges of the object.
 ///
 /// Example:
@@ -19,6 +21,7 @@ use crate::{helper::string_to_int, raw::drawing::color::XlsxColorEnum};
 ///     </a:schemeClr>
 /// </a:glow>
 /// ```
+/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.glow?view=openxml-3.0.1
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxGlow {
@@ -26,7 +29,10 @@ pub struct XlsxGlow {
     pub color: Option<XlsxColorEnum>,
 
     // attribute
-    pub rad: Option<i64>,
+    /// radius
+    ///
+    /// Specifies the radius of the glow in emu
+    pub rad: Option<u64>,
 }
 
 impl XlsxGlow {
@@ -43,7 +49,7 @@ impl XlsxGlow {
                     let string_value = String::from_utf8(a.value.to_vec())?;
                     match a.key.local_name().as_ref() {
                         b"pos" => {
-                            glow.rad = string_to_int(&string_value);
+                            glow.rad = string_to_unsignedint(&string_value);
                             break;
                         }
                         _ => {}

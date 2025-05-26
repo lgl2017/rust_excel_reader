@@ -1,14 +1,16 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::BytesStart;
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
-use crate::{helper::string_to_int, raw::drawing::color::XlsxColorEnum};
+use crate::helper::string_to_unsignedint;
+use crate::raw::drawing::color::XlsxColorEnum;
 
-/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.innershadow?view=openxml-3.0.1
+/// innerShdw (Inner Shadow Effect
+///
 /// specifies an inner shadow effect.
-/// A shadow is applied within the edges of the object according to the parameters given by the attributes///
+/// A shadow is applied within the edges of the object according to the parameters given by the attributes
 ///
 ///  Example:
 /// ```
@@ -20,22 +22,24 @@ use crate::{helper::string_to_int, raw::drawing::color::XlsxColorEnum};
 ///     </a:schemeClr>
 /// </a:innerShdw>
 /// ```
-
+///
+/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.innershadow?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxInnerShadow {
     // children
     pub color: Option<XlsxColorEnum>,
 
     // attribute
-    /// Specifies the blur radius
-    //  tag: blurRad
-    pub blur_rad: Option<i64>,
+    /// blurRad
+    ///
+    /// Specifies the blur radius in emu.
+    pub blur_rad: Option<u64>,
 
     /// Specifies the direction to offset the shadow as angle
-    pub dir: Option<i64>,
+    pub dir: Option<u64>,
 
     /// Specifies how far to offset the shadow
-    pub dist: Option<i64>,
+    pub dist: Option<u64>,
 }
 
 impl XlsxInnerShadow {
@@ -54,13 +58,13 @@ impl XlsxInnerShadow {
                     let string_value = String::from_utf8(a.value.to_vec())?;
                     match a.key.local_name().as_ref() {
                         b"blurRad" => {
-                            shadow.blur_rad = string_to_int(&string_value);
+                            shadow.blur_rad = string_to_unsignedint(&string_value);
                         }
                         b"dir" => {
-                            shadow.dir = string_to_int(&string_value);
+                            shadow.dir = string_to_unsignedint(&string_value);
                         }
                         b"dist" => {
-                            shadow.dist = string_to_int(&string_value);
+                            shadow.dist = string_to_unsignedint(&string_value);
                         }
                         _ => {}
                     }

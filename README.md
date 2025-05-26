@@ -13,6 +13,7 @@ You can use this library to get
 - An overview of Sheets in the workbook
 - Detail information on worksheets including dimension, merged cells, tables, and some other properties
 - Cell values, formatting, and styles including hyperlink, border, fill, font, alignment and etc
+- Worksheet drawings (Shape, Image, Picture, GraphicFrame, and GroupShape), their visual properties (position, size, geometry, fills, outlines, effects, and etc.) and non-visaul properties (locks, macros, hyperlinks, and etc.).
 
 
 If the processed information above does not meet your needs, you can also get the raw version (parsed xml in Rust structures) directly for the following elements.
@@ -23,6 +24,7 @@ If the processed information above does not meet your needs, you can also get th
 - Theme
 - Worksheet
 - Tables
+- Drawings
 
 
 ## Installation
@@ -39,10 +41,19 @@ excel_reader = "0.1.4"
 ```
 
 ## Features
+
+### Serde
 Serialization and Deserialization on processed structs can be enabled by adding the `serde` feature.
 ```
-excel_reader = { version = "0.1.9", features = ["serde"] }
+excel_reader = { version = "2.0.0", features = ["serde"] }
 ```
+
+### Drawing
+Ability on obtaining worksheet drawings can be enable by addding the `drawing` feature.
+```
+excel_reader = { version = "2.0.0", features = ["drawing"] }
+```
+
 
 
 ## Examples
@@ -119,41 +130,52 @@ let Some(dimension) = worksheet.dimension else {
     return Ok(());
 };
 
-let (start, end) = (dimension.start, dimension.end);
-let mut row_index = start.row;
-
 println!("Cells: ");
 
-while row_index <= end.row {
-    let mut col_index = start.col;
-    while col_index <= end.col {
-        let cell = worksheet.get_cell(Coordinate::from_point((row_index, col_index)))?;
-        println!("--------");
-        println!("coordinate: {:?}", cell.coordinate);
-        println!("value {:?}.", cell.value);
-        if let CellValueType::Numeric(_) = cell.value {
-            println!(
-                "Numeric format: {:?}",
-                cell.property.numbering_format.format_code
-            )
-        }
-        let properties = cell.property;
-
-        println!("size: {} * {}", properties.width, properties.height);
-        println!("hidden : {:?}", properties.hidden);
-        println!("show_phonetic : {:?}", properties.show_phonetic);
-        println!("hyperlink : {:?}", properties.hyperlink);
-        println!("font : {:?}", properties.font);
-        println!("border : {:?}", properties.border);
-        println!("fill : {:?}", properties.fill);
-        println!("alignment : {:?}", properties.alignment);
-        col_index += 1;
+let cells = worksheet.get_cells()?;
+for cell in cells {
+    println!("--------");
+    println!("coordinate: {:?}", cell.coordinate);
+    println!("value {:?}.", cell.value);
+    if let CellValueType::Numeric(_) = cell.value {
+        println!(
+            "Numeric format: {:?}",
+            cell.property.numbering_format.format_code
+        )
     }
-    row_index += 1;
+    let properties = cell.property;
+
+    println!("size: {} * {}", properties.width, properties.height);
+    println!("hidden : {:?}", properties.hidden);
+    println!("show_phonetic : {:?}", properties.show_phonetic);
+    println!("hyperlink : {:?}", properties.hyperlink);
+    println!("font : {:?}", properties.font);
+    println!("border : {:?}", properties.border);
+    println!("fill : {:?}", properties.fill);
+    println!("alignment : {:?}", properties.alignment);
 }
 
 ```
 
+
+### Getting Worksheet drawings
+
+```
+let drawings = worksheet.get_drawings();
+println!("drawings: {}", drawings.len());
+
+for (_, drawing) in drawings.into_iter().enumerate() {
+    println!("---------------");
+    println!(
+        "anchor: {}",
+        serde_json::to_string_pretty(&drawing.anchor.clone())?
+    );
+    println!(
+        "content: {}",
+        serde_json::to_string_pretty(&drawing.content.clone())?
+    );
+}
+```
 
 
 ### Getting Raw (Parsed XML)

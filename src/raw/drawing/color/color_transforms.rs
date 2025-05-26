@@ -3,12 +3,13 @@ use std::vec;
 use crate::excel::XmlReader;
 use crate::helper::{
     apply_modulation, apply_offset, apply_tint, complementary, extract_val_attribute, gamma_shift,
-    grayscale, hsla_to_rgba, inverse, inverse_gamma_shift, percentage_int_to_float, rgba_to_hsla,
-    string_to_bool, string_to_int,
+    grayscale, hsla_to_rgba, inverse, inverse_gamma_shift, rgba_to_hsla, string_to_bool,
+    string_to_int,
 };
-use std::io::Read;
+use crate::raw::drawing::st_types::st_percentage_to_float;
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
 /// Common children configuration for drawingML colors
 /// Example:
@@ -139,6 +140,7 @@ pub enum XlsxColorTransform {
 
     /// Shade: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.shade?view=openxml-3.0.1
     /// specifies a darker version of its input color. A 10% shade is 10% of the input color combined with 90% black.
+    ///
     /// Example:
     /// ```
     /// <a:srgbClr val="FF0000">
@@ -428,25 +430,25 @@ impl XlsxColorTransform {
         let mut a = rgba.3;
 
         match self {
-            XlsxColorTransform::Alpha(alpha) => a = percentage_int_to_float(*alpha),
+            XlsxColorTransform::Alpha(alpha) => a = st_percentage_to_float(*alpha),
             XlsxColorTransform::AlphaModulation(modulation) => a = apply_modulation(a, *modulation),
             XlsxColorTransform::AlphaOffset(offset) => a = apply_offset(a, *offset),
 
-            XlsxColorTransform::Blue(blue) => b = percentage_int_to_float(*blue),
+            XlsxColorTransform::Blue(blue) => b = st_percentage_to_float(*blue),
             XlsxColorTransform::BlueModulation(modulation) => b = apply_modulation(b, *modulation),
             XlsxColorTransform::BlueOffset(offset) => b = apply_offset(b, *offset),
 
-            XlsxColorTransform::Green(green) => g = percentage_int_to_float(*green),
+            XlsxColorTransform::Green(green) => g = st_percentage_to_float(*green),
             XlsxColorTransform::GreenModulation(modulation) => g = apply_modulation(g, *modulation),
             XlsxColorTransform::GreenOffset(offset) => g = apply_offset(g, *offset),
 
-            XlsxColorTransform::Red(red) => r = percentage_int_to_float(*red),
+            XlsxColorTransform::Red(red) => r = st_percentage_to_float(*red),
             XlsxColorTransform::RedModulation(modulation) => r = apply_modulation(r, *modulation),
             XlsxColorTransform::RedOffset(offset) => r = apply_offset(r, *offset),
 
             XlsxColorTransform::Hue(hue) => {
                 if let Ok(mut hsla) = rgba_to_hsla(rgba) {
-                    hsla.0 = percentage_int_to_float(*hue) * 360.0;
+                    hsla.0 = st_percentage_to_float(*hue) * 360.0;
                     match hsla_to_rgba(hsla) {
                         Ok(new) => return new,
                         Err(_) => return rgba,
@@ -473,7 +475,7 @@ impl XlsxColorTransform {
             }
             XlsxColorTransform::Sat(sat) => {
                 if let Ok(mut hsla) = rgba_to_hsla(rgba) {
-                    hsla.1 = percentage_int_to_float(*sat) * 100.0;
+                    hsla.1 = st_percentage_to_float(*sat) * 100.0;
                     match hsla_to_rgba(hsla) {
                         Ok(new) => return new,
                         Err(_) => return rgba,
@@ -501,7 +503,7 @@ impl XlsxColorTransform {
 
             XlsxColorTransform::Lum(lum) => {
                 if let Ok(mut hsla) = rgba_to_hsla(rgba) {
-                    hsla.2 = percentage_int_to_float(*lum) * 100.0;
+                    hsla.2 = st_percentage_to_float(*lum) * 100.0;
                     match hsla_to_rgba(hsla) {
                         Ok(new) => return new,
                         Err(_) => return rgba,
@@ -550,13 +552,13 @@ impl XlsxColorTransform {
             },
 
             XlsxColorTransform::Shade(shade) => {
-                match apply_tint(rgba, -percentage_int_to_float(*shade)) {
+                match apply_tint(rgba, -1.0 + st_percentage_to_float(*shade)) {
                     Ok(new) => return new,
                     Err(_) => return rgba,
                 }
             }
             XlsxColorTransform::Tint(tint) => {
-                match apply_tint(rgba, percentage_int_to_float(*tint)) {
+                match apply_tint(rgba, st_percentage_to_float(*tint)) {
                     Ok(new) => return new,
                     Err(_) => return rgba,
                 }

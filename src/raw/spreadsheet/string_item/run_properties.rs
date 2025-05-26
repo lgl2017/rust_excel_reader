@@ -5,7 +5,7 @@ use std::io::Read;
 use crate::{
     excel::XmlReader,
     helper::{extract_val_attribute, string_to_bool, string_to_float, string_to_unsignedint},
-    raw::spreadsheet::stylesheet::color::XlsxColor,
+    raw::spreadsheet::{ct_types::CTFontSize, stylesheet::color::XlsxColor},
 };
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.runproperties?view=openxml-3.0.1
@@ -142,11 +142,13 @@ pub struct XlsxRunProperties {
 
     /// FontSize: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.fontsize?view=openxml-3.0.1
     ///
+    /// This element represents the point size (1/72 of an inch) of the Latin and East Asian text
+    ///
     /// Example:
     /// ```
     /// <sz val="11"/>
     /// ```
-    pub size: Option<f64>,
+    pub size: Option<CTFontSize>,
 
     /// Underline: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.underline?view=openxml-3.0.1
     ///

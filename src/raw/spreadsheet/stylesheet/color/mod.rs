@@ -118,7 +118,7 @@ impl XlsxColor {
         color_scheme: Option<XlsxColorScheme>,
     ) -> Option<HexColor> {
         if let (Some(theme_index), Some(color_scheme)) = (self.theme, color_scheme) {
-            return color_scheme.get_color(theme_index);
+            return color_scheme.get_color_by_index(theme_index);
         }
 
         // <color rgb="ffff95ca" />

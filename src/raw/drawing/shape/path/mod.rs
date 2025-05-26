@@ -1,4 +1,6 @@
-use crate::excel::XmlReader;
+use crate::{
+    excel::XmlReader, helper::string_to_unsignedint, raw::drawing::st_types::STPositiveCoordinate,
+};
 
 use anyhow::bail;
 use std::io::Read;
@@ -11,7 +13,7 @@ use move_to::XlsxMoveTo;
 use quad_bezier_curve_to::XlsxQuadraticBezierCurveTo;
 use quick_xml::events::{BytesStart, Event};
 
-use crate::helper::{string_to_bool, string_to_int};
+use crate::helper::string_to_bool;
 
 pub mod arc_to;
 pub mod close_shape_path;
@@ -29,7 +31,7 @@ pub mod quad_bezier_curve_to;
 /// Example
 /// ```
 ///   <a:pathLst>
-///     <a:path w="2650602" h="1261641">
+///     <a:path w="3810000" h="3581400" fill="none" extrusionOk="0">
 ///       <a:moveTo>
 ///         <a:pt x="0" y="1261641"/>
 ///       </a:moveTo>
@@ -47,7 +49,7 @@ pub mod quad_bezier_curve_to;
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxPath {
     // Child Elements
-    paths: Option<Vec<XlsxPathTypeEnum>>,
+    pub paths: Option<Vec<XlsxPathTypeEnum>>,
 
     // Attributes
     /// Specifies that the use of 3D extrusions are possible on this path.
@@ -66,7 +68,7 @@ pub struct XlsxPath {
     /// Specifies the height, or maximum y coordinate that should be used for within the path coordinate system.
     /// This value determines the vertical placement of all points within the corresponding path as they are all calculated using this height attribute as the max y coordinate.
     // h (Path Height)
-    pub height: Option<i64>,
+    pub height: Option<STPositiveCoordinate>,
 
     /// Specifies if the corresponding path should have a path stroke shown.
     /// This is a boolean value that affect the outline of the path.
@@ -77,17 +79,17 @@ pub struct XlsxPath {
     /// Specifies the width, or maximum x coordinate that should be used for within the path coordinate system.
     /// This value determines the horizontal placement of all points within the corresponding path as they are all calculated using this width attribute as the max x coordinate.
     // w (Path Width)
-    pub width: Option<i64>,
+    pub width: Option<STPositiveCoordinate>,
 }
 
 impl XlsxPath {
     pub(crate) fn load(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
         let mut path = Self {
             paths: Some(XlsxPathTypeEnum::load_list(reader, b"path")?),
-            extrusion_allowed: Some(false),
-            fill: Some("norm".to_owned()),
+            extrusion_allowed: None,
+            fill: None,
             height: None,
-            stroke: Some(true),
+            stroke: None,
             width: None,
         };
 
@@ -100,9 +102,9 @@ impl XlsxPath {
                     match a.key.local_name().as_ref() {
                         b"extrusionOk" => path.extrusion_allowed = string_to_bool(&string_value),
                         b"fill" => path.fill = Some(string_value),
-                        b"h" => path.height = string_to_int(&string_value),
+                        b"h" => path.height = string_to_unsignedint(&string_value),
                         b"stroke" => path.stroke = string_to_bool(&string_value),
-                        b"w" => path.width = string_to_int(&string_value),
+                        b"w" => path.width = string_to_unsignedint(&string_value),
                         _ => {}
                     }
                 }

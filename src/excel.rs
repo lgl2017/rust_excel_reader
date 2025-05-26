@@ -1,24 +1,33 @@
+#[cfg(feature = "drawing")]
+use std::collections::BTreeMap;
+
 use anyhow::{bail, Context};
 use quick_xml::Reader;
 use std::{
-    collections::BTreeMap,
     fs::File,
     io::{BufReader, Read, Seek},
     path::Path,
 };
+
 use zip::{read::ZipFile, ZipArchive};
+
+#[cfg(feature = "drawing")]
+use crate::packaging::relationship::load_drawing_relationships;
+
+#[cfg(feature = "drawing")]
+use crate::raw::drawing::worksheet_drawing::XlsxWorksheetDrawing;
 
 use crate::{
     packaging::relationship::{
-        load_sheet_relationships, load_workbook_relationships, raw_target_for_id, zip_path_for_id,
-        zip_path_for_type, XlsxRelationships,
+        load_sheet_relationships, load_workbook_relationships, zip_path_for_id, zip_path_for_type,
+        XlsxRelationships,
     },
     processed::spreadsheet::{
         sheet::worksheet::{calculation_reference::CalculationReferenceMode, Worksheet},
         sheet_basic_info::{SheetBasicInfo, SheetType},
     },
     raw::{
-        drawing::{scheme::color_scheme::XlsxColorScheme, theme::XlsxTheme},
+        drawing::theme::XlsxTheme,
         spreadsheet::{
             shared_string::shared_string_table::XlsxSharedStringTable,
             sheet::worksheet::XlsxWorksheet, stylesheet::XlsxStyleSheet, table::XlsxTable,
@@ -33,10 +42,10 @@ pub(crate) type XmlReader<'a, R> = Reader<BufReader<ZipFile<'a, R>>>;
 pub struct Excel<RS> {
     zip: ZipArchive<RS>,
     workbook_relationships: XlsxRelationships,
-    stylesheet: Box<Option<XlsxStyleSheet>>,
-    theme: Box<Option<XlsxTheme>>,
-    shared_strings: Box<Option<XlsxSharedStringTable>>,
-    workbook: Box<Option<XlsxWorkbook>>,
+    stylesheet: Option<Box<XlsxStyleSheet>>,
+    theme: Option<Box<XlsxTheme>>,
+    shared_strings: Option<Box<XlsxSharedStringTable>>,
+    workbook: Option<Box<XlsxWorkbook>>,
 }
 
 // initialization
@@ -54,10 +63,10 @@ impl<RS: Read + Seek> Excel<RS> {
         Ok(Self {
             zip,
             workbook_relationships: relationships,
-            stylesheet: Box::new(None),
-            theme: Box::new(None),
-            shared_strings: Box::new(None),
-            workbook: Box::new(None),
+            stylesheet: None,
+            theme: None,
+            shared_strings: None,
+            workbook: None,
         })
     }
 }
@@ -70,35 +79,36 @@ impl<RS: Read + Seek> Excel<RS> {
     }
 
     /// Get stylesheet parsed from xl/styles.xml
-    pub fn get_raw_stylesheet(&mut self) -> anyhow::Result<Box<Option<XlsxStyleSheet>>> {
+    pub fn get_raw_stylesheet(&mut self) -> anyhow::Result<Option<Box<XlsxStyleSheet>>> {
         if self.stylesheet.is_none() {
-            self.stylesheet = Box::new(Some(XlsxStyleSheet::load(&mut self.zip)?));
+            self.stylesheet = Some(Box::new(XlsxStyleSheet::load(&mut self.zip)?));
         }
         return Ok(self.stylesheet.clone());
     }
 
     /// Get theme used.
     /// Parsed from get stylesheet parsed from xl/theme/theme{}.xml
-    pub fn get_raw_theme(&mut self) -> anyhow::Result<Box<Option<XlsxTheme>>> {
+    pub fn get_raw_theme(&mut self) -> anyhow::Result<Option<Box<XlsxTheme>>> {
         if self.theme.is_none() {
             let path = zip_path_for_type(&self.workbook_relationships, "theme");
-            self.theme = Box::new(Some(XlsxTheme::load(&mut self.zip, path)?));
+            let path = path.iter().map(|p| p.1.to_string()).collect();
+            self.theme = Some(Box::new(XlsxTheme::load(&mut self.zip, path)?));
         }
         return Ok(self.theme.clone());
     }
 
     /// Get shared string parsed from xl/sharedStrings.xml
-    pub fn get_raw_shared_strings(&mut self) -> anyhow::Result<Box<Option<XlsxSharedStringTable>>> {
+    pub fn get_raw_shared_strings(&mut self) -> anyhow::Result<Option<Box<XlsxSharedStringTable>>> {
         if self.shared_strings.is_none() {
-            self.shared_strings = Box::new(Some(XlsxSharedStringTable::load(&mut self.zip)?));
+            self.shared_strings = Some(Box::new(XlsxSharedStringTable::load(&mut self.zip)?));
         }
         return Ok(self.shared_strings.clone());
     }
 
     /// Get workbook parsed from xl/workbook.xml
-    pub fn get_raw_workbook(&mut self) -> anyhow::Result<Box<Option<XlsxWorkbook>>> {
+    pub fn get_raw_workbook(&mut self) -> anyhow::Result<Option<Box<XlsxWorkbook>>> {
         if self.workbook.is_none() {
-            self.workbook = Box::new(Some(XlsxWorkbook::load(&mut self.zip)?));
+            self.workbook = Some(Box::new(XlsxWorkbook::load(&mut self.zip)?));
         }
         return Ok(self.workbook.clone());
     }
@@ -189,13 +199,24 @@ impl<RS: Read + Seek> Excel<RS> {
         let worksheet_rels = self.get_raw_sheet_relationship(&sheet).unwrap_or(vec![]);
         return self.get_raw_tables(raw_worksheet, worksheet_rels);
     }
+
+    /// Get XlsxWorksheetDrawing that defines all drawing objects within the worksheet parsed from xl/drawings/drawing{}.xml
+    #[cfg(feature = "drawing")]
+    pub fn get_raw_drawing_for_worksheet(
+        &mut self,
+        sheet: &SheetBasicInfo,
+    ) -> anyhow::Result<Option<(XlsxWorksheetDrawing, XlsxRelationships)>> {
+        let raw_worksheet = self.get_raw_worksheet(&sheet)?;
+        let worksheet_rels = self.get_raw_sheet_relationship(&sheet).unwrap_or(vec![]);
+        return self.get_raw_drawing(raw_worksheet, worksheet_rels);
+    }
 }
 
 /// functions for getting processed parsed results
 impl<RS: Read + Seek> Excel<RS> {
     /// Get a list of sheets in the workbook
     pub fn get_sheets(&mut self) -> anyhow::Result<Vec<SheetBasicInfo>> {
-        let Some(workbook) = *self.get_raw_workbook()?.clone() else {
+        let Some(workbook) = self.get_raw_workbook()?.clone() else {
             return Ok(vec![]);
         };
         let Some(sheets) = workbook.sheets.clone() else {
@@ -231,7 +252,7 @@ impl<RS: Read + Seek> Excel<RS> {
         let raw_worksheet = self.get_raw_worksheet(&sheet)?;
         let worksheet_rels = self.get_raw_sheet_relationship(&sheet).unwrap_or(vec![]);
 
-        let shared_strings = if let Some(table) = *self.get_raw_shared_strings()? {
+        let shared_strings = if let Some(table) = self.get_raw_shared_strings()? {
             table.string_item.unwrap_or(vec![])
         } else {
             vec![]
@@ -241,29 +262,43 @@ impl<RS: Read + Seek> Excel<RS> {
             .get_raw_stylesheet()?
             .context("Style sheet not availalble")?;
 
-        let mut color_scheme: Option<XlsxColorScheme> = None;
-        if let Some(theme) = *self.get_raw_theme()? {
-            if let Some(theme_elements) = theme.theme_elements {
-                color_scheme = theme_elements.color_scheme
-            }
-        };
+        let theme = self.get_raw_theme()?;
 
         let tables = self.get_raw_tables(raw_worksheet.clone(), worksheet_rels.clone())?;
-        let rel_hyperlinks =
-            self.get_hyperlinks_in_rel(raw_worksheet.clone(), worksheet_rels.clone())?;
+
+        #[cfg(feature = "drawing")]
+        let mut drawing_rel: XlsxRelationships = vec![];
+        #[cfg(feature = "drawing")]
+        let mut raw_drawing: Option<Box<XlsxWorksheetDrawing>> = None;
+
+        #[cfg(feature = "drawing")]
+        if let Some(drawing) =
+            self.get_raw_drawing(raw_worksheet.clone(), worksheet_rels.clone())?
+        {
+            drawing_rel = drawing.1;
+            raw_drawing = Some(Box::new(drawing.0));
+        }
+        #[cfg(feature = "drawing")]
+        let bytes = self.get_image_bytes_in_rel(drawing_rel.clone());
 
         let worksheet = Worksheet::from_raw(
             sheet.clone().name,
             sheet.sheet_id,
-            raw_worksheet,
-            tables,
-            raw_workbook.clone().defined_names.unwrap_or(vec![]),
-            rel_hyperlinks,
-            self.is_1904(raw_workbook.clone()),
-            self.calculation_mode(raw_workbook.clone()),
-            shared_strings,
+            Box::new(raw_worksheet),
+            Box::new(worksheet_rels),
+            Box::new(tables),
+            Box::new(raw_workbook.clone().defined_names.unwrap_or(vec![])),
+            self.is_1904(*raw_workbook.clone()),
+            self.calculation_mode(*raw_workbook.clone()),
+            Box::new(shared_strings),
             stylesheet.clone(),
-            color_scheme,
+            theme.clone(),
+            #[cfg(feature = "drawing")]
+            Box::new(drawing_rel),
+            #[cfg(feature = "drawing")]
+            raw_drawing,
+            #[cfg(feature = "drawing")]
+            Box::new(bytes),
         );
 
         Ok(worksheet)
@@ -272,34 +307,6 @@ impl<RS: Read + Seek> Excel<RS> {
 
 /// private helper functions
 impl<RS: Read + Seek> Excel<RS> {
-    /// get a list of hyperlinks defined in a worksheet relationships
-    ///
-    /// (r_id, target): Example: `("rId1", "www.google.com")`
-    fn get_hyperlinks_in_rel(
-        &self,
-        raw_worksheet: XlsxWorksheet,
-        worksheet_rels: XlsxRelationships,
-    ) -> anyhow::Result<BTreeMap<String, String>> {
-        let hyperlinks = raw_worksheet.hyperlinks.unwrap_or(vec![]);
-        if hyperlinks.is_empty() {
-            return Ok(BTreeMap::new());
-        } else {
-            let rels: BTreeMap<String, String> = hyperlinks
-                .into_iter()
-                .filter(|h| h.r_id.is_some())
-                .map(|h| {
-                    (
-                        h.r_id.clone().unwrap(),
-                        raw_target_for_id(&worksheet_rels, &h.r_id.clone().unwrap()),
-                    )
-                })
-                .filter(|p| p.1.is_some())
-                .map(|p| (p.0, p.1.unwrap()))
-                .collect();
-            return Ok(rels);
-        };
-    }
-
     /// get a list of tables used in a worksheet
     fn get_raw_tables(
         &mut self,
@@ -326,6 +333,57 @@ impl<RS: Read + Seek> Excel<RS> {
 
             return Ok(raw_tables);
         };
+    }
+
+    /// get
+    /// - `XlsxWorksheetDrawing` parsed from xl/drawings/drawing{}.xml that defines all drawing objects within the worksheet
+    /// - `Relationship` from the xl/drawings/_rels/drawing{}.xml.rel
+    #[cfg(feature = "drawing")]
+    fn get_raw_drawing(
+        &mut self,
+        raw_worksheet: XlsxWorksheet,
+        worksheet_rels: XlsxRelationships,
+    ) -> anyhow::Result<Option<(XlsxWorksheetDrawing, XlsxRelationships)>> {
+        let Some(drawing) = raw_worksheet.drawing else {
+            return Ok(None);
+        };
+        let Some(path) = zip_path_for_id(&worksheet_rels, &drawing.id) else {
+            return Ok(None);
+        };
+        let drawing_rels = load_drawing_relationships(&mut self.zip, &path).unwrap_or(vec![]);
+        return Ok(Some((
+            XlsxWorksheetDrawing::load(&mut self.zip, &path)?,
+            drawing_rels,
+        )));
+    }
+
+    /// get a list of image bytes defined in a drawing relationships
+    ///
+    /// (r_id, bytes): Example: `("rId1", some bytes)`
+    #[cfg(feature = "drawing")]
+    fn get_image_bytes_in_rel(
+        &mut self,
+        drawing_rel: XlsxRelationships,
+    ) -> BTreeMap<String, Vec<u8>> {
+        let rels = zip_path_for_type(&drawing_rel, "image");
+        let mut bytes: BTreeMap<String, Vec<u8>> = BTreeMap::new();
+        for rel in rels.into_iter() {
+            if let Ok(b) = self.get_bytes_for_path(&rel.1) {
+                bytes.insert(rel.0, b);
+            }
+        }
+        return bytes;
+    }
+
+    #[cfg(feature = "drawing")]
+    fn get_bytes_for_path(&mut self, path: &str) -> anyhow::Result<Vec<u8>> {
+        let zip = &mut self.zip;
+        let path = get_actual_path(zip, path)
+            .context(format!("File does not exist for path: {}", path))?;
+        let mut zip = zip.by_name(&path)?;
+        let mut buf: Vec<u8> = Vec::new();
+        zip.read_to_end(&mut buf)?;
+        Ok(buf)
     }
 
     fn get_sheet_with_name(&mut self, name: &str) -> anyhow::Result<SheetBasicInfo> {

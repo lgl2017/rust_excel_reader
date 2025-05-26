@@ -1,15 +1,18 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::BytesStart;
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
+use crate::helper::string_to_unsignedint;
+use crate::raw::drawing::st_types::{STAngle, STPercentage, STPositiveAngle, STPositiveCoordinate};
 use crate::{
     helper::{string_to_bool, string_to_int},
     raw::drawing::color::XlsxColorEnum,
 };
 
-/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.outershadow?view=openxml-3.0.1
+/// outerShdw (Outer Shadow Effect)
+///
 /// specifies an outer shadow effect.
 ///
 ///  Example:
@@ -22,6 +25,8 @@ use crate::{
 ///     </a:schemeClr>
 /// </a:outerShdw>
 /// ```
+///
+/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.outershadow?view=openxml-3.0.1
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxOuterShadow {
     // children
@@ -34,29 +39,29 @@ pub struct XlsxOuterShadow {
 
     /// Specifies the blur radius
     //  tag: blurRad
-    pub blur_rad: Option<i64>,
+    pub blur_rad: Option<STPositiveCoordinate>,
 
     /// Specifies the direction to offset the shadow as angle
-    pub dir: Option<i64>,
+    pub dir: Option<STPositiveAngle>,
 
     /// Specifies how far to offset the shadow
-    pub dist: Option<i64>,
+    pub dist: Option<STPositiveCoordinate>,
 
     /// Specifies the horizontal skew angle
-    pub kx: Option<i64>,
+    pub kx: Option<STAngle>,
 
     /// Specifies the vertical skew angle
-    pub ky: Option<i64>,
+    pub ky: Option<STAngle>,
 
     /// Specifies whether the shadow rotates with the shape if the shape is rotated
     // tag: rotWithShape
     pub rot_with_shape: Option<bool>,
 
     /// Specifies the horizontal scaling factor; negative scaling causes a flip.
-    pub sx: Option<i64>,
+    pub sx: Option<STPercentage>,
 
     /// Specifies the vertical scaling factor; negative scaling causes a flip.
-    pub sy: Option<i64>,
+    pub sy: Option<STPercentage>,
 }
 
 impl XlsxOuterShadow {
@@ -84,13 +89,13 @@ impl XlsxOuterShadow {
                             shadow.algn = Some(string_value);
                         }
                         b"blurRad" => {
-                            shadow.blur_rad = string_to_int(&string_value);
+                            shadow.blur_rad = string_to_unsignedint(&string_value);
                         }
                         b"dir" => {
-                            shadow.dir = string_to_int(&string_value);
+                            shadow.dir = string_to_unsignedint(&string_value);
                         }
                         b"dist" => {
-                            shadow.dist = string_to_int(&string_value);
+                            shadow.dist = string_to_unsignedint(&string_value);
                         }
                         b"kx" => {
                             shadow.kx = string_to_int(&string_value);

@@ -1,6 +1,6 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::BytesStart;
+use std::io::Read;
 
 use crate::excel::XmlReader;
 use crate::helper::string_to_unsignedint;
@@ -12,6 +12,7 @@ use crate::raw::drawing::color::XlsxColorEnum;
 ///
 /// Example
 /// ```
+/// // idx: 0 based
 /// <effectRef idx="0">
 ///     <schemeClr val="accent2"/>
 /// </effectRef>
@@ -20,10 +21,10 @@ use crate::raw::drawing::color::XlsxColorEnum;
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxEffectReference {
     // Child Elements
-    color: Option<XlsxColorEnum>,
+    pub color: Option<XlsxColorEnum>,
 
     // Attributes
-    /// Specifies the style matrix index of the style referred to
+    /// Specifies the style matrix 0 based index of the style referred to
     // tag: idx
     pub index: Option<u64>,
 }

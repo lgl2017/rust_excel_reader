@@ -1,7 +1,7 @@
 use anyhow::bail;
 use quick_xml::events::BytesStart;
 
-use crate::common_types::XlsxAdjustCoordinate;
+use crate::raw::drawing::st_types::STAdjustCoordinate;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.position?view=openxml-3.0.1
 ///
@@ -22,14 +22,14 @@ pub struct XlsxPosition {
     /// - `ST_Coordinate` simple type: i64
     /// - `ST_GeomGuideName`: String referencing to a geometry guide name
     // x (X-Coordinate)
-    pub x: Option<XlsxAdjustCoordinate>,
+    pub x: Option<STAdjustCoordinate>,
 
     /// Specifies the y coordinate for this position coordinate
     ///
     /// value type: `ST_AdjCoordinate` defined as a union of the following
     /// - `ST_Coordinate` simple type: i64
     /// - `ST_GeomGuideName`: String referencing to a geometry guide name
-    pub y: Option<XlsxAdjustCoordinate>,
+    pub y: Option<STAdjustCoordinate>,
 }
 
 impl XlsxPosition {
@@ -42,8 +42,8 @@ impl XlsxPosition {
                 Ok(a) => {
                     let string_value = String::from_utf8(a.value.to_vec())?;
                     match a.key.local_name().as_ref() {
-                        b"x" => position.x = Some(XlsxAdjustCoordinate::from_string(&string_value)),
-                        b"y" => position.y = Some(XlsxAdjustCoordinate::from_string(&string_value)),
+                        b"x" => position.x = Some(STAdjustCoordinate::from_string(&string_value)),
+                        b"y" => position.y = Some(STAdjustCoordinate::from_string(&string_value)),
                         _ => {}
                     }
                 }

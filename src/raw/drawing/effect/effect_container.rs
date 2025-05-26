@@ -1,6 +1,6 @@
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::{BytesStart, Event};
+use std::io::Read;
 
 use crate::excel::XmlReader;
 
@@ -21,108 +21,310 @@ use super::{
 pub type XlsxEffectDag = XlsxEffectContainer;
 
 /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.effectcontainer?view=openxml-3.0.1
+///
 /// A list of effects.
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxEffectContainer {
     // Child Elements	Subclause
-
-    // alphaBiLevel (Alpha Bi-Level Effect)	§20.1.8.1
+    /// alphaBiLevel (Alpha Bi-Level Effect):
+    ///
+    /// Alpha (Opacity) values less than the threshold are changed to 0 (fully transparent) and alpha values greater than or equal to the threshold are changed to 100% (fully opaque).
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alphabilevel?view=openxml-3.0.1
     pub alpha_bi_level: Option<XlsxAlphaBiLevel>,
 
-    // alphaCeiling (Alpha Ceiling Effect)	§20.1.8.2
+    /// alphaCeiling (Alpha Ceiling Effect)
+    ///
+    /// When present, Alpha (opacity) values greater than zero are changed to 100%.
+    /// In other words, anything partially opaque becomes fully opaque.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alphaceiling?view=openxml-3.0.1
     pub alpha_ceiling: Option<XlsxAlphaCeiling>,
 
-    // alphaFloor (Alpha Floor Effect)	§20.1.8.3
+    /// alphaFloor (Alpha Floor Effect)
+    ///
+    /// when present, Alpha (opacity) values less than 100% are changed to zero.
+    /// In other words, anything partially transparent becomes fully transparent.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alphafloor?view=openxml-3.0.1
     pub alpha_floor: Option<XlsxAlphaFloor>,
 
-    // alphaInv (Alpha Inverse Effect)	§20.1.8.4
+    /// alphaInv (Alpha Inverse Effect)
+    ///
+    /// This element represents an alpha inverse effect.
+    /// Alpha (opacity) values are inverted by subtracting from 100%.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alphainverse?view=openxml-3.0.1
     pub alpha_inv: Option<XlsxAlphaInverse>,
 
-    // alphaMod (Alpha Modulate Effect)	§20.1.8.5
+    /// alphaMod (Alpha Modulate Effect)
+    ///
+    /// This element represents an alpha modulate effect.
+    /// Effect alpha (opacity) values are multiplied by a fixed percentage.
+    /// The effect container specifies an effect containing alpha values to modulate
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alphamodulationeffect?view=openxml-3.0.1
     pub alpha_mod: Option<XlsxAlphaModulation>,
 
-    // alphaModFix (Alpha Modulate Fixed Effect)	§20.1.8.6
+    /// alphaModFix (Alpha Modulate Fixed Effect)
+    ///
+    /// This element represents an alpha modulate fixed effect.
+    /// Effect alpha (opacity) values are multiplied by a fixed percentage
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alphamodulationfixed?view=openxml-3.0.1
     pub alpha_mod_fix: Option<XlsxAlphaModulationFixed>,
 
-    // alphaOutset (Alpha Inset/Outset Effect)	§20.1.8.7
+    // alphaOutset (Alpha Inset/Outset Effect)
+    ///
+    /// This is equivalent to an alpha ceiling, followed by alpha blur, followed by either an alpha ceiling (positive radius) or alpha floor (negative radius).
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alphaoutset?view=openxml-3.0.1
     pub alpha_outset: Option<XlsxAlphaOutset>,
 
-    // alphaRepl (Alpha Replace Effect)	§20.1.8.8
+    /// alphaRepl (Alpha Replace Effect)
+    ///
+    /// This element specifies an alpha replace effect.
+    /// Effect alpha (opacity) values are replaced by a fixed alpha.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alphareplace?view=openxml-3.0.1
     pub alpha_repl: Option<XlsxAlphaReplace>,
 
-    // biLevel (Bi-Level (Black/White) Effect)	§20.1.8.11
+    /// biLevel (Bi-Level (Black/White) Effect)
+    ///
+    /// This element specifies a bi-level (black/white) effect.
+    /// Input colors whose luminance is less than the specified threshold value are changed to black.
+    /// Input colors whose luminance are greater than or equal the specified value are set to white.
+    /// The alpha effect values are unaffected by this effect.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.alphabilevel?view=openxml-3.0.1
     pub bi_level: Option<XlsxBiLevel>,
 
-    // blend (Blend Effect)	§20.1.8.12
+    /// blend (Blend Effect)
+    ///
+    /// Specifies a blend of several effects.
+    /// The container specifies the raw effects to blend while the blend mode specifies how the effects are to be blended.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blend?view=openxml-3.0.1
     pub blend: Option<XlsxBlend>,
 
-    // blur (Blur Effect)	§20.1.8.15
+    /// blur (Blur Effect)
+    ///
+    /// a blur effect that is applied to the entire shape, including its fill.
+    /// All color channels, including alpha, are affected.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blur?view=openxml-3.0.1
     pub blur: Option<XlsxBlur>,
 
-    // clrChange (Color Change Effect)	§20.1.8.16
+    /// clrChange (Color Change Effect)
+    ///
+    /// This element specifies a Color Change Effect.
+    /// Instances of clrFrom are replaced with instances of clrTo
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.colorchange?view=openxml-3.0.1
     pub clr_change: Option<XlsxColorChange>,
 
-    // clrRepl (Solid Color Replacement)	§20.1.8.18
+    /// clrRepl (Solid Color Replacement)
+    ///
+    /// specifies a solid color replacement value.
+    /// All effect colors are changed to a fixed color. Alpha values are unaffected.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.colorreplacement?view=openxml-3.0.1
     pub clr_repl: Option<XlsxColorReplacement>,
 
-    // cont (Effect Container)	§20.1.8.20
+    /// cont (Effect Container)
+    ///
+    /// A list of effects.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.effectcontainer?view=openxml-3.0.1
     pub cont: Option<Box<XlsxEffectContainer>>,
 
-    // duotone (Duotone Effect)	§20.1.8.23
+    /// duotone (Duotone Effect)
+    ///
+    /// This element specifies a duotone effect.
+    /// For each pixel, combines clr1 and clr2 through a linear interpolation to determine the new color for that pixel.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.duotone?view=openxml-3.0.1
     pub duotone: Option<XlsxDuotone>,
 
-    // effect (Effect)	§20.1.8.24
+    /// effect (Effect)
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.effect?view=openxml-3.0.1
+    ///
+    /// This element specifies a reference to an existing effect container
+    ///
+    /// * Container: refer to an effect container with the name specified
+    /// * Fill: refers to the fill effect
+    /// * Line: refers to the line effect
+    /// * FillLine: refers to the combined fill and line effects
+    /// * Children: refers to the combined effects from logical child shapes or text
     pub effect: Option<XlsxEffect>,
 
-    // fill (Fill)	§20.1.8.28
+    /// fill (Fill)
+    ///
+    /// This element specifies a fill which is one of blipFill, gradFill, grpFill, noFill, pattFill or solidFill.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.fill?view=openxml-3.0.1
     pub fill: Option<XlsxFill>,
 
-    // fillOverlay (Fill Overlay Effect)	§20.1.8.29
+    /// fillOverlay (Fill Overlay Effect)
+    ///
+    ///  specifies a fill overlay effect.
+    /// A fill overlay can be used to specify an additional fill for an object and blend the two fills together
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.filloverlay?view=openxml-3.0.1
     pub fill_overlay: Option<Box<XlsxFillOverlay>>,
 
-    // glow (Glow Effect)	§20.1.8.32
+    /// glow (Glow Effect)
+    ///
+    /// specifies a glow effect, in which a color blurred outline is added outside the edges of the object.
+    ///
+    /// Example:
+    /// ```
+    /// <a:glow rad="10">
+    ///     <a:schemeClr val="phClr">
+    ///         <a:lumMod val="99000" />
+    ///         <a:satMod val="120000" />
+    ///          a:shade val="78000" />
+    ///     </a:schemeClr>
+    /// </a:glow>
+    /// ```
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.glow?view=openxml-3.0.1
     pub glow: Option<XlsxGlow>,
 
-    // grayscl (Gray Scale Effect)	§20.1.8.34
+    /// grayscl (Gray Scale Effect)
+    ///
+    /// When present, Converts all effect color values to a shade of gray, corresponding to their luminance.
+    /// Effect alpha (opacity) values are unaffected.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.grayscale?view=openxml-3.0.1
     pub grayscl: Option<XlsxGrayScale>,
 
-    // hsl (Hue Saturation Luminance Effect)	§20.1.8.39
+    /// hsl (Hue Saturation Luminance Effect)
+    ///
+    /// This element specifies a hue/saturation/luminance effect.
+    /// The hue, saturation, and luminance can each be adjusted relative to its current value.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.hsl?view=openxml-3.0.1
     pub hsl: Option<XlsxHsl>,
 
-    // innerShdw (Inner Shadow Effect)	§20.1.8.40
+    /// innerShdw (Inner Shadow Effect)
+    ///
+    /// specifies an inner shadow effect.
+    /// A shadow is applied within the edges of the object according to the parameters given by the attributes
+    ///
+    ///  Example:
+    /// ```
+    /// <a:innerShdw blurRad="10" dir"90" dist="10">
+    ///     <a:schemeClr val="phClr">
+    ///         <a:lumMod val="99000" />
+    ///         <a:satMod val="120000" />
+    ///          a:shade val="78000" />
+    ///     </a:schemeClr>
+    /// </a:innerShdw>
+    /// ```
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.innershadow?view=openxml-3.0.1
     pub innder_shadow: Option<XlsxInnerShadow>,
 
-    // lum (Luminance Effect)	§20.1.8.42
+    /// lum (Luminance Effect)
+    ///
+    /// This element specifies a luminance effect.
+    /// Brightness linearly shifts all colors closer to white or black.
+    /// Contrast scales all colors to be either closer or further apart.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.luminanceeffect?view=openxml-3.0.1
     pub lum: Option<XlsxLuminance>,
 
-    // outerShdw (Outer Shadow Effect)	§20.1.8.45
+    /// outerShdw (Outer Shadow Effect)
+    ///
+    /// specifies an outer shadow effect.
+    ///
+    ///  Example:
+    /// ```
+    /// <a:outerShdw blurRad="57150" dist="38100" dir="5400000" algn="ctr" rotWithShape="0" >
+    ///     <a:schemeClr val="phClr">
+    ///         <a:lumMod val="99000" />
+    ///         <a:satMod val="120000" />
+    ///          a:shade val="78000" />
+    ///     </a:schemeClr>
+    /// </a:outerShdw>
+    /// ```
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.outershadow?view=openxml-3.0.1
     pub outer_shadow: Option<XlsxOuterShadow>,
 
-    // prstShdw (Preset Shadow)	§20.1.8.49
+    /// prstShdw (Preset Shadow)
+    ///
+    /// specifies that a preset shadow is to be used.
+    ///
+    /// Each preset shadow is equivalent to a specific outer shadow effect.
+    /// For each preset shadow, the color element, direction attribute, and distance attribute represent the color, direction, and distance parameters of the corresponding outer shadow.
+    /// Additionally, the rotateWithShape attribute of corresponding outer shadow is always false. Other non-default parameters of the outer shadow are dependent on the prst attribute
+    ///
+    ///  Example:
+    /// ```
+    /// <a:prstShdw dir"90" dist="10" prst="shdw19">
+    ///     <a:schemeClr val="phClr">
+    ///         <a:lumMod val="99000" />
+    ///         <a:satMod val="120000" />
+    ///          a:shade val="78000" />
+    ///     </a:schemeClr>
+    /// </a:prstShdw>
+    /// ```
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.presetshadow?view=openxml-3.0.1
     pub preset_shadow: Option<XlsxPresetShadow>,
 
-    // reflection (Reflection Effect)	§20.1.8.50
+    /// reflection (Reflection Effect)
+    ///
+    /// This element specifies a reflection effect.
+    ///
+    /// Example:
+    /// ```
+    /// <a:reflection blurRad="151308" stA="88815" endPos="65000" dist="402621"dir="5400000" sy="-100000" algn="bl" rotWithShape="0" />
+    /// ```
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.reflection?view=openxml-3.0.1
     pub reflection: Option<XlsxReflection>,
 
-    // relOff (Relative Offset Effect)	§20.1.8.51
+    /// relOff (Relative Offset Effect)
+    ///
+    /// This element specifies a relative offset effect. Sets up a new origin by offsetting relative to the size of the previous effect.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.relativeoffset?view=openxml-3.0.1
     pub relative_offset: Option<XlsxRelativeOffset>,
 
-    // softEdge (Soft Edge Effect)	§20.1.8.53
+    /// softEdge (Soft Edge Effect)
+    ///
+    /// This element specifies a soft edge effect.
+    /// The edges of the shape are blurred, while the fill is not affected.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.softedge?view=openxml-3.0.1
     pub soft_edge: Option<XlsxSoftEdge>,
 
-    // tint (Tint Effect)
+    /// tint (Tint Effect)
+    ///
+    /// This element specifies a tint effect.
+    /// Shifts effect color values towards/away from hue by the specified amount.
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.tinteffect?view=openxml-3.0.1
     pub tint: Option<XlsxTint>,
 
-    // xfrm (Transform Effect)
+    /// xfrm (Transform Effect)
+    ///
+    /// This element specifies a transform effect. The transform is applied to each point in the shape's geometry using the following matrix:
+    ///
+    /// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.transformeffect?view=openxml-3.0.1
     pub transform: Option<XlsxTransformEffect>,
 
     // attributes
+    /// name (Name)
+    ///
     /// Specifies an optional name for this list of effects, so that it can be referred to later.
     /// Shall be unique across all effect trees and effect containers.
-    // tag: name (Name)
     pub name: Option<String>,
 
     /// type (Effect Container Type)
+    ///
     /// Specifies the kind of container, either sibling or tree.
     /// allowed values: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.effectcontainervalues?view=openxml-3.0.1
     pub r#type: Option<String>,
@@ -133,11 +335,18 @@ impl XlsxEffectContainer {
         return XlsxEffectContainer::load_helper(reader, e, b"cont");
     }
 
-    pub(crate) fn load_effect_dag(reader: &mut XmlReader<impl Read>, e: &BytesStart) -> anyhow::Result<Self> {
+    pub(crate) fn load_effect_dag(
+        reader: &mut XmlReader<impl Read>,
+        e: &BytesStart,
+    ) -> anyhow::Result<Self> {
         return XlsxEffectContainer::load_helper(reader, e, b"effectDag");
     }
 
-    fn load_helper(reader: &mut XmlReader<impl Read>, e: &BytesStart, tag: &[u8]) -> anyhow::Result<Self> {
+    fn load_helper(
+        reader: &mut XmlReader<impl Read>,
+        e: &BytesStart,
+        tag: &[u8],
+    ) -> anyhow::Result<Self> {
         let attributes = e.attributes();
         let mut container = Self {
             alpha_bi_level: None,
@@ -246,7 +455,7 @@ impl XlsxEffectContainer {
                 }
 
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"duotone" => {
-                    container.duotone = Some(XlsxDuotone::load(reader)?);
+                    container.duotone = XlsxDuotone::load(reader, b"duotone")?;
                 }
                 Ok(Event::Start(ref e)) if e.local_name().as_ref() == b"effect" => {
                     container.effect = Some(XlsxEffect::load(e)?);

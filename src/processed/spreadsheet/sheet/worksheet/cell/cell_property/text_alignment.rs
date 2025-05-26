@@ -99,6 +99,7 @@ impl TextAlignment {
 // * Right
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum HorizontalAlignementValue {
     Center,
     CenterContinuous,
@@ -136,6 +137,7 @@ impl HorizontalAlignementValue {
 /// * Top
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum VerticalAlignementValue {
     Bottom,
     Center,
@@ -162,6 +164,7 @@ impl VerticalAlignementValue {
 ///
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum ReadingOrderValue {
     ContextDependent,
     LeftToRight,

@@ -7,6 +7,7 @@ use serde::Serialize;
 /// * R1C1
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum CalculationReferenceMode {
     A1,
     R1C1,

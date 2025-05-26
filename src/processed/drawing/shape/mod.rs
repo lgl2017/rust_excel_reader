@@ -1,0 +1,16 @@
+pub mod adjust_handle_polar;
+pub mod adjust_handle_type;
+pub mod adjust_handle_xy;
+pub mod bevel;
+pub mod black_white_mode;
+pub mod connection_shape;
+pub mod connection_site;
+pub mod custom_geometry;
+pub mod geometry;
+pub mod path;
+pub mod preset_geometry_shape;
+pub mod preset_material;
+pub mod shape_3d_properties;
+pub mod shape_properties;
+pub mod shape_style;
+pub mod transform_2d;

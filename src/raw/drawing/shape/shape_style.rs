@@ -1,13 +1,14 @@
 use crate::excel::XmlReader;
 use crate::raw::drawing::{
     effect::effect_reference::XlsxEffectReference, fill::fill_reference::XlsxFillReference,
-    font::font_reference::XlsxFontReference, line::line_reference::XlsxLineReference,
+    line::line_reference::XlsxLineReference, text::font::font_reference::XlsxFontReference,
 };
-use std::io::Read;
 use anyhow::bail;
 use quick_xml::events::Event;
+use std::io::Read;
 
-/// https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.shapestyle?view=openxml-3.0.1
+/// - https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.shapestyle?view=openxml-3.0.1
+/// - https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.spreadsheet.shapestyle?view=openxml-3.0.1
 ///
 /// This element specifies the style information for a shape.
 ///
@@ -28,10 +29,11 @@ use quick_xml::events::Event;
 ///     </fontRef>
 /// </style>
 /// ```
-// tag: style
+///
+/// style (Shape Style)
 #[derive(Debug, Clone, PartialEq)]
 pub struct XlsxShapeStyle {
-    // Child Elements	Subclause
+    // Child Elements
     // effectRef (Effect Reference)
     pub effect_reference: Option<XlsxEffectReference>,
 
